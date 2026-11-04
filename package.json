@@ -13,7 +13,7 @@
     "format:check": "prettier --check ."
   },
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=24.0.0"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",
