@@ -1,0 +1,240 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --------------------------------------------------
+// FUEL TYPES & PRICING
+// --------------------------------------------------
+
+model FuelType {
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String   @unique
+  prices FuelPrice[]
+  tanks  Tank[]
+  orders FuelOrder[]
+  @@map("fuel_types")
+}
+
+model FuelPrice {
+  id         Int      @id @default(autoincrement())
+  fuelTypeId Int      @map("fuel_type_id")
+  priceMinor Int      @map("price_minor")
+  currency   String   @db.VarChar(3)
+  source     String?
+  fetchedAt  DateTime @default(now()) @map("fetched_at")
+
+  fuelType FuelType @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
+
+  @@index([fuelTypeId, fetchedAt])
+  @@map("fuel_prices")
+}
+
+// --------------------------------------------------
+// STATIONS & USERS
+// --------------------------------------------------
+
+model Station {
+  id             Int      @id @default(autoincrement())
+  name           String
+  address        String?
+  latitude       Decimal? @db.Decimal(10, 7)
+  longitude      Decimal? @db.Decimal(10, 7)
+  managerId      Int?     @map("manager_id")
+  deviceKeyHash  String?  @unique @map("device_key_hash")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  manager     User?        @relation("StationManager", fields: [managerId], references: [id], onDelete: SetNull)
+  users       User[]       @relation("UserStation")
+  tanks       Tank[]
+  pumps       Pump[]
+  orders      FuelOrder[]
+  callSessions CallSession[]
+
+  @@index([managerId])
+  @@map("stations")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      String
+  stationId Int?     @map("station_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  station             Station?      @relation("UserStation", fields: [stationId], references: [id], onDelete: SetNull)
+  managedStations     Station[]     @relation("StationManager")
+  customerOrders      FuelOrder[]   @relation("OrderCustomer")
+  createdOrders       FuelOrder[]   @relation("OrderCreator")
+  orderEvents         OrderEvent[]  @relation("OrderEventActor")
+  handledCallSessions CallSession[] @relation("CallSessionHandoff")
+
+  @@index([stationId])
+  @@map("users")
+}
+
+// --------------------------------------------------
+// FUEL INVENTORY & SENSORS
+// --------------------------------------------------
+
+model Tank {
+  id                  Int      @id @default(autoincrement())
+  stationId           Int      @map("station_id")
+  fuelTypeId          Int      @map("fuel_type_id")
+  capacityLiters      Decimal  @db.Decimal(12, 3) @map("capacity_liters")
+  lowThresholdLiters  Decimal  @db.Decimal(12, 3) @map("low_threshold_liters")
+
+  station        Station        @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  fuelType       FuelType       @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
+  sensorReadings SensorReading[]
+
+  @@index([stationId])
+  @@index([fuelTypeId])
+  @@map("tanks")
+}
+
+model SensorReading {
+  id          Int      @id @default(autoincrement())
+  tankId      Int      @map("tank_id")
+  levelLiters Decimal  @db.Decimal(12, 3) @map("level_liters")
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  tank Tank @relation(fields: [tankId], references: [id], onDelete: Restrict)
+
+  @@index([tankId, recordedAt])
+  @@map("sensor_readings")
+}
+
+// --------------------------------------------------
+// PUMPS
+// --------------------------------------------------
+
+model Pump {
+  id        Int    @id @default(autoincrement())
+  stationId Int    @map("station_id")
+  number    Int
+  status    String
+
+  station Station     @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  orders  FuelOrder[]
+
+  @@unique([stationId, number])
+  @@map("pumps")
+}
+
+// --------------------------------------------------
+// ORDERS & ORDER HISTORY
+// --------------------------------------------------
+
+model FuelOrder {
+  id                  Int       @id @default(autoincrement())
+  stationId           Int       @map("station_id")
+  pumpId              Int       @map("pump_id")
+  userId              Int?      @map("user_id")
+  createdBy           Int?      @map("created_by")
+  fuelTypeId          Int       @map("fuel_type_id")
+  source              String
+  status              String
+  unitPriceMinor      Int       @map("unit_price_minor")
+  orderedVolume       Decimal   @db.Decimal(12, 3) @map("ordered_volume")
+  orderedAmountMinor  Int       @map("ordered_amount_minor")
+  dispensedVolume     Decimal?  @db.Decimal(12, 3) @map("dispensed_volume")
+  finalMinor          Int?      @map("final_minor")
+  customerName        String?   @map("customer_name")
+  customerPhone       String?   @map("customer_phone")
+  scheduledFor        DateTime? @map("scheduled_for")
+  notes               String?
+  expiresAt           DateTime? @map("expires_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  station       Station     @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  pump          Pump        @relation(fields: [pumpId], references: [id], onDelete: Restrict)
+  user          User?       @relation("OrderCustomer", fields: [userId], references: [id], onDelete: SetNull)
+  creator       User?       @relation("OrderCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  fuelType      FuelType    @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
+  events        OrderEvent[]
+  payments      Payment[]
+  callSessions  CallSession[]
+
+  @@index([stationId, status])
+  @@index([pumpId])
+  @@index([userId])
+  @@index([fuelTypeId])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderEvent {
+  id          Int      @id @default(autoincrement())
+  orderId     Int      @map("order_id")
+  actorUserId Int?     @map("actor_user_id")
+  actorType   String   @map("actor_type")
+  fromStatus  String?  @map("from_status")
+  toStatus    String   @map("to_status")
+  note        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  order FuelOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  actor User?     @relation("OrderEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+  @@index([actorUserId])
+  @@map("order_events")
+}
+
+// --------------------------------------------------
+// PAYMENTS
+// --------------------------------------------------
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  orderId       Int      @map("order_id")
+  method        String
+  provider      String?
+  currency      String   @db.VarChar(3)
+  amountMinor   Int      @map("amount_minor")
+  capturedMinor Int      @default(0) @map("captured_minor")
+  status        String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  order FuelOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+// --------------------------------------------------
+// AI VOICE CALL SESSIONS
+// --------------------------------------------------
+
+model CallSession {
+  id            Int       @id @default(autoincrement())
+  stationId     Int       @map("station_id")
+  orderId       Int?      @map("order_id")
+  handoffUserId Int?      @map("handoff_user_id")
+  phone         String?
+  outcome       String?
+  transcript    String?
+  extractedData Json?     @map("extracted_data")
+  confidence    Decimal?  @db.Decimal(5, 4)
+  startedAt     DateTime  @default(now()) @map("started_at")
+  endedAt       DateTime? @map("ended_at")
+
+  station     Station  @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  order       FuelOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  handoffUser User?    @relation("CallSessionHandoff", fields: [handoffUserId], references: [id], onDelete: SetNull)
+
+  @@index([stationId, startedAt])
+  @@index([orderId])
+  @@map("call_sessions")
+}
