@@ -997,10 +997,6 @@ export type FuelOrderUncheckedUpdateManyWithoutPumpNestedInput = {
   deleteMany?: Prisma.FuelOrderScalarWhereInput | Prisma.FuelOrderScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type FuelOrderCreateNestedOneWithoutEventsInput = {
   create?: Prisma.XOR<Prisma.FuelOrderCreateWithoutEventsInput, Prisma.FuelOrderUncheckedCreateWithoutEventsInput>
   connectOrCreate?: Prisma.FuelOrderCreateOrConnectWithoutEventsInput
