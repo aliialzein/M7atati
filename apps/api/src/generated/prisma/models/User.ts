@@ -28,11 +28,13 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   id: number | null
+  roleId: number | null
   stationId: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
+  roleId: number | null
   stationId: number | null
 }
 
@@ -40,7 +42,9 @@ export type UserMinAggregateOutputType = {
   id: number | null
   name: string | null
   email: string | null
-  role: string | null
+  passwordHash: string | null
+  isActive: boolean | null
+  roleId: number | null
   stationId: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -50,7 +54,9 @@ export type UserMaxAggregateOutputType = {
   id: number | null
   name: string | null
   email: string | null
-  role: string | null
+  passwordHash: string | null
+  isActive: boolean | null
+  roleId: number | null
   stationId: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -60,7 +66,9 @@ export type UserCountAggregateOutputType = {
   id: number
   name: number
   email: number
-  role: number
+  passwordHash: number
+  isActive: number
+  roleId: number
   stationId: number
   createdAt: number
   updatedAt: number
@@ -70,11 +78,13 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   id?: true
+  roleId?: true
   stationId?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
+  roleId?: true
   stationId?: true
 }
 
@@ -82,7 +92,9 @@ export type UserMinAggregateInputType = {
   id?: true
   name?: true
   email?: true
-  role?: true
+  passwordHash?: true
+  isActive?: true
+  roleId?: true
   stationId?: true
   createdAt?: true
   updatedAt?: true
@@ -92,7 +104,9 @@ export type UserMaxAggregateInputType = {
   id?: true
   name?: true
   email?: true
-  role?: true
+  passwordHash?: true
+  isActive?: true
+  roleId?: true
   stationId?: true
   createdAt?: true
   updatedAt?: true
@@ -102,7 +116,9 @@ export type UserCountAggregateInputType = {
   id?: true
   name?: true
   email?: true
-  role?: true
+  passwordHash?: true
+  isActive?: true
+  roleId?: true
   stationId?: true
   createdAt?: true
   updatedAt?: true
@@ -199,7 +215,9 @@ export type UserGroupByOutputType = {
   id: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive: boolean
+  roleId: number
   stationId: number | null
   createdAt: Date
   updatedAt: Date
@@ -232,32 +250,40 @@ export type UserWhereInput = {
   id?: Prisma.IntFilter<"User"> | number
   name?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
-  role?: Prisma.StringFilter<"User"> | string
+  passwordHash?: Prisma.StringFilter<"User"> | string
+  isActive?: Prisma.BoolFilter<"User"> | boolean
+  roleId?: Prisma.IntFilter<"User"> | number
   stationId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  role?: Prisma.XOR<Prisma.RoleScalarRelationFilter, Prisma.RoleWhereInput>
   station?: Prisma.XOR<Prisma.StationNullableScalarRelationFilter, Prisma.StationWhereInput> | null
   managedStations?: Prisma.StationListRelationFilter
   customerOrders?: Prisma.FuelOrderListRelationFilter
   createdOrders?: Prisma.FuelOrderListRelationFilter
   orderEvents?: Prisma.OrderEventListRelationFilter
   handledCallSessions?: Prisma.CallSessionListRelationFilter
+  refreshSessions?: Prisma.RefreshSessionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  role?: Prisma.RoleOrderByWithRelationInput
   station?: Prisma.StationOrderByWithRelationInput
   managedStations?: Prisma.StationOrderByRelationAggregateInput
   customerOrders?: Prisma.FuelOrderOrderByRelationAggregateInput
   createdOrders?: Prisma.FuelOrderOrderByRelationAggregateInput
   orderEvents?: Prisma.OrderEventOrderByRelationAggregateInput
   handledCallSessions?: Prisma.CallSessionOrderByRelationAggregateInput
+  refreshSessions?: Prisma.RefreshSessionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -267,23 +293,29 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringFilter<"User"> | string
-  role?: Prisma.StringFilter<"User"> | string
+  passwordHash?: Prisma.StringFilter<"User"> | string
+  isActive?: Prisma.BoolFilter<"User"> | boolean
+  roleId?: Prisma.IntFilter<"User"> | number
   stationId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  role?: Prisma.XOR<Prisma.RoleScalarRelationFilter, Prisma.RoleWhereInput>
   station?: Prisma.XOR<Prisma.StationNullableScalarRelationFilter, Prisma.StationWhereInput> | null
   managedStations?: Prisma.StationListRelationFilter
   customerOrders?: Prisma.FuelOrderListRelationFilter
   createdOrders?: Prisma.FuelOrderListRelationFilter
   orderEvents?: Prisma.OrderEventListRelationFilter
   handledCallSessions?: Prisma.CallSessionListRelationFilter
+  refreshSessions?: Prisma.RefreshSessionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -301,7 +333,9 @@ export type UserScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"User"> | number
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
-  role?: Prisma.StringWithAggregatesFilter<"User"> | string
+  passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
+  isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  roleId?: Prisma.IntWithAggregatesFilter<"User"> | number
   stationId?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -310,22 +344,27 @@ export type UserScalarWhereWithAggregatesInput = {
 export type UserCreateInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
   managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
   customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -334,27 +373,33 @@ export type UserUncheckedCreateInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
   managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
   customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -363,13 +408,16 @@ export type UserUncheckedUpdateInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -378,7 +426,8 @@ export type UserCreateManyInput = {
 export type UserUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -387,7 +436,9 @@ export type UserUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,7 +463,9 @@ export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -420,6 +473,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
 }
 
@@ -427,7 +481,9 @@ export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -437,7 +493,9 @@ export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -445,7 +503,13 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type UserCreateNestedOneWithoutManagedStationsInput = {
@@ -504,6 +568,66 @@ export type UserUncheckedUpdateManyWithoutStationNestedInput = {
   update?: Prisma.UserUpdateWithWhereUniqueWithoutStationInput | Prisma.UserUpdateWithWhereUniqueWithoutStationInput[]
   updateMany?: Prisma.UserUpdateManyWithWhereWithoutStationInput | Prisma.UserUpdateManyWithWhereWithoutStationInput[]
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type UserCreateNestedManyWithoutRoleInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRoleInput, Prisma.UserUncheckedCreateWithoutRoleInput> | Prisma.UserCreateWithoutRoleInput[] | Prisma.UserUncheckedCreateWithoutRoleInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRoleInput | Prisma.UserCreateOrConnectWithoutRoleInput[]
+  createMany?: Prisma.UserCreateManyRoleInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutRoleInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRoleInput, Prisma.UserUncheckedCreateWithoutRoleInput> | Prisma.UserCreateWithoutRoleInput[] | Prisma.UserUncheckedCreateWithoutRoleInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRoleInput | Prisma.UserCreateOrConnectWithoutRoleInput[]
+  createMany?: Prisma.UserCreateManyRoleInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUpdateManyWithoutRoleNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRoleInput, Prisma.UserUncheckedCreateWithoutRoleInput> | Prisma.UserCreateWithoutRoleInput[] | Prisma.UserUncheckedCreateWithoutRoleInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRoleInput | Prisma.UserCreateOrConnectWithoutRoleInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutRoleInput | Prisma.UserUpsertWithWhereUniqueWithoutRoleInput[]
+  createMany?: Prisma.UserCreateManyRoleInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutRoleInput | Prisma.UserUpdateWithWhereUniqueWithoutRoleInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutRoleInput | Prisma.UserUpdateManyWithWhereWithoutRoleInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutRoleNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRoleInput, Prisma.UserUncheckedCreateWithoutRoleInput> | Prisma.UserCreateWithoutRoleInput[] | Prisma.UserUncheckedCreateWithoutRoleInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRoleInput | Prisma.UserCreateOrConnectWithoutRoleInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutRoleInput | Prisma.UserUpsertWithWhereUniqueWithoutRoleInput[]
+  createMany?: Prisma.UserCreateManyRoleInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutRoleInput | Prisma.UserUpdateWithWhereUniqueWithoutRoleInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutRoleInput | Prisma.UserUpdateManyWithWhereWithoutRoleInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserCreateNestedOneWithoutRefreshSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRefreshSessionsInput, Prisma.UserUncheckedCreateWithoutRefreshSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRefreshSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRefreshSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRefreshSessionsInput, Prisma.UserUncheckedCreateWithoutRefreshSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRefreshSessionsInput
+  upsert?: Prisma.UserUpsertWithoutRefreshSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRefreshSessionsInput, Prisma.UserUpdateWithoutRefreshSessionsInput>, Prisma.UserUncheckedUpdateWithoutRefreshSessionsInput>
 }
 
 export type UserCreateNestedOneWithoutCustomerOrdersInput = {
@@ -573,21 +697,26 @@ export type UserUpdateOneWithoutHandledCallSessionsNestedInput = {
 export type UserCreateWithoutManagedStationsInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
   customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutManagedStationsInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -595,6 +724,7 @@ export type UserUncheckedCreateWithoutManagedStationsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutManagedStationsInput = {
@@ -605,21 +735,26 @@ export type UserCreateOrConnectWithoutManagedStationsInput = {
 export type UserCreateWithoutStationInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
   customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStationInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   createdAt?: Date | string
   updatedAt?: Date | string
   managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
@@ -627,6 +762,7 @@ export type UserUncheckedCreateWithoutStationInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStationInput = {
@@ -653,21 +789,26 @@ export type UserUpdateToOneWithWhereWithoutManagedStationsInput = {
 export type UserUpdateWithoutManagedStationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
   customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutManagedStationsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -675,6 +816,7 @@ export type UserUncheckedUpdateWithoutManagedStationsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutStationInput = {
@@ -700,30 +842,178 @@ export type UserScalarWhereInput = {
   id?: Prisma.IntFilter<"User"> | number
   name?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
-  role?: Prisma.StringFilter<"User"> | string
+  passwordHash?: Prisma.StringFilter<"User"> | string
+  isActive?: Prisma.BoolFilter<"User"> | boolean
+  roleId?: Prisma.IntFilter<"User"> | number
   stationId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
 
+export type UserCreateWithoutRoleInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutRoleInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutRoleInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRoleInput, Prisma.UserUncheckedCreateWithoutRoleInput>
+}
+
+export type UserCreateManyRoleInputEnvelope = {
+  data: Prisma.UserCreateManyRoleInput | Prisma.UserCreateManyRoleInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithWhereUniqueWithoutRoleInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRoleInput, Prisma.UserUncheckedUpdateWithoutRoleInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRoleInput, Prisma.UserUncheckedCreateWithoutRoleInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutRoleInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRoleInput, Prisma.UserUncheckedUpdateWithoutRoleInput>
+}
+
+export type UserUpdateManyWithWhereWithoutRoleInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutRoleInput>
+}
+
+export type UserCreateWithoutRefreshSessionsInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+}
+
+export type UserUncheckedCreateWithoutRefreshSessionsInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+}
+
+export type UserCreateOrConnectWithoutRefreshSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRefreshSessionsInput, Prisma.UserUncheckedCreateWithoutRefreshSessionsInput>
+}
+
+export type UserUpsertWithoutRefreshSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRefreshSessionsInput, Prisma.UserUncheckedUpdateWithoutRefreshSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRefreshSessionsInput, Prisma.UserUncheckedCreateWithoutRefreshSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRefreshSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRefreshSessionsInput, Prisma.UserUncheckedUpdateWithoutRefreshSessionsInput>
+}
+
+export type UserUpdateWithoutRefreshSessionsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+}
+
 export type UserCreateWithoutCustomerOrdersInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
   managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCustomerOrdersInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -731,6 +1021,7 @@ export type UserUncheckedCreateWithoutCustomerOrdersInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCustomerOrdersInput = {
@@ -741,21 +1032,26 @@ export type UserCreateOrConnectWithoutCustomerOrdersInput = {
 export type UserCreateWithoutCreatedOrdersInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
   managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
   customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -763,6 +1059,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedOrdersInput = {
@@ -784,21 +1081,26 @@ export type UserUpdateToOneWithWhereWithoutCustomerOrdersInput = {
 export type UserUpdateWithoutCustomerOrdersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
   managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -806,6 +1108,7 @@ export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutCreatedOrdersInput = {
@@ -822,21 +1125,26 @@ export type UserUpdateToOneWithWhereWithoutCreatedOrdersInput = {
 export type UserUpdateWithoutCreatedOrdersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
   managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
   customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -844,26 +1152,32 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOrderEventsInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
   managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
   customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOrderEventsInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -871,6 +1185,7 @@ export type UserUncheckedCreateWithoutOrderEventsInput = {
   customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOrderEventsInput = {
@@ -892,21 +1207,26 @@ export type UserUpdateToOneWithWhereWithoutOrderEventsInput = {
 export type UserUpdateWithoutOrderEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
   managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
   customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrderEventsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -914,26 +1234,32 @@ export type UserUncheckedUpdateWithoutOrderEventsInput = {
   customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutHandledCallSessionsInput = {
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
   managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
   customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -941,6 +1267,7 @@ export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
   customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutHandledCallSessionsInput = {
@@ -962,21 +1289,26 @@ export type UserUpdateToOneWithWhereWithoutHandledCallSessionsInput = {
 export type UserUpdateWithoutHandledCallSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
   managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
   customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -984,13 +1316,16 @@ export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
   customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyStationInput = {
   id?: number
   name: string
   email: string
-  role: string
+  passwordHash: string
+  isActive?: boolean
+  roleId: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -998,21 +1333,26 @@ export type UserCreateManyStationInput = {
 export type UserUpdateWithoutStationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
   customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
@@ -1020,13 +1360,71 @@ export type UserUncheckedUpdateWithoutStationInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutStationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserCreateManyRoleInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserUpdateWithoutRoleInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRoleInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutRoleInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1042,6 +1440,7 @@ export type UserCountOutputType = {
   createdOrders: number
   orderEvents: number
   handledCallSessions: number
+  refreshSessions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1050,6 +1449,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   createdOrders?: boolean | UserCountOutputTypeCountCreatedOrdersArgs
   orderEvents?: boolean | UserCountOutputTypeCountOrderEventsArgs
   handledCallSessions?: boolean | UserCountOutputTypeCountHandledCallSessionsArgs
+  refreshSessions?: boolean | UserCountOutputTypeCountRefreshSessionsArgs
 }
 
 /**
@@ -1097,21 +1497,32 @@ export type UserCountOutputTypeCountHandledCallSessionsArgs<ExtArgs extends runt
   where?: Prisma.CallSessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRefreshSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RefreshSessionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   email?: boolean
-  role?: boolean
+  passwordHash?: boolean
+  isActive?: boolean
+  roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
   managedStations?: boolean | Prisma.User$managedStationsArgs<ExtArgs>
   customerOrders?: boolean | Prisma.User$customerOrdersArgs<ExtArgs>
   createdOrders?: boolean | Prisma.User$createdOrdersArgs<ExtArgs>
   orderEvents?: boolean | Prisma.User$orderEventsArgs<ExtArgs>
   handledCallSessions?: boolean | Prisma.User$handledCallSessionsArgs<ExtArgs>
+  refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1119,10 +1530,13 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   name?: boolean
   email?: boolean
-  role?: boolean
+  passwordHash?: boolean
+  isActive?: boolean
+  roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1130,10 +1544,13 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   name?: boolean
   email?: boolean
-  role?: boolean
+  passwordHash?: boolean
+  isActive?: boolean
+  roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1141,44 +1558,54 @@ export type UserSelectScalar = {
   id?: boolean
   name?: boolean
   email?: boolean
-  role?: boolean
+  passwordHash?: boolean
+  isActive?: boolean
+  roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "role" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "isActive" | "roleId" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
   managedStations?: boolean | Prisma.User$managedStationsArgs<ExtArgs>
   customerOrders?: boolean | Prisma.User$customerOrdersArgs<ExtArgs>
   createdOrders?: boolean | Prisma.User$createdOrdersArgs<ExtArgs>
   orderEvents?: boolean | Prisma.User$orderEventsArgs<ExtArgs>
   handledCallSessions?: boolean | Prisma.User$handledCallSessionsArgs<ExtArgs>
+  refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
 }
 export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
 }
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    role: Prisma.$RolePayload<ExtArgs>
     station: Prisma.$StationPayload<ExtArgs> | null
     managedStations: Prisma.$StationPayload<ExtArgs>[]
     customerOrders: Prisma.$FuelOrderPayload<ExtArgs>[]
     createdOrders: Prisma.$FuelOrderPayload<ExtArgs>[]
     orderEvents: Prisma.$OrderEventPayload<ExtArgs>[]
     handledCallSessions: Prisma.$CallSessionPayload<ExtArgs>[]
+    refreshSessions: Prisma.$RefreshSessionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     name: string
     email: string
-    role: string
+    passwordHash: string
+    isActive: boolean
+    roleId: number
     stationId: number | null
     createdAt: Date
     updatedAt: Date
@@ -1576,12 +2003,14 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  role<T extends Prisma.RoleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RoleDefaultArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   station<T extends Prisma.User$stationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$stationArgs<ExtArgs>>): Prisma.Prisma__StationClient<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   managedStations<T extends Prisma.User$managedStationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$managedStationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   customerOrders<T extends Prisma.User$customerOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$customerOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuelOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdOrders<T extends Prisma.User$createdOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuelOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderEvents<T extends Prisma.User$orderEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orderEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   handledCallSessions<T extends Prisma.User$handledCallSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$handledCallSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CallSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  refreshSessions<T extends Prisma.User$refreshSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1614,7 +2043,9 @@ export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'Int'>
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
-  readonly role: Prisma.FieldRef<"User", 'String'>
+  readonly passwordHash: Prisma.FieldRef<"User", 'String'>
+  readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
+  readonly roleId: Prisma.FieldRef<"User", 'Int'>
   readonly stationId: Prisma.FieldRef<"User", 'Int'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -2155,6 +2586,30 @@ export type User$handledCallSessionsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.CallSessionScalarFieldEnum | Prisma.CallSessionScalarFieldEnum[]
+}
+
+/**
+ * User.refreshSessions
+ */
+export type User$refreshSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RefreshSession
+   */
+  select?: Prisma.RefreshSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RefreshSession
+   */
+  omit?: Prisma.RefreshSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RefreshSessionInclude<ExtArgs> | null
+  where?: Prisma.RefreshSessionWhereInput
+  orderBy?: Prisma.RefreshSessionOrderByWithRelationInput | Prisma.RefreshSessionOrderByWithRelationInput[]
+  cursor?: Prisma.RefreshSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RefreshSessionScalarFieldEnum | Prisma.RefreshSessionScalarFieldEnum[]
 }
 
 /**
