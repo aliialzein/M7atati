@@ -3,7 +3,9 @@
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
-    "prisma.config.ts"
+    "prisma.config.ts",
+    "prisma/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
