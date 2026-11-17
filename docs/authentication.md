@@ -1,5 +1,30 @@
 # Authentication and authorization
 
+## Account token versions
+
+Apply the additive `20261117090000_add_user_token_version` migration before
+deploying this version. It adds `users.token_version` with default zero, preserving
+accounts and IDs. Both JWT types require a nonnegative integer `ver` claim, checked
+against the current database account version. Pre-change tokens without `ver` are
+explicitly rejected: all existing sessions must log in again after deployment.
+
+Deactivation changes status, increments the version and revokes refresh sessions
+in one transaction. Reactivation never decrements the version or restores old
+tokens. Refresh's conditional update also checks the current version. Already
+authenticated in-flight requests are not cancelled. Logout continues to revoke
+only refresh capability; role/station changes retain their existing semantics.
+
+Prepare/generate from repository root with the existing Prisma conventions.
+Review pending migrations and the target before explicitly deploying:
+`prisma migrate deploy --config apps/api/prisma.config.ts`.
+No normal-development migration is automatically applied by the verification
+scripts. The disposable users acceptance command is
+`tsx apps/api/scripts/verify-stations-postgres.ts --users`.
+
+Local rollout on 2026-11-17 explicitly applied this migration to `m7atati` using
+`migrate deploy`; migration status was verified up to date. A newly provisioned
+ADMIN completed normal listening-server login/profile and logout successfully.
+
 The API uses HTTP-only JWT cookies. No tokens are returned in JSON or stored in
 localStorage. Existing liveness (`GET /api/health`) and readiness
 (`GET /api/health/ready`) remain public.
@@ -9,16 +34,16 @@ localStorage. Existing liveness (`GET /api/health`) and readiness
 Configure `apps/api/.env`, or supply these variables through the deployment's
 secret manager:
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Existing PostgreSQL connection URL |
-| `JWT_ACCESS_SECRET` | 32 random bytes encoded as exactly 64 hexadecimal characters |
-| `JWT_REFRESH_SECRET` | A different independently generated 32-byte hexadecimal secret |
-| `JWT_ISSUER` | Defaults to `m7atati-api` |
-| `JWT_AUDIENCE` | Defaults to `m7atati-web` |
-| `ALLOWED_ORIGINS` | Comma-separated exact origins; required in production, HTTPS only |
-| `NODE_ENV` | `development`, `test`, or `production` |
-| `PORT` | Defaults to `4000` |
+| Variable             | Purpose                                                           |
+| -------------------- | ----------------------------------------------------------------- |
+| `DATABASE_URL`       | Existing PostgreSQL connection URL                                |
+| `JWT_ACCESS_SECRET`  | 32 random bytes encoded as exactly 64 hexadecimal characters      |
+| `JWT_REFRESH_SECRET` | A different independently generated 32-byte hexadecimal secret    |
+| `JWT_ISSUER`         | Defaults to `m7atati-api`                                         |
+| `JWT_AUDIENCE`       | Defaults to `m7atati-web`                                         |
+| `ALLOWED_ORIGINS`    | Comma-separated exact origins; required in production, HTTPS only |
+| `NODE_ENV`           | `development`, `test`, or `production`                            |
+| `PORT`               | Defaults to `4000`                                                |
 
 Generate **each** secret independently with:
 
@@ -40,13 +65,13 @@ must contain no credentials, paths, or trailing slash. There is no wildcard.
 
 All responses from `/api/auth` use `Cache-Control: no-store`.
 
-| Endpoint | Request | Success |
-| --- | --- | --- |
-| `POST /api/auth/register` | JSON `name`, `email`, `password` | 201, `{ "user": ... }` and both cookies |
-| `POST /api/auth/login` | JSON `email`, `password` | 200, `{ "user": ... }` and both cookies |
-| `POST /api/auth/refresh` | Refresh cookie | 200, `{ "user": ... }` and rotated cookies |
-| `POST /api/auth/logout` | Refresh cookie if present | 204, both cookies cleared |
-| `GET /api/auth/me` | Access cookie | 200, `{ "user": ... }` |
+| Endpoint                  | Request                          | Success                                    |
+| ------------------------- | -------------------------------- | ------------------------------------------ |
+| `POST /api/auth/register` | JSON `name`, `email`, `password` | 201, `{ "user": ... }` and both cookies    |
+| `POST /api/auth/login`    | JSON `email`, `password`         | 200, `{ "user": ... }` and both cookies    |
+| `POST /api/auth/refresh`  | Refresh cookie                   | 200, `{ "user": ... }` and rotated cookies |
+| `POST /api/auth/logout`   | Refresh cookie if present        | 204, both cookies cleared                  |
+| `GET /api/auth/me`        | Access cookie                    | 200, `{ "user": ... }`                     |
 
 The safe user object contains `id`, `name`, `email`, `role` (role name), and
 `stationId`. JSON responses never contain passwords, hashes, or JWTs.
@@ -124,7 +149,7 @@ seven-day lifetime. A consumed token cannot create a session or rotate again.
 The client should serialize refresh attempts; a concurrent loser receives 401
 and no replacement cookies, so it cannot erase the winner's new cookies.
 
-No schema changes are needed. Old hashes are not retained, so the system rejects
+Old refresh hashes are not retained, so the system rejects
 reuse but does not classify it as theft or revoke an entire session family on
 reuse. Expired/revoked row cleanup and absolute session lifetime policies can be
 added later without being required for correctness here.

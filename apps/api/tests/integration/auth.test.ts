@@ -63,6 +63,7 @@ function fixture(): AuthUser {
     email: 'customer@example.com',
     passwordHash,
     isActive: true,
+    tokenVersion: 0,
     stationId: null,
     role: {
       name: 'CUSTOMER',
@@ -166,7 +167,7 @@ beforeEach(() => {
         userId: number;
         tokenHash?: string;
         expiresAt?: { gt: Date };
-        user?: { isActive: boolean };
+        user?: { isActive: boolean; tokenVersion: number };
       };
       data: Partial<StoredSession>;
     }) => {
@@ -178,7 +179,9 @@ beforeEach(() => {
         (where.tokenHash !== undefined &&
           where.tokenHash !== session.tokenHash) ||
         (where.expiresAt && session.expiresAt <= where.expiresAt.gt) ||
-        (where.user && !currentUser?.isActive)
+        (where.user &&
+          (!currentUser?.isActive ||
+            currentUser.tokenVersion !== where.user.tokenVersion))
       )
         return Promise.resolve({ count: 0 });
       Object.assign(session, data);
@@ -324,6 +327,18 @@ describe('login and cookie configuration', () => {
 });
 
 describe('refresh sessions', () => {
+  it('rejects an old refresh version after reactivation and issues current versions on login', async () => {
+    const old = persist();
+    currentUser!.tokenVersion++;
+    expect((await refresh(old)).status).toBe(401);
+    const loggedIn = await post('login').send({
+      email: 'customer@example.com',
+      password,
+    });
+    expect(loggedIn.status).toBe(200);
+    const raw = cookie(loggedIn, ACCESS_COOKIE).split('=')[1];
+    expect(tokenService.verifyAccess(raw).tokenVersion).toBe(1);
+  });
   it('rotates the token in the same session, rejects reuse, and accepts the replacement', async () => {
     const tokens = persist();
     const first = await refresh(tokens);
@@ -402,7 +417,7 @@ describe('refresh sessions', () => {
           revokedAt: null,
           userId: 1,
           expiresAt: { gt: expect.any(Date) },
-          user: { isActive: true },
+          user: { isActive: true, tokenVersion: 0 },
         }),
       }),
     );

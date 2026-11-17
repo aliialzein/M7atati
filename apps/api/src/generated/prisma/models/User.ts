@@ -28,12 +28,14 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
   roleId: number | null
   stationId: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: number | null
+  tokenVersion: number | null
   roleId: number | null
   stationId: number | null
 }
@@ -44,6 +46,7 @@ export type UserMinAggregateOutputType = {
   email: string | null
   passwordHash: string | null
   isActive: boolean | null
+  tokenVersion: number | null
   roleId: number | null
   stationId: number | null
   createdAt: Date | null
@@ -56,6 +59,7 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   passwordHash: string | null
   isActive: boolean | null
+  tokenVersion: number | null
   roleId: number | null
   stationId: number | null
   createdAt: Date | null
@@ -68,6 +72,7 @@ export type UserCountAggregateOutputType = {
   email: number
   passwordHash: number
   isActive: number
+  tokenVersion: number
   roleId: number
   stationId: number
   createdAt: number
@@ -78,12 +83,14 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   id?: true
+  tokenVersion?: true
   roleId?: true
   stationId?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
+  tokenVersion?: true
   roleId?: true
   stationId?: true
 }
@@ -94,6 +101,7 @@ export type UserMinAggregateInputType = {
   email?: true
   passwordHash?: true
   isActive?: true
+  tokenVersion?: true
   roleId?: true
   stationId?: true
   createdAt?: true
@@ -106,6 +114,7 @@ export type UserMaxAggregateInputType = {
   email?: true
   passwordHash?: true
   isActive?: true
+  tokenVersion?: true
   roleId?: true
   stationId?: true
   createdAt?: true
@@ -118,6 +127,7 @@ export type UserCountAggregateInputType = {
   email?: true
   passwordHash?: true
   isActive?: true
+  tokenVersion?: true
   roleId?: true
   stationId?: true
   createdAt?: true
@@ -217,6 +227,7 @@ export type UserGroupByOutputType = {
   email: string
   passwordHash: string
   isActive: boolean
+  tokenVersion: number
   roleId: number
   stationId: number | null
   createdAt: Date
@@ -252,6 +263,7 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
   roleId?: Prisma.IntFilter<"User"> | number
   stationId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -272,6 +284,7 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -295,6 +308,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
   roleId?: Prisma.IntFilter<"User"> | number
   stationId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -315,6 +329,7 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -335,6 +350,7 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
   roleId?: Prisma.IntWithAggregatesFilter<"User"> | number
   stationId?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -346,6 +362,7 @@ export type UserCreateInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -364,6 +381,7 @@ export type UserUncheckedCreateInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -381,6 +399,7 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -399,6 +418,7 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -417,6 +437,7 @@ export type UserCreateManyInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -428,6 +449,7 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -438,6 +460,7 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -465,6 +488,7 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -473,6 +497,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
 }
@@ -483,6 +508,7 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -495,6 +521,7 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -503,6 +530,7 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tokenVersion?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
 }
@@ -568,10 +596,6 @@ export type UserUncheckedUpdateManyWithoutStationNestedInput = {
   update?: Prisma.UserUpdateWithWhereUniqueWithoutStationInput | Prisma.UserUpdateWithWhereUniqueWithoutStationInput[]
   updateMany?: Prisma.UserUpdateManyWithWhereWithoutStationInput | Prisma.UserUpdateManyWithWhereWithoutStationInput[]
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
 }
 
 export type UserCreateNestedManyWithoutRoleInput = {
@@ -699,6 +723,7 @@ export type UserCreateWithoutManagedStationsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -716,6 +741,7 @@ export type UserUncheckedCreateWithoutManagedStationsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -737,6 +763,7 @@ export type UserCreateWithoutStationInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -754,6 +781,7 @@ export type UserUncheckedCreateWithoutStationInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -791,6 +819,7 @@ export type UserUpdateWithoutManagedStationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -808,6 +837,7 @@ export type UserUncheckedUpdateWithoutManagedStationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -844,6 +874,7 @@ export type UserScalarWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringFilter<"User"> | string
   isActive?: Prisma.BoolFilter<"User"> | boolean
+  tokenVersion?: Prisma.IntFilter<"User"> | number
   roleId?: Prisma.IntFilter<"User"> | number
   stationId?: Prisma.IntNullableFilter<"User"> | number | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -855,6 +886,7 @@ export type UserCreateWithoutRoleInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   station?: Prisma.StationCreateNestedOneWithoutUsersInput
@@ -872,6 +904,7 @@ export type UserUncheckedCreateWithoutRoleInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -914,6 +947,7 @@ export type UserCreateWithoutRefreshSessionsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -931,6 +965,7 @@ export type UserUncheckedCreateWithoutRefreshSessionsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -963,6 +998,7 @@ export type UserUpdateWithoutRefreshSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -980,6 +1016,7 @@ export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -996,6 +1033,7 @@ export type UserCreateWithoutCustomerOrdersInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -1013,6 +1051,7 @@ export type UserUncheckedCreateWithoutCustomerOrdersInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -1034,6 +1073,7 @@ export type UserCreateWithoutCreatedOrdersInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -1051,6 +1091,7 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -1083,6 +1124,7 @@ export type UserUpdateWithoutCustomerOrdersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -1100,6 +1142,7 @@ export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1127,6 +1170,7 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -1144,6 +1188,7 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1160,6 +1205,7 @@ export type UserCreateWithoutOrderEventsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -1177,6 +1223,7 @@ export type UserUncheckedCreateWithoutOrderEventsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -1209,6 +1256,7 @@ export type UserUpdateWithoutOrderEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -1226,6 +1274,7 @@ export type UserUncheckedUpdateWithoutOrderEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1242,6 +1291,7 @@ export type UserCreateWithoutHandledCallSessionsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -1259,6 +1309,7 @@ export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   stationId?: number | null
   createdAt?: Date | string
@@ -1291,6 +1342,7 @@ export type UserUpdateWithoutHandledCallSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -1308,6 +1360,7 @@ export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1325,6 +1378,7 @@ export type UserCreateManyStationInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   roleId: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1335,6 +1389,7 @@ export type UserUpdateWithoutStationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
@@ -1352,6 +1407,7 @@ export type UserUncheckedUpdateWithoutStationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1369,6 +1425,7 @@ export type UserUncheckedUpdateManyWithoutStationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   roleId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1380,6 +1437,7 @@ export type UserCreateManyRoleInput = {
   email: string
   passwordHash: string
   isActive?: boolean
+  tokenVersion?: number
   stationId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1390,6 +1448,7 @@ export type UserUpdateWithoutRoleInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneWithoutUsersNestedInput
@@ -1407,6 +1466,7 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1424,6 +1484,7 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1511,6 +1572,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   passwordHash?: boolean
   isActive?: boolean
+  tokenVersion?: boolean
   roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
@@ -1532,6 +1594,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   passwordHash?: boolean
   isActive?: boolean
+  tokenVersion?: boolean
   roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
@@ -1546,6 +1609,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   passwordHash?: boolean
   isActive?: boolean
+  tokenVersion?: boolean
   roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
@@ -1560,13 +1624,14 @@ export type UserSelectScalar = {
   email?: boolean
   passwordHash?: boolean
   isActive?: boolean
+  tokenVersion?: boolean
   roleId?: boolean
   stationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "isActive" | "roleId" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "isActive" | "tokenVersion" | "roleId" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   station?: boolean | Prisma.User$stationArgs<ExtArgs>
@@ -1605,6 +1670,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     passwordHash: string
     isActive: boolean
+    tokenVersion: number
     roleId: number
     stationId: number | null
     createdAt: Date
@@ -2045,6 +2111,7 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
+  readonly tokenVersion: Prisma.FieldRef<"User", 'Int'>
   readonly roleId: Prisma.FieldRef<"User", 'Int'>
   readonly stationId: Prisma.FieldRef<"User", 'Int'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>

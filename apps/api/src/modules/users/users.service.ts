@@ -55,6 +55,7 @@ export class UsersService {
     role: string,
     stationId: number | null,
     tx: Prisma.TransactionClient,
+    newAssignment = true,
   ): Promise<void> {
     if (role === 'CUSTOMER')
       throw new HttpError('Customer role transitions are not supported', 400);
@@ -69,7 +70,13 @@ export class UsersService {
     }
     if (stationId !== null) {
       const station = await this.repository.findStation(
-        { AND: [{ id: stationId }, stationScope(actor)] },
+        {
+          AND: [
+            { id: stationId },
+            stationScope(actor),
+            ...(newAssignment ? [{ isActive: true }] : []),
+          ],
+        },
         tx,
       );
       if (!station)
@@ -161,7 +168,13 @@ export class UsersService {
           );
         }
       } else {
-        await this.assignment(actor, nextRole, stationId, tx);
+        await this.assignment(
+          actor,
+          nextRole,
+          stationId,
+          tx,
+          stationId !== target.stationId,
+        );
       }
       const roleChanged = nextRole !== target.role.name;
       if (
@@ -209,7 +222,16 @@ export class UsersService {
       const target = await this.target(id, actor, tx);
       if (!isActive && target.isActive && target.role.name === 'ADMIN')
         await this.protectFinalAdmin(tx);
-      const updated = await this.repository.update(id, { isActive }, tx);
+      const updated = await this.repository.update(
+        id,
+        {
+          isActive,
+          ...(!isActive && target.isActive
+            ? { tokenVersion: { increment: 1 } }
+            : {}),
+        },
+        tx,
+      );
       if (!isActive) await this.repository.revokeSessions(id, tx);
       return managedUser(updated);
     });

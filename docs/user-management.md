@@ -1,16 +1,34 @@
 # User and access management
 
+Operational staff means MANAGER, EMPLOYEE, HR and SECURITY. ADMIN account
+administration is conceptually separate; the existing ADMIN provisioning and
+user endpoints retain their capabilities. This terminology adds no role group or
+authorization grant. General PATCH supports only name, role and stationId;
+email/password changes remain outside this API.
+
+New station assignments (creation or a changed stationId) must target an active
+station within the actor's existing scope. Station deactivation preserves existing
+assignments. An unchanged stationId, including an explicitly repeated value, is
+not a transfer; unrelated profile changes remain allowed at inactive stations.
+Manager deactivation retains managed-station links and leaves employee accounts
+active; authentication is blocked. Manager demotion still requires reassignment
+of managed stations first.
+
+Account deactivation atomically increments the private token version and revokes
+refresh sessions with the status update. Reactivation leaves that version intact:
+earlier access and refresh tokens remain rejected; fresh login is required.
+
 All `/api/users` endpoints use the existing cookie authentication and permission
 middleware. Mutations also require the existing allowed Origin and
 `X-CSRF-Protection: 1` header. Responses use `Cache-Control: no-store`.
 
-| Method and path | Permission | Success |
-| --- | --- | --- |
-| `GET /api/users` | `users.read` | 200, `{ users, pagination }` |
-| `GET /api/users/:id` | `users.read` | 200, `{ user }` |
-| `POST /api/users` | `users.create` | 201, `{ user }` |
-| `PATCH /api/users/:id` | `users.update` | 200, `{ user }` |
-| `PATCH /api/users/:id/status` | `users.update` | 200, `{ user }` |
+| Method and path               | Permission     | Success                      |
+| ----------------------------- | -------------- | ---------------------------- |
+| `GET /api/users`              | `users.read`   | 200, `{ users, pagination }` |
+| `GET /api/users/:id`          | `users.read`   | 200, `{ user }`              |
+| `POST /api/users`             | `users.create` | 201, `{ user }`              |
+| `PATCH /api/users/:id`        | `users.update` | 200, `{ user }`              |
+| `PATCH /api/users/:id/status` | `users.update` | 200, `{ user }`              |
 
 Profiles contain id, name, email, role name, stationId, isActive, createdAt, and
 updatedAt. Dates are ISO strings over HTTP. Passwords, password hashes, role IDs,
@@ -26,12 +44,12 @@ The only architecture documentation available when this phase was implemented
 was `authentication.md`. It does not define HR station grants. The schema has
 no HR-to-station authorization relationship. Accordingly:
 
-| Actor | User-management scope |
-| --- | --- |
-| ADMIN | All users and stations, subject to integrity rules |
-| MANAGER | EMPLOYEE users assigned to stations managed through `Station.managerId` |
-| HR | Denied until an explicit authorized scope is modeled and approved |
-| EMPLOYEE, SECURITY, CUSTOMER | No user-management scope |
+| Actor                        | User-management scope                                                   |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| ADMIN                        | All users and stations, subject to integrity rules                      |
+| MANAGER                      | EMPLOYEE users assigned to stations managed through `Station.managerId` |
+| HR                           | Denied until an explicit authorized scope is modeled and approved       |
+| EMPLOYEE, SECURITY, CUSTOMER | No user-management scope                                                |
 
 HR's seeded user permissions do not override the missing resource scope. Even
 an HR user's `stationId` is not interpreted as an authorization grant. Adding
@@ -84,12 +102,12 @@ ADMIN, MANAGER, HR, and SECURITY accounts. Managers can create only EMPLOYEE.
 
 Station assignment policy:
 
-| Role | User.stationId |
-| --- | --- |
-| EMPLOYEE, SECURITY | Required, existing station |
-| MANAGER | Optional existing station, affiliation only |
-| ADMIN, HR | Must be null |
-| CUSTOMER | Not assignable through this module |
+| Role               | User.stationId                              |
+| ------------------ | ------------------------------------------- |
+| EMPLOYEE, SECURITY | Required, existing station                  |
+| MANAGER            | Optional existing station, affiliation only |
+| ADMIN, HR          | Must be null                                |
+| CUSTOMER           | Not assignable through this module          |
 
 A MANAGER's station affiliation never proves management; actual managed stations
 are represented by `Station.managerId`/`User.managedStations`. Creating a manager
@@ -160,7 +178,12 @@ recovery command. Provisioning was not executed as part of implementation.
 Jest/Supertest uses mocked Prisma and explicit test credentials, preserving
 database-free CI. Tests verify the emitted filters/transaction options and model
 rollback/conflict retries; they do not simulate PostgreSQL's full Serializable
-implementation. No schema or migration changes are needed for these policies.
+implementation. The token-version policy requires the additive
+`20261117090000_add_user_token_version` migration; the disposable PostgreSQL
+`verify-stations-postgres.ts --users` run verifies real authentication and storage
+independently of those mocks. The token-version migration was explicitly applied
+to local development `m7atati` on 2026-11-17. Users/station acceptance suites were
+not repeated for the subsequent pricing-only conversion change, at the user's request.
 
 Before expanding access, agree on HR grants and station-management workflows.
 Future credential changes, email verification, invitations, audit trails, and

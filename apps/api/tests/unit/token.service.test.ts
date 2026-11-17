@@ -13,7 +13,7 @@ function signed(
   options: jwt.SignOptions = {},
   secret = env.accessTokenSecret,
 ) {
-  return jwt.sign(payload, Buffer.from(secret, 'hex'), {
+  return jwt.sign({ ver: 0, ...payload }, Buffer.from(secret, 'hex'), {
     algorithm: 'HS256',
     issuer: env.tokenIssuer,
     audience: env.tokenAudience,
@@ -26,10 +26,14 @@ function signed(
 describe('JWT creation and verification', () => {
   it('issues minimal claims with separate lifetimes and secrets', () => {
     const tokens = tokenService.issue(1);
-    expect(tokenService.verifyAccess(tokens.accessToken)).toBe(1);
+    expect(tokenService.verifyAccess(tokens.accessToken)).toEqual({
+      userId: 1,
+      tokenVersion: 0,
+    });
     expect(tokenService.verifyRefresh(tokens.refreshToken)).toEqual({
       userId: 1,
       sessionId: tokens.sessionId,
+      tokenVersion: 0,
     });
     const access = jwt.decode(tokens.accessToken) as jwt.JwtPayload;
     const refresh = jwt.decode(tokens.refreshToken) as jwt.JwtPayload;
@@ -42,6 +46,7 @@ describe('JWT creation and verification', () => {
       'iss',
       'sub',
       'type',
+      'ver',
     ]);
     expect(tokens.expiresAt.getTime()).toBe(refresh.exp! * 1000);
     expect(() => tokenService.verifyAccess(tokens.refreshToken)).toThrow(
@@ -120,5 +125,19 @@ describe('JWT creation and verification', () => {
     const second = tokenService.issue(1, sessionId);
     expect(first.refreshToken).not.toBe(second.refreshToken);
     expect(first.tokenHash).not.toBe(second.tokenHash);
+  });
+  it('rejects pre-change tokens without a version claim', () => {
+    expect(() =>
+      tokenService.verifyAccess(signed({ type: 'access', ver: undefined })),
+    ).toThrow('Unauthenticated');
+    expect(() =>
+      tokenService.verifyRefresh(
+        signed(
+          { type: 'refresh', ver: undefined, nonce: randomUUID() },
+          { jwtid: randomUUID() },
+          env.refreshTokenSecret,
+        ),
+      ),
+    ).toThrow('Unauthenticated');
   });
 });

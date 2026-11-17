@@ -30,12 +30,18 @@ export type FuelPriceAvgAggregateOutputType = {
   id: number | null
   fuelTypeId: number | null
   priceMinor: number | null
+  price: runtime.Decimal | null
+  providerPrice: runtime.Decimal | null
+  conversionDivisor: number | null
 }
 
 export type FuelPriceSumAggregateOutputType = {
   id: number | null
   fuelTypeId: number | null
   priceMinor: number | null
+  price: runtime.Decimal | null
+  providerPrice: runtime.Decimal | null
+  conversionDivisor: number | null
 }
 
 export type FuelPriceMinAggregateOutputType = {
@@ -45,6 +51,23 @@ export type FuelPriceMinAggregateOutputType = {
   currency: string | null
   source: string | null
   fetchedAt: Date | null
+  provenance: string | null
+  provider: string | null
+  market: string | null
+  fuelCode: string | null
+  price: runtime.Decimal | null
+  providerFuelCode: string | null
+  providerPrice: runtime.Decimal | null
+  providerUnit: string | null
+  conversionDivisor: number | null
+  unit: string | null
+  effectiveAt: Date | null
+  seriesKey: string | null
+  providerSeriesId: string | null
+  kind: string | null
+  interval: string | null
+  freshness: string | null
+  lastSeenAt: Date | null
 }
 
 export type FuelPriceMaxAggregateOutputType = {
@@ -54,6 +77,23 @@ export type FuelPriceMaxAggregateOutputType = {
   currency: string | null
   source: string | null
   fetchedAt: Date | null
+  provenance: string | null
+  provider: string | null
+  market: string | null
+  fuelCode: string | null
+  price: runtime.Decimal | null
+  providerFuelCode: string | null
+  providerPrice: runtime.Decimal | null
+  providerUnit: string | null
+  conversionDivisor: number | null
+  unit: string | null
+  effectiveAt: Date | null
+  seriesKey: string | null
+  providerSeriesId: string | null
+  kind: string | null
+  interval: string | null
+  freshness: string | null
+  lastSeenAt: Date | null
 }
 
 export type FuelPriceCountAggregateOutputType = {
@@ -63,6 +103,23 @@ export type FuelPriceCountAggregateOutputType = {
   currency: number
   source: number
   fetchedAt: number
+  provenance: number
+  provider: number
+  market: number
+  fuelCode: number
+  price: number
+  providerFuelCode: number
+  providerPrice: number
+  providerUnit: number
+  conversionDivisor: number
+  unit: number
+  effectiveAt: number
+  seriesKey: number
+  providerSeriesId: number
+  kind: number
+  interval: number
+  freshness: number
+  lastSeenAt: number
   _all: number
 }
 
@@ -71,12 +128,18 @@ export type FuelPriceAvgAggregateInputType = {
   id?: true
   fuelTypeId?: true
   priceMinor?: true
+  price?: true
+  providerPrice?: true
+  conversionDivisor?: true
 }
 
 export type FuelPriceSumAggregateInputType = {
   id?: true
   fuelTypeId?: true
   priceMinor?: true
+  price?: true
+  providerPrice?: true
+  conversionDivisor?: true
 }
 
 export type FuelPriceMinAggregateInputType = {
@@ -86,6 +149,23 @@ export type FuelPriceMinAggregateInputType = {
   currency?: true
   source?: true
   fetchedAt?: true
+  provenance?: true
+  provider?: true
+  market?: true
+  fuelCode?: true
+  price?: true
+  providerFuelCode?: true
+  providerPrice?: true
+  providerUnit?: true
+  conversionDivisor?: true
+  unit?: true
+  effectiveAt?: true
+  seriesKey?: true
+  providerSeriesId?: true
+  kind?: true
+  interval?: true
+  freshness?: true
+  lastSeenAt?: true
 }
 
 export type FuelPriceMaxAggregateInputType = {
@@ -95,6 +175,23 @@ export type FuelPriceMaxAggregateInputType = {
   currency?: true
   source?: true
   fetchedAt?: true
+  provenance?: true
+  provider?: true
+  market?: true
+  fuelCode?: true
+  price?: true
+  providerFuelCode?: true
+  providerPrice?: true
+  providerUnit?: true
+  conversionDivisor?: true
+  unit?: true
+  effectiveAt?: true
+  seriesKey?: true
+  providerSeriesId?: true
+  kind?: true
+  interval?: true
+  freshness?: true
+  lastSeenAt?: true
 }
 
 export type FuelPriceCountAggregateInputType = {
@@ -104,6 +201,23 @@ export type FuelPriceCountAggregateInputType = {
   currency?: true
   source?: true
   fetchedAt?: true
+  provenance?: true
+  provider?: true
+  market?: true
+  fuelCode?: true
+  price?: true
+  providerFuelCode?: true
+  providerPrice?: true
+  providerUnit?: true
+  conversionDivisor?: true
+  unit?: true
+  effectiveAt?: true
+  seriesKey?: true
+  providerSeriesId?: true
+  kind?: true
+  interval?: true
+  freshness?: true
+  lastSeenAt?: true
   _all?: true
 }
 
@@ -196,10 +310,27 @@ export type FuelPriceGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type FuelPriceGroupByOutputType = {
   id: number
   fuelTypeId: number
-  priceMinor: number
+  priceMinor: number | null
   currency: string
   source: string | null
   fetchedAt: Date
+  provenance: string
+  provider: string | null
+  market: string | null
+  fuelCode: string | null
+  price: runtime.Decimal | null
+  providerFuelCode: string | null
+  providerPrice: runtime.Decimal | null
+  providerUnit: string | null
+  conversionDivisor: number | null
+  unit: string | null
+  effectiveAt: Date | null
+  seriesKey: string | null
+  providerSeriesId: string | null
+  kind: string | null
+  interval: string | null
+  freshness: string | null
+  lastSeenAt: Date | null
   _count: FuelPriceCountAggregateOutputType | null
   _avg: FuelPriceAvgAggregateOutputType | null
   _sum: FuelPriceSumAggregateOutputType | null
@@ -228,43 +359,112 @@ export type FuelPriceWhereInput = {
   NOT?: Prisma.FuelPriceWhereInput | Prisma.FuelPriceWhereInput[]
   id?: Prisma.IntFilter<"FuelPrice"> | number
   fuelTypeId?: Prisma.IntFilter<"FuelPrice"> | number
-  priceMinor?: Prisma.IntFilter<"FuelPrice"> | number
+  priceMinor?: Prisma.IntNullableFilter<"FuelPrice"> | number | null
   currency?: Prisma.StringFilter<"FuelPrice"> | string
   source?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
   fetchedAt?: Prisma.DateTimeFilter<"FuelPrice"> | Date | string
+  provenance?: Prisma.StringFilter<"FuelPrice"> | string
+  provider?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  market?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  fuelCode?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  price?: Prisma.DecimalNullableFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  providerPrice?: Prisma.DecimalNullableFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  conversionDivisor?: Prisma.IntNullableFilter<"FuelPrice"> | number | null
+  unit?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  effectiveAt?: Prisma.DateTimeNullableFilter<"FuelPrice"> | Date | string | null
+  seriesKey?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  providerSeriesId?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  kind?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  interval?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  freshness?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  lastSeenAt?: Prisma.DateTimeNullableFilter<"FuelPrice"> | Date | string | null
   fuelType?: Prisma.XOR<Prisma.FuelTypeScalarRelationFilter, Prisma.FuelTypeWhereInput>
 }
 
 export type FuelPriceOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   fuelTypeId?: Prisma.SortOrder
-  priceMinor?: Prisma.SortOrder
+  priceMinor?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   source?: Prisma.SortOrderInput | Prisma.SortOrder
   fetchedAt?: Prisma.SortOrder
+  provenance?: Prisma.SortOrder
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder
+  market?: Prisma.SortOrderInput | Prisma.SortOrder
+  fuelCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  price?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerFuelCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  effectiveAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  seriesKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerSeriesId?: Prisma.SortOrderInput | Prisma.SortOrder
+  kind?: Prisma.SortOrderInput | Prisma.SortOrder
+  interval?: Prisma.SortOrderInput | Prisma.SortOrder
+  freshness?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   fuelType?: Prisma.FuelTypeOrderByWithRelationInput
 }
 
 export type FuelPriceWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  provider_market_fuelCode_seriesKey_currency_unit_effectiveAt_price?: Prisma.FuelPriceProviderMarketFuelCodeSeriesKeyCurrencyUnitEffectiveAtPriceCompoundUniqueInput
   AND?: Prisma.FuelPriceWhereInput | Prisma.FuelPriceWhereInput[]
   OR?: Prisma.FuelPriceWhereInput[]
   NOT?: Prisma.FuelPriceWhereInput | Prisma.FuelPriceWhereInput[]
   fuelTypeId?: Prisma.IntFilter<"FuelPrice"> | number
-  priceMinor?: Prisma.IntFilter<"FuelPrice"> | number
+  priceMinor?: Prisma.IntNullableFilter<"FuelPrice"> | number | null
   currency?: Prisma.StringFilter<"FuelPrice"> | string
   source?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
   fetchedAt?: Prisma.DateTimeFilter<"FuelPrice"> | Date | string
+  provenance?: Prisma.StringFilter<"FuelPrice"> | string
+  provider?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  market?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  fuelCode?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  price?: Prisma.DecimalNullableFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  providerPrice?: Prisma.DecimalNullableFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  conversionDivisor?: Prisma.IntNullableFilter<"FuelPrice"> | number | null
+  unit?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  effectiveAt?: Prisma.DateTimeNullableFilter<"FuelPrice"> | Date | string | null
+  seriesKey?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  providerSeriesId?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  kind?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  interval?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  freshness?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  lastSeenAt?: Prisma.DateTimeNullableFilter<"FuelPrice"> | Date | string | null
   fuelType?: Prisma.XOR<Prisma.FuelTypeScalarRelationFilter, Prisma.FuelTypeWhereInput>
-}, "id">
+}, "id" | "provider_market_fuelCode_seriesKey_currency_unit_effectiveAt_price">
 
 export type FuelPriceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   fuelTypeId?: Prisma.SortOrder
-  priceMinor?: Prisma.SortOrder
+  priceMinor?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
   source?: Prisma.SortOrderInput | Prisma.SortOrder
   fetchedAt?: Prisma.SortOrder
+  provenance?: Prisma.SortOrder
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder
+  market?: Prisma.SortOrderInput | Prisma.SortOrder
+  fuelCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  price?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerFuelCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrderInput | Prisma.SortOrder
+  unit?: Prisma.SortOrderInput | Prisma.SortOrder
+  effectiveAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  seriesKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerSeriesId?: Prisma.SortOrderInput | Prisma.SortOrder
+  kind?: Prisma.SortOrderInput | Prisma.SortOrder
+  interval?: Prisma.SortOrderInput | Prisma.SortOrder
+  freshness?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.FuelPriceCountOrderByAggregateInput
   _avg?: Prisma.FuelPriceAvgOrderByAggregateInput
   _max?: Prisma.FuelPriceMaxOrderByAggregateInput
@@ -278,69 +478,205 @@ export type FuelPriceScalarWhereWithAggregatesInput = {
   NOT?: Prisma.FuelPriceScalarWhereWithAggregatesInput | Prisma.FuelPriceScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"FuelPrice"> | number
   fuelTypeId?: Prisma.IntWithAggregatesFilter<"FuelPrice"> | number
-  priceMinor?: Prisma.IntWithAggregatesFilter<"FuelPrice"> | number
+  priceMinor?: Prisma.IntNullableWithAggregatesFilter<"FuelPrice"> | number | null
   currency?: Prisma.StringWithAggregatesFilter<"FuelPrice"> | string
   source?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
   fetchedAt?: Prisma.DateTimeWithAggregatesFilter<"FuelPrice"> | Date | string
+  provenance?: Prisma.StringWithAggregatesFilter<"FuelPrice"> | string
+  provider?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  market?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  fuelCode?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  price?: Prisma.DecimalNullableWithAggregatesFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  providerPrice?: Prisma.DecimalNullableWithAggregatesFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  conversionDivisor?: Prisma.IntNullableWithAggregatesFilter<"FuelPrice"> | number | null
+  unit?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  effectiveAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FuelPrice"> | Date | string | null
+  seriesKey?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  providerSeriesId?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  kind?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  interval?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  freshness?: Prisma.StringNullableWithAggregatesFilter<"FuelPrice"> | string | null
+  lastSeenAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FuelPrice"> | Date | string | null
 }
 
 export type FuelPriceCreateInput = {
-  priceMinor: number
+  priceMinor?: number | null
   currency: string
   source?: string | null
   fetchedAt?: Date | string
+  provenance?: string
+  provider?: string | null
+  market?: string | null
+  fuelCode?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: string | null
+  providerPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: string | null
+  conversionDivisor?: number | null
+  unit?: string | null
+  effectiveAt?: Date | string | null
+  seriesKey?: string | null
+  providerSeriesId?: string | null
+  kind?: string | null
+  interval?: string | null
+  freshness?: string | null
+  lastSeenAt?: Date | string | null
   fuelType: Prisma.FuelTypeCreateNestedOneWithoutPricesInput
 }
 
 export type FuelPriceUncheckedCreateInput = {
   id?: number
   fuelTypeId: number
-  priceMinor: number
+  priceMinor?: number | null
   currency: string
   source?: string | null
   fetchedAt?: Date | string
+  provenance?: string
+  provider?: string | null
+  market?: string | null
+  fuelCode?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: string | null
+  providerPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: string | null
+  conversionDivisor?: number | null
+  unit?: string | null
+  effectiveAt?: Date | string | null
+  seriesKey?: string | null
+  providerSeriesId?: string | null
+  kind?: string | null
+  interval?: string | null
+  freshness?: string | null
+  lastSeenAt?: Date | string | null
 }
 
 export type FuelPriceUpdateInput = {
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fuelType?: Prisma.FuelTypeUpdateOneRequiredWithoutPricesNestedInput
 }
 
 export type FuelPriceUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   fuelTypeId?: Prisma.IntFieldUpdateOperationsInput | number
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type FuelPriceCreateManyInput = {
   id?: number
   fuelTypeId: number
-  priceMinor: number
+  priceMinor?: number | null
   currency: string
   source?: string | null
   fetchedAt?: Date | string
+  provenance?: string
+  provider?: string | null
+  market?: string | null
+  fuelCode?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: string | null
+  providerPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: string | null
+  conversionDivisor?: number | null
+  unit?: string | null
+  effectiveAt?: Date | string | null
+  seriesKey?: string | null
+  providerSeriesId?: string | null
+  kind?: string | null
+  interval?: string | null
+  freshness?: string | null
+  lastSeenAt?: Date | string | null
 }
 
 export type FuelPriceUpdateManyMutationInput = {
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type FuelPriceUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   fuelTypeId?: Prisma.IntFieldUpdateOperationsInput | number
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type FuelPriceListRelationFilter = {
@@ -353,6 +689,17 @@ export type FuelPriceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type FuelPriceProviderMarketFuelCodeSeriesKeyCurrencyUnitEffectiveAtPriceCompoundUniqueInput = {
+  provider: string
+  market: string
+  fuelCode: string
+  seriesKey: string
+  currency: string
+  unit: string
+  effectiveAt: Date | string
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type FuelPriceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   fuelTypeId?: Prisma.SortOrder
@@ -360,12 +707,32 @@ export type FuelPriceCountOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   source?: Prisma.SortOrder
   fetchedAt?: Prisma.SortOrder
+  provenance?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  market?: Prisma.SortOrder
+  fuelCode?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+  providerFuelCode?: Prisma.SortOrder
+  providerPrice?: Prisma.SortOrder
+  providerUnit?: Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  effectiveAt?: Prisma.SortOrder
+  seriesKey?: Prisma.SortOrder
+  providerSeriesId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  interval?: Prisma.SortOrder
+  freshness?: Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrder
 }
 
 export type FuelPriceAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   fuelTypeId?: Prisma.SortOrder
   priceMinor?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+  providerPrice?: Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrder
 }
 
 export type FuelPriceMaxOrderByAggregateInput = {
@@ -375,6 +742,23 @@ export type FuelPriceMaxOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   source?: Prisma.SortOrder
   fetchedAt?: Prisma.SortOrder
+  provenance?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  market?: Prisma.SortOrder
+  fuelCode?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+  providerFuelCode?: Prisma.SortOrder
+  providerPrice?: Prisma.SortOrder
+  providerUnit?: Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  effectiveAt?: Prisma.SortOrder
+  seriesKey?: Prisma.SortOrder
+  providerSeriesId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  interval?: Prisma.SortOrder
+  freshness?: Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrder
 }
 
 export type FuelPriceMinOrderByAggregateInput = {
@@ -384,12 +768,32 @@ export type FuelPriceMinOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   source?: Prisma.SortOrder
   fetchedAt?: Prisma.SortOrder
+  provenance?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  market?: Prisma.SortOrder
+  fuelCode?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+  providerFuelCode?: Prisma.SortOrder
+  providerPrice?: Prisma.SortOrder
+  providerUnit?: Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrder
+  unit?: Prisma.SortOrder
+  effectiveAt?: Prisma.SortOrder
+  seriesKey?: Prisma.SortOrder
+  providerSeriesId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  interval?: Prisma.SortOrder
+  freshness?: Prisma.SortOrder
+  lastSeenAt?: Prisma.SortOrder
 }
 
 export type FuelPriceSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   fuelTypeId?: Prisma.SortOrder
   priceMinor?: Prisma.SortOrder
+  price?: Prisma.SortOrder
+  providerPrice?: Prisma.SortOrder
+  conversionDivisor?: Prisma.SortOrder
 }
 
 export type FuelPriceCreateNestedManyWithoutFuelTypeInput = {
@@ -434,6 +838,14 @@ export type FuelPriceUncheckedUpdateManyWithoutFuelTypeNestedInput = {
   deleteMany?: Prisma.FuelPriceScalarWhereInput | Prisma.FuelPriceScalarWhereInput[]
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
@@ -442,19 +854,65 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type FuelPriceCreateWithoutFuelTypeInput = {
-  priceMinor: number
+  priceMinor?: number | null
   currency: string
   source?: string | null
   fetchedAt?: Date | string
+  provenance?: string
+  provider?: string | null
+  market?: string | null
+  fuelCode?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: string | null
+  providerPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: string | null
+  conversionDivisor?: number | null
+  unit?: string | null
+  effectiveAt?: Date | string | null
+  seriesKey?: string | null
+  providerSeriesId?: string | null
+  kind?: string | null
+  interval?: string | null
+  freshness?: string | null
+  lastSeenAt?: Date | string | null
 }
 
 export type FuelPriceUncheckedCreateWithoutFuelTypeInput = {
   id?: number
-  priceMinor: number
+  priceMinor?: number | null
   currency: string
   source?: string | null
   fetchedAt?: Date | string
+  provenance?: string
+  provider?: string | null
+  market?: string | null
+  fuelCode?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: string | null
+  providerPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: string | null
+  conversionDivisor?: number | null
+  unit?: string | null
+  effectiveAt?: Date | string | null
+  seriesKey?: string | null
+  providerSeriesId?: string | null
+  kind?: string | null
+  interval?: string | null
+  freshness?: string | null
+  lastSeenAt?: Date | string | null
 }
 
 export type FuelPriceCreateOrConnectWithoutFuelTypeInput = {
@@ -489,41 +947,126 @@ export type FuelPriceScalarWhereInput = {
   NOT?: Prisma.FuelPriceScalarWhereInput | Prisma.FuelPriceScalarWhereInput[]
   id?: Prisma.IntFilter<"FuelPrice"> | number
   fuelTypeId?: Prisma.IntFilter<"FuelPrice"> | number
-  priceMinor?: Prisma.IntFilter<"FuelPrice"> | number
+  priceMinor?: Prisma.IntNullableFilter<"FuelPrice"> | number | null
   currency?: Prisma.StringFilter<"FuelPrice"> | string
   source?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
   fetchedAt?: Prisma.DateTimeFilter<"FuelPrice"> | Date | string
+  provenance?: Prisma.StringFilter<"FuelPrice"> | string
+  provider?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  market?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  fuelCode?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  price?: Prisma.DecimalNullableFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  providerPrice?: Prisma.DecimalNullableFilter<"FuelPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  conversionDivisor?: Prisma.IntNullableFilter<"FuelPrice"> | number | null
+  unit?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  effectiveAt?: Prisma.DateTimeNullableFilter<"FuelPrice"> | Date | string | null
+  seriesKey?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  providerSeriesId?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  kind?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  interval?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  freshness?: Prisma.StringNullableFilter<"FuelPrice"> | string | null
+  lastSeenAt?: Prisma.DateTimeNullableFilter<"FuelPrice"> | Date | string | null
 }
 
 export type FuelPriceCreateManyFuelTypeInput = {
   id?: number
-  priceMinor: number
+  priceMinor?: number | null
   currency: string
   source?: string | null
   fetchedAt?: Date | string
+  provenance?: string
+  provider?: string | null
+  market?: string | null
+  fuelCode?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: string | null
+  providerPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: string | null
+  conversionDivisor?: number | null
+  unit?: string | null
+  effectiveAt?: Date | string | null
+  seriesKey?: string | null
+  providerSeriesId?: string | null
+  kind?: string | null
+  interval?: string | null
+  freshness?: string | null
+  lastSeenAt?: Date | string | null
 }
 
 export type FuelPriceUpdateWithoutFuelTypeInput = {
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type FuelPriceUncheckedUpdateWithoutFuelTypeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type FuelPriceUncheckedUpdateManyWithoutFuelTypeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  priceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  priceMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fetchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provenance?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  market?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerFuelCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  providerUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  conversionDivisor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  unit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  effectiveAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seriesKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerSeriesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interval?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  freshness?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastSeenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -535,6 +1078,23 @@ export type FuelPriceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   currency?: boolean
   source?: boolean
   fetchedAt?: boolean
+  provenance?: boolean
+  provider?: boolean
+  market?: boolean
+  fuelCode?: boolean
+  price?: boolean
+  providerFuelCode?: boolean
+  providerPrice?: boolean
+  providerUnit?: boolean
+  conversionDivisor?: boolean
+  unit?: boolean
+  effectiveAt?: boolean
+  seriesKey?: boolean
+  providerSeriesId?: boolean
+  kind?: boolean
+  interval?: boolean
+  freshness?: boolean
+  lastSeenAt?: boolean
   fuelType?: boolean | Prisma.FuelTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fuelPrice"]>
 
@@ -545,6 +1105,23 @@ export type FuelPriceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   currency?: boolean
   source?: boolean
   fetchedAt?: boolean
+  provenance?: boolean
+  provider?: boolean
+  market?: boolean
+  fuelCode?: boolean
+  price?: boolean
+  providerFuelCode?: boolean
+  providerPrice?: boolean
+  providerUnit?: boolean
+  conversionDivisor?: boolean
+  unit?: boolean
+  effectiveAt?: boolean
+  seriesKey?: boolean
+  providerSeriesId?: boolean
+  kind?: boolean
+  interval?: boolean
+  freshness?: boolean
+  lastSeenAt?: boolean
   fuelType?: boolean | Prisma.FuelTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fuelPrice"]>
 
@@ -555,6 +1132,23 @@ export type FuelPriceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   currency?: boolean
   source?: boolean
   fetchedAt?: boolean
+  provenance?: boolean
+  provider?: boolean
+  market?: boolean
+  fuelCode?: boolean
+  price?: boolean
+  providerFuelCode?: boolean
+  providerPrice?: boolean
+  providerUnit?: boolean
+  conversionDivisor?: boolean
+  unit?: boolean
+  effectiveAt?: boolean
+  seriesKey?: boolean
+  providerSeriesId?: boolean
+  kind?: boolean
+  interval?: boolean
+  freshness?: boolean
+  lastSeenAt?: boolean
   fuelType?: boolean | Prisma.FuelTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fuelPrice"]>
 
@@ -565,9 +1159,26 @@ export type FuelPriceSelectScalar = {
   currency?: boolean
   source?: boolean
   fetchedAt?: boolean
+  provenance?: boolean
+  provider?: boolean
+  market?: boolean
+  fuelCode?: boolean
+  price?: boolean
+  providerFuelCode?: boolean
+  providerPrice?: boolean
+  providerUnit?: boolean
+  conversionDivisor?: boolean
+  unit?: boolean
+  effectiveAt?: boolean
+  seriesKey?: boolean
+  providerSeriesId?: boolean
+  kind?: boolean
+  interval?: boolean
+  freshness?: boolean
+  lastSeenAt?: boolean
 }
 
-export type FuelPriceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fuelTypeId" | "priceMinor" | "currency" | "source" | "fetchedAt", ExtArgs["result"]["fuelPrice"]>
+export type FuelPriceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fuelTypeId" | "priceMinor" | "currency" | "source" | "fetchedAt" | "provenance" | "provider" | "market" | "fuelCode" | "price" | "providerFuelCode" | "providerPrice" | "providerUnit" | "conversionDivisor" | "unit" | "effectiveAt" | "seriesKey" | "providerSeriesId" | "kind" | "interval" | "freshness" | "lastSeenAt", ExtArgs["result"]["fuelPrice"]>
 export type FuelPriceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fuelType?: boolean | Prisma.FuelTypeDefaultArgs<ExtArgs>
 }
@@ -586,10 +1197,27 @@ export type $FuelPricePayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     fuelTypeId: number
-    priceMinor: number
+    priceMinor: number | null
     currency: string
     source: string | null
     fetchedAt: Date
+    provenance: string
+    provider: string | null
+    market: string | null
+    fuelCode: string | null
+    price: runtime.Decimal | null
+    providerFuelCode: string | null
+    providerPrice: runtime.Decimal | null
+    providerUnit: string | null
+    conversionDivisor: number | null
+    unit: string | null
+    effectiveAt: Date | null
+    seriesKey: string | null
+    providerSeriesId: string | null
+    kind: string | null
+    interval: string | null
+    freshness: string | null
+    lastSeenAt: Date | null
   }, ExtArgs["result"]["fuelPrice"]>
   composites: {}
 }
@@ -1020,6 +1648,23 @@ export interface FuelPriceFieldRefs {
   readonly currency: Prisma.FieldRef<"FuelPrice", 'String'>
   readonly source: Prisma.FieldRef<"FuelPrice", 'String'>
   readonly fetchedAt: Prisma.FieldRef<"FuelPrice", 'DateTime'>
+  readonly provenance: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly provider: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly market: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly fuelCode: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly price: Prisma.FieldRef<"FuelPrice", 'Decimal'>
+  readonly providerFuelCode: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly providerPrice: Prisma.FieldRef<"FuelPrice", 'Decimal'>
+  readonly providerUnit: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly conversionDivisor: Prisma.FieldRef<"FuelPrice", 'Int'>
+  readonly unit: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly effectiveAt: Prisma.FieldRef<"FuelPrice", 'DateTime'>
+  readonly seriesKey: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly providerSeriesId: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly kind: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly interval: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly freshness: Prisma.FieldRef<"FuelPrice", 'String'>
+  readonly lastSeenAt: Prisma.FieldRef<"FuelPrice", 'DateTime'>
 }
     
 

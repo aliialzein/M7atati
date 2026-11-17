@@ -399,6 +399,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   FuelType: 'FuelType',
   FuelPrice: 'FuelPrice',
+  FuelPriceRefresh: 'FuelPriceRefresh',
   Station: 'Station',
   User: 'User',
   Role: 'Role',
@@ -427,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "fuelType" | "fuelPrice" | "station" | "user" | "role" | "permission" | "rolePermission" | "refreshSession" | "tank" | "sensorReading" | "pump" | "fuelOrder" | "orderEvent" | "payment" | "callSession"
+    modelProps: "fuelType" | "fuelPrice" | "fuelPriceRefresh" | "station" | "user" | "role" | "permission" | "rolePermission" | "refreshSession" | "tank" | "sensorReading" | "pump" | "fuelOrder" | "orderEvent" | "payment" | "callSession"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -576,6 +577,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FuelPriceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FuelPriceCountAggregateOutputType> | number
+        }
+      }
+    }
+    FuelPriceRefresh: {
+      payload: Prisma.$FuelPriceRefreshPayload<ExtArgs>
+      fields: Prisma.FuelPriceRefreshFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FuelPriceRefreshFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FuelPriceRefreshFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>
+        }
+        findFirst: {
+          args: Prisma.FuelPriceRefreshFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FuelPriceRefreshFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>
+        }
+        findMany: {
+          args: Prisma.FuelPriceRefreshFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>[]
+        }
+        create: {
+          args: Prisma.FuelPriceRefreshCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>
+        }
+        createMany: {
+          args: Prisma.FuelPriceRefreshCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FuelPriceRefreshCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>[]
+        }
+        delete: {
+          args: Prisma.FuelPriceRefreshDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>
+        }
+        update: {
+          args: Prisma.FuelPriceRefreshUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>
+        }
+        deleteMany: {
+          args: Prisma.FuelPriceRefreshDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FuelPriceRefreshUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FuelPriceRefreshUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>[]
+        }
+        upsert: {
+          args: Prisma.FuelPriceRefreshUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuelPriceRefreshPayload>
+        }
+        aggregate: {
+          args: Prisma.FuelPriceRefreshAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFuelPriceRefresh>
+        }
+        groupBy: {
+          args: Prisma.FuelPriceRefreshGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FuelPriceRefreshGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FuelPriceRefreshCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FuelPriceRefreshCountAggregateOutputType> | number
         }
       }
     }
@@ -1595,15 +1670,41 @@ export const FuelPriceScalarFieldEnum = {
   priceMinor: 'priceMinor',
   currency: 'currency',
   source: 'source',
-  fetchedAt: 'fetchedAt'
+  fetchedAt: 'fetchedAt',
+  provenance: 'provenance',
+  provider: 'provider',
+  market: 'market',
+  fuelCode: 'fuelCode',
+  price: 'price',
+  providerFuelCode: 'providerFuelCode',
+  providerPrice: 'providerPrice',
+  providerUnit: 'providerUnit',
+  conversionDivisor: 'conversionDivisor',
+  unit: 'unit',
+  effectiveAt: 'effectiveAt',
+  seriesKey: 'seriesKey',
+  providerSeriesId: 'providerSeriesId',
+  kind: 'kind',
+  interval: 'interval',
+  freshness: 'freshness',
+  lastSeenAt: 'lastSeenAt'
 } as const
 
 export type FuelPriceScalarFieldEnum = (typeof FuelPriceScalarFieldEnum)[keyof typeof FuelPriceScalarFieldEnum]
 
 
+export const FuelPriceRefreshScalarFieldEnum = {
+  key: 'key',
+  nextAllowedAt: 'nextAllowedAt'
+} as const
+
+export type FuelPriceRefreshScalarFieldEnum = (typeof FuelPriceRefreshScalarFieldEnum)[keyof typeof FuelPriceRefreshScalarFieldEnum]
+
+
 export const StationScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  isActive: 'isActive',
   address: 'address',
   latitude: 'latitude',
   longitude: 'longitude',
@@ -1621,6 +1722,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
   isActive: 'isActive',
+  tokenVersion: 'tokenVersion',
   roleId: 'roleId',
   stationId: 'stationId',
   createdAt: 'createdAt',
@@ -2063,6 +2165,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   fuelType?: Prisma.FuelTypeOmit
   fuelPrice?: Prisma.FuelPriceOmit
+  fuelPriceRefresh?: Prisma.FuelPriceRefreshOmit
   station?: Prisma.StationOmit
   user?: Prisma.UserOmit
   role?: Prisma.RoleOmit

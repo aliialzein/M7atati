@@ -7,6 +7,8 @@ import { env } from './config/env.js';
 import { csrfProtection } from './middleware/csrf.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
+import { stationsRouter } from './modules/stations/stations.routes.js';
+import { fuelPricesRouter } from './modules/fuel-prices/fuel-prices.routes.js';
 
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
@@ -30,6 +32,8 @@ app.use(express.json({ limit: '16kb' }));
 app.use('/api', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/stations', stationsRouter);
+app.use('/api/fuel-prices', fuelPricesRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

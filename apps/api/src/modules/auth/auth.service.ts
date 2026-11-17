@@ -20,7 +20,7 @@ export class AuthService {
         email: input.email,
         passwordHash: await this.passwords.hash(input.password),
       },
-      (id) => this.tokens.issue(id),
+      (id, version) => this.tokens.issue(id, undefined, version),
     );
     return { user: userProfile(result.user), tokens: result.tokens };
   }
@@ -34,13 +34,14 @@ export class AuthService {
     if (!user || !valid || !user.isActive) {
       throw new HttpError('Invalid credentials', 401);
     }
-    const tokens = this.tokens.issue(user.id);
+    const tokens = this.tokens.issue(user.id, undefined, user.tokenVersion);
     await this.repository.createSession(user.id, tokens);
     return { user: userProfile(user), tokens };
   }
 
   async refresh(token: string | undefined): Promise<AuthResult> {
-    const { userId, sessionId } = this.tokens.verifyRefresh(token);
+    const { userId, sessionId, tokenVersion } =
+      this.tokens.verifyRefresh(token);
     const session = await this.repository.findSession(sessionId);
     const oldHash = this.tokens.hash(token!);
     if (
@@ -49,11 +50,12 @@ export class AuthService {
       session.revokedAt ||
       session.expiresAt <= new Date() ||
       session.tokenHash !== oldHash ||
-      !session.user.isActive
+      !session.user.isActive ||
+      session.user.tokenVersion !== tokenVersion
     ) {
       throw new HttpError('Unauthenticated', 401);
     }
-    const tokens = this.tokens.issue(userId, sessionId);
+    const tokens = this.tokens.issue(userId, sessionId, tokenVersion);
     if (!(await this.repository.rotateSession(userId, oldHash, tokens))) {
       throw new HttpError('Unauthenticated', 401);
     }
@@ -72,9 +74,10 @@ export class AuthService {
   }
 
   async authenticate(token: string | undefined): Promise<AuthContext> {
-    const id = this.tokens.verifyAccess(token);
-    const user = await this.repository.findUserById(id);
-    if (!user?.isActive) throw new HttpError('Unauthenticated', 401);
+    const { userId, tokenVersion } = this.tokens.verifyAccess(token);
+    const user = await this.repository.findUserById(userId);
+    if (!user?.isActive || user.tokenVersion !== tokenVersion)
+      throw new HttpError('Unauthenticated', 401);
     return {
       user: userProfile(user),
       permissions: user.role.permissions.map(

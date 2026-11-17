@@ -45,7 +45,7 @@ type MockDatabase = {
   $transaction: jest.Mock;
 };
 const db = prisma as unknown as MockDatabase;
-type StoredUser = UserRecord & { passwordHash: string };
+type StoredUser = UserRecord & { passwordHash: string; tokenVersion: number };
 type Where = {
   id?: number;
   AND?: Where[];
@@ -69,8 +69,8 @@ let users: Map<number, StoredUser>;
 let sessions: { userId: number; revokedAt: Date | null }[];
 let permissions: string[];
 const stations = new Map([
-  [10, { id: 10, managerId: 2 }],
-  [20, { id: 20, managerId: 9 }],
+  [10, { id: 10, managerId: 2, isActive: true }],
+  [20, { id: 20, managerId: 9, isActive: true }],
 ]);
 const staffInput = {
   name: ' New Employee ',
@@ -93,6 +93,7 @@ function user(
     role: { name: role },
     stationId,
     isActive: true,
+    tokenVersion: 0,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
   };
@@ -134,6 +135,8 @@ function authenticated(
 }
 
 beforeEach(() => {
+  stations.get(10)!.isActive = true;
+  stations.get(20)!.isActive = true;
   jest.resetAllMocks();
   users = new Map([
     [1, user(1, 'ADMIN')],
@@ -209,14 +212,20 @@ beforeEach(() => {
       Promise.resolve(roleIds[where.name] ? { id: roleIds[where.name] } : null),
   );
   db.station.findFirst.mockImplementation(
-    ({ where }: { where: { AND: { id?: number; managerId?: number }[] } }) =>
+    ({
+      where,
+    }: {
+      where: { AND: { id?: number; managerId?: number; isActive?: boolean }[] };
+    }) =>
       Promise.resolve(
         [...stations.values()].find((station) =>
           where.AND.every(
             (part) =>
               (part.id === undefined || station.id === part.id) &&
               (part.managerId === undefined ||
-                station.managerId === part.managerId),
+                station.managerId === part.managerId) &&
+              (part.isActive === undefined ||
+                station.isActive === part.isActive),
           ),
         ) ?? null,
       ),
@@ -268,6 +277,7 @@ beforeEach(() => {
         roleId?: number;
         stationId?: number | null;
         isActive?: boolean;
+        tokenVersion?: { increment: number };
       };
     }) => {
       const row = users.get(where.id)!;
@@ -280,6 +290,7 @@ beforeEach(() => {
         };
       if (data.stationId !== undefined) row.stationId = data.stationId;
       if (data.isActive !== undefined) row.isActive = data.isActive;
+      if (data.tokenVersion) row.tokenVersion += data.tokenVersion.increment;
       return Promise.resolve(row);
     },
   );
@@ -578,6 +589,43 @@ describe('manager station boundaries and HR restrictions', () => {
 });
 
 describe('updates, deactivation, and integrity', () => {
+  it('rejects new inactive assignments but allows unchanged affiliations and unrelated edits', async () => {
+    stations.get(10)!.isActive = false;
+    expect((await authenticated('post').send(staffInput)).status).toBe(400);
+    expect(
+      (await authenticated('patch', '/4').send({ stationId: 10 })).status,
+    ).toBe(400);
+    expect(
+      (await authenticated('patch', '/3').send({ name: 'Still assigned' }))
+        .status,
+    ).toBe(200);
+    expect(
+      (await authenticated('patch', '/3').send({ stationId: 10 })).status,
+    ).toBe(200);
+    expect(users.get(3)!.stationId).toBe(10);
+  });
+  it('reactivation cannot restore earlier access tokens and does not reset the version', async () => {
+    const old = tokenService.issue(3);
+    await authenticated('patch', '/3/status').send({ isActive: false });
+    expect(users.get(3)!.tokenVersion).toBe(1);
+    await authenticated('patch', '/3/status').send({ isActive: true });
+    expect(users.get(3)!.tokenVersion).toBe(1);
+    expect(
+      (
+        await request(app)
+          .get('/api/auth/me')
+          .set('Cookie', `${ACCESS_COOKIE}=${old.accessToken}`)
+      ).status,
+    ).toBe(401);
+    const fresh = tokenService.issue(3, undefined, 1);
+    expect(
+      (
+        await request(app)
+          .get('/api/auth/me')
+          .set('Cookie', `${ACCESS_COOKIE}=${fresh.accessToken}`)
+      ).status,
+    ).toBe(200);
+  });
   it('revokes sessions for a station-only reassignment', async () => {
     const response = await authenticated('patch', '/3').send({ stationId: 20 });
     expect(response.status).toBe(200);

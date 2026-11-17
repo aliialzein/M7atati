@@ -43,6 +43,7 @@ export type StationSumAggregateOutputType = {
 export type StationMinAggregateOutputType = {
   id: number | null
   name: string | null
+  isActive: boolean | null
   address: string | null
   latitude: runtime.Decimal | null
   longitude: runtime.Decimal | null
@@ -54,6 +55,7 @@ export type StationMinAggregateOutputType = {
 export type StationMaxAggregateOutputType = {
   id: number | null
   name: string | null
+  isActive: boolean | null
   address: string | null
   latitude: runtime.Decimal | null
   longitude: runtime.Decimal | null
@@ -65,6 +67,7 @@ export type StationMaxAggregateOutputType = {
 export type StationCountAggregateOutputType = {
   id: number
   name: number
+  isActive: number
   address: number
   latitude: number
   longitude: number
@@ -92,6 +95,7 @@ export type StationSumAggregateInputType = {
 export type StationMinAggregateInputType = {
   id?: true
   name?: true
+  isActive?: true
   address?: true
   latitude?: true
   longitude?: true
@@ -103,6 +107,7 @@ export type StationMinAggregateInputType = {
 export type StationMaxAggregateInputType = {
   id?: true
   name?: true
+  isActive?: true
   address?: true
   latitude?: true
   longitude?: true
@@ -114,6 +119,7 @@ export type StationMaxAggregateInputType = {
 export type StationCountAggregateInputType = {
   id?: true
   name?: true
+  isActive?: true
   address?: true
   latitude?: true
   longitude?: true
@@ -212,6 +218,7 @@ export type StationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type StationGroupByOutputType = {
   id: number
   name: string
+  isActive: boolean
   address: string | null
   latitude: runtime.Decimal | null
   longitude: runtime.Decimal | null
@@ -246,6 +253,7 @@ export type StationWhereInput = {
   NOT?: Prisma.StationWhereInput | Prisma.StationWhereInput[]
   id?: Prisma.IntFilter<"Station"> | number
   name?: Prisma.StringFilter<"Station"> | string
+  isActive?: Prisma.BoolFilter<"Station"> | boolean
   address?: Prisma.StringNullableFilter<"Station"> | string | null
   latitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -263,6 +271,7 @@ export type StationWhereInput = {
 export type StationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -284,6 +293,7 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.StationWhereInput[]
   NOT?: Prisma.StationWhereInput | Prisma.StationWhereInput[]
   name?: Prisma.StringFilter<"Station"> | string
+  isActive?: Prisma.BoolFilter<"Station"> | boolean
   address?: Prisma.StringNullableFilter<"Station"> | string | null
   latitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -300,6 +310,7 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
 export type StationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -319,6 +330,7 @@ export type StationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.StationScalarWhereWithAggregatesInput | Prisma.StationScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Station"> | number
   name?: Prisma.StringWithAggregatesFilter<"Station"> | string
+  isActive?: Prisma.BoolWithAggregatesFilter<"Station"> | boolean
   address?: Prisma.StringNullableWithAggregatesFilter<"Station"> | string | null
   latitude?: Prisma.DecimalNullableWithAggregatesFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableWithAggregatesFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -329,6 +341,7 @@ export type StationScalarWhereWithAggregatesInput = {
 
 export type StationCreateInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -345,6 +358,7 @@ export type StationCreateInput = {
 export type StationUncheckedCreateInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -360,6 +374,7 @@ export type StationUncheckedCreateInput = {
 
 export type StationUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -376,6 +391,7 @@ export type StationUpdateInput = {
 export type StationUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -392,6 +408,7 @@ export type StationUncheckedUpdateInput = {
 export type StationCreateManyInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -402,6 +419,7 @@ export type StationCreateManyInput = {
 
 export type StationUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -412,6 +430,7 @@ export type StationUpdateManyMutationInput = {
 export type StationUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -423,6 +442,7 @@ export type StationUncheckedUpdateManyInput = {
 export type StationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   address?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
@@ -441,6 +461,7 @@ export type StationAvgOrderByAggregateInput = {
 export type StationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   address?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
@@ -452,6 +473,7 @@ export type StationMaxOrderByAggregateInput = {
 export type StationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   address?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
@@ -487,20 +509,8 @@ export type StationScalarRelationFilter = {
   isNot?: Prisma.StationWhereInput
 }
 
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type StationCreateNestedOneWithoutUsersInput = {
@@ -619,6 +629,7 @@ export type StationUpdateOneRequiredWithoutCallSessionsNestedInput = {
 
 export type StationCreateWithoutUsersInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -634,6 +645,7 @@ export type StationCreateWithoutUsersInput = {
 export type StationUncheckedCreateWithoutUsersInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -653,6 +665,7 @@ export type StationCreateOrConnectWithoutUsersInput = {
 
 export type StationCreateWithoutManagerInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -668,6 +681,7 @@ export type StationCreateWithoutManagerInput = {
 export type StationUncheckedCreateWithoutManagerInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -703,6 +717,7 @@ export type StationUpdateToOneWithWhereWithoutUsersInput = {
 
 export type StationUpdateWithoutUsersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -718,6 +733,7 @@ export type StationUpdateWithoutUsersInput = {
 export type StationUncheckedUpdateWithoutUsersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -752,6 +768,7 @@ export type StationScalarWhereInput = {
   NOT?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
   id?: Prisma.IntFilter<"Station"> | number
   name?: Prisma.StringFilter<"Station"> | string
+  isActive?: Prisma.BoolFilter<"Station"> | boolean
   address?: Prisma.StringNullableFilter<"Station"> | string | null
   latitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -762,6 +779,7 @@ export type StationScalarWhereInput = {
 
 export type StationCreateWithoutTanksInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -777,6 +795,7 @@ export type StationCreateWithoutTanksInput = {
 export type StationUncheckedCreateWithoutTanksInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -807,6 +826,7 @@ export type StationUpdateToOneWithWhereWithoutTanksInput = {
 
 export type StationUpdateWithoutTanksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -822,6 +842,7 @@ export type StationUpdateWithoutTanksInput = {
 export type StationUncheckedUpdateWithoutTanksInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -836,6 +857,7 @@ export type StationUncheckedUpdateWithoutTanksInput = {
 
 export type StationCreateWithoutPumpsInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -851,6 +873,7 @@ export type StationCreateWithoutPumpsInput = {
 export type StationUncheckedCreateWithoutPumpsInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -881,6 +904,7 @@ export type StationUpdateToOneWithWhereWithoutPumpsInput = {
 
 export type StationUpdateWithoutPumpsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -896,6 +920,7 @@ export type StationUpdateWithoutPumpsInput = {
 export type StationUncheckedUpdateWithoutPumpsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -910,6 +935,7 @@ export type StationUncheckedUpdateWithoutPumpsInput = {
 
 export type StationCreateWithoutOrdersInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -925,6 +951,7 @@ export type StationCreateWithoutOrdersInput = {
 export type StationUncheckedCreateWithoutOrdersInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -955,6 +982,7 @@ export type StationUpdateToOneWithWhereWithoutOrdersInput = {
 
 export type StationUpdateWithoutOrdersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -970,6 +998,7 @@ export type StationUpdateWithoutOrdersInput = {
 export type StationUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -984,6 +1013,7 @@ export type StationUncheckedUpdateWithoutOrdersInput = {
 
 export type StationCreateWithoutCallSessionsInput = {
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -999,6 +1029,7 @@ export type StationCreateWithoutCallSessionsInput = {
 export type StationUncheckedCreateWithoutCallSessionsInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1029,6 +1060,7 @@ export type StationUpdateToOneWithWhereWithoutCallSessionsInput = {
 
 export type StationUpdateWithoutCallSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1044,6 +1076,7 @@ export type StationUpdateWithoutCallSessionsInput = {
 export type StationUncheckedUpdateWithoutCallSessionsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1059,6 +1092,7 @@ export type StationUncheckedUpdateWithoutCallSessionsInput = {
 export type StationCreateManyManagerInput = {
   id?: number
   name: string
+  isActive?: boolean
   address?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1068,6 +1102,7 @@ export type StationCreateManyManagerInput = {
 
 export type StationUpdateWithoutManagerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1083,6 +1118,7 @@ export type StationUpdateWithoutManagerInput = {
 export type StationUncheckedUpdateWithoutManagerInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1098,6 +1134,7 @@ export type StationUncheckedUpdateWithoutManagerInput = {
 export type StationUncheckedUpdateManyWithoutManagerInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1175,6 +1212,7 @@ export type StationCountOutputTypeCountCallSessionsArgs<ExtArgs extends runtime.
 export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  isActive?: boolean
   address?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -1193,6 +1231,7 @@ export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type StationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  isActive?: boolean
   address?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -1205,6 +1244,7 @@ export type StationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type StationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  isActive?: boolean
   address?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -1217,6 +1257,7 @@ export type StationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type StationSelectScalar = {
   id?: boolean
   name?: boolean
+  isActive?: boolean
   address?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -1225,7 +1266,7 @@ export type StationSelectScalar = {
   createdAt?: boolean
 }
 
-export type StationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "address" | "latitude" | "longitude" | "managerId" | "deviceKeyHash" | "createdAt", ExtArgs["result"]["station"]>
+export type StationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "isActive" | "address" | "latitude" | "longitude" | "managerId" | "deviceKeyHash" | "createdAt", ExtArgs["result"]["station"]>
 export type StationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   manager?: boolean | Prisma.Station$managerArgs<ExtArgs>
   users?: boolean | Prisma.Station$usersArgs<ExtArgs>
@@ -1255,6 +1296,7 @@ export type $StationPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     name: string
+    isActive: boolean
     address: string | null
     latitude: runtime.Decimal | null
     longitude: runtime.Decimal | null
@@ -1692,6 +1734,7 @@ export interface Prisma__StationClient<T, Null = never, ExtArgs extends runtime.
 export interface StationFieldRefs {
   readonly id: Prisma.FieldRef<"Station", 'Int'>
   readonly name: Prisma.FieldRef<"Station", 'String'>
+  readonly isActive: Prisma.FieldRef<"Station", 'Boolean'>
   readonly address: Prisma.FieldRef<"Station", 'String'>
   readonly latitude: Prisma.FieldRef<"Station", 'Decimal'>
   readonly longitude: Prisma.FieldRef<"Station", 'Decimal'>

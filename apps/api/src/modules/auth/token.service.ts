@@ -16,6 +16,8 @@ const claims = z.object({
     .transform(Number)
     .refine((id) => Number.isSafeInteger(id) && id <= 2147483647),
   type: z.enum(['access', 'refresh']),
+  // Required: pre-version deployment tokens must require a new login.
+  ver: z.number().int().nonnegative(),
   exp: z.number().int(),
   iat: z.number().int(),
   jti: z.string().uuid().optional(),
@@ -51,7 +53,11 @@ function verify(token: string | undefined, type: 'access' | 'refresh') {
 export const tokenService = {
   hash: (token: string): string =>
     createHash('sha256').update(token).digest('hex'),
-  issue(userId: number, sessionId: string = randomUUID()): TokenPair {
+  issue(
+    userId: number,
+    sessionId: string = randomUUID(),
+    tokenVersion = 0,
+  ): TokenPair {
     const options = {
       algorithm: 'HS256' as const,
       issuer: env.tokenIssuer,
@@ -59,7 +65,7 @@ export const tokenService = {
       subject: String(userId),
     };
     const accessToken = jwt.sign(
-      { type: 'access' },
+      { type: 'access', ver: tokenVersion },
       Buffer.from(env.accessTokenSecret, 'hex'),
       {
         ...options,
@@ -67,7 +73,7 @@ export const tokenService = {
       },
     );
     const refreshToken = jwt.sign(
-      { type: 'refresh', nonce: randomUUID() },
+      { type: 'refresh', ver: tokenVersion, nonce: randomUUID() },
       Buffer.from(env.refreshTokenSecret, 'hex'),
       {
         ...options,
@@ -76,6 +82,7 @@ export const tokenService = {
       },
     );
     return {
+      tokenVersion,
       accessToken,
       refreshToken,
       sessionId,
@@ -85,14 +92,23 @@ export const tokenService = {
       ),
     };
   },
-  verifyAccess(token: string | undefined): number {
-    return verify(token, 'access').sub;
+  verifyAccess(token: string | undefined): {
+    userId: number;
+    tokenVersion: number;
+  } {
+    const parsed = verify(token, 'access');
+    return { userId: parsed.sub, tokenVersion: parsed.ver };
   },
   verifyRefresh(token: string | undefined): {
     userId: number;
     sessionId: string;
+    tokenVersion: number;
   } {
     const parsed = verify(token, 'refresh');
-    return { userId: parsed.sub, sessionId: parsed.jti! };
+    return {
+      userId: parsed.sub,
+      sessionId: parsed.jti!,
+      tokenVersion: parsed.ver,
+    };
   },
 };

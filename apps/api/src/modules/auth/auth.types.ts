@@ -7,6 +7,7 @@ export interface AuthUser {
   email: string;
   passwordHash: string;
   isActive: boolean;
+  tokenVersion: number;
   stationId: number | null;
   role: {
     name: string;
@@ -28,6 +29,7 @@ export interface AuthContext {
 }
 
 export interface TokenPair {
+  tokenVersion: number;
   accessToken: string;
   refreshToken: string;
   sessionId: string;

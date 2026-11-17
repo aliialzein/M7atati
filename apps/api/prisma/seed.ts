@@ -30,6 +30,9 @@ const roleDefinitions = [
 ];
 
 const permissionDefinitions = [
+  { key: 'stations.read', description: 'View stations' },
+  { key: 'stations.create', description: 'Create stations' },
+  { key: 'stations.update', description: 'Update station details and status' },
   { key: 'users.read', description: 'View users' },
   { key: 'users.create', description: 'Create users' },
   { key: 'users.update', description: 'Update users' },
