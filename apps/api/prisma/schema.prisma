@@ -23,17 +23,45 @@ model FuelType {
 }
 
 model FuelPrice {
-  id         Int      @id @default(autoincrement())
-  fuelTypeId Int      @map("fuel_type_id")
-  priceMinor Int      @map("price_minor")
-  currency   String   @db.VarChar(3)
-  source     String?
-  fetchedAt  DateTime @default(now()) @map("fetched_at")
+  id                Int       @id @default(autoincrement())
+  fuelTypeId        Int       @map("fuel_type_id")
+  priceMinor        Int?      @map("price_minor")
+  currency          String    @db.VarChar(3)
+  source            String?
+  fetchedAt         DateTime  @default(now()) @map("fetched_at")
+  // Legacy amounts retain their original integer semantics; never infer their unit/market.
+  provenance        String    @default("legacy")
+  provider          String?   @db.VarChar(32)
+  market            String?   @db.VarChar(2)
+  fuelCode          String?   @map("fuel_code") @db.VarChar(64)
+  price             Decimal?  @db.Decimal(32, 14)
+  providerFuelCode  String?   @map("provider_fuel_code") @db.VarChar(64)
+  providerPrice     Decimal?  @map("provider_price") @db.Decimal(30, 12)
+  providerUnit      String?   @map("provider_unit") @db.VarChar(16)
+  conversionDivisor Int?      @map("conversion_divisor")
+  unit              String?   @db.VarChar(16)
+  effectiveAt       DateTime? @map("effective_at") @db.Date
+  seriesKey         String?   @map("series_key") @db.VarChar(256)
+  providerSeriesId  String?   @map("provider_series_id") @db.VarChar(240)
+  kind              String?   @db.VarChar(16)
+  interval          String?   @db.VarChar(16)
+  freshness         String?   @db.VarChar(64)
+  lastSeenAt        DateTime? @map("last_seen_at")
 
   fuelType FuelType @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
 
+  @@unique([provider, market, fuelCode, seriesKey, currency, unit, effectiveAt, price], map: "fuel_prices_quote_identity")
   @@index([fuelTypeId, fetchedAt])
+  @@index([provider, market, effectiveAt])
   @@map("fuel_prices")
+}
+
+// One atomic, cross-process cooldown claim per provider/market. No network transaction.
+model FuelPriceRefresh {
+  key           String   @id
+  nextAllowedAt DateTime @map("next_allowed_at")
+
+  @@map("fuel_price_refreshes")
 }
 
 // --------------------------------------------------
@@ -43,6 +71,7 @@ model FuelPrice {
 model Station {
   id            Int      @id @default(autoincrement())
   name          String
+  isActive      Boolean  @default(true) @map("is_active")
   address       String?
   latitude      Decimal? @db.Decimal(10, 7)
   longitude     Decimal? @db.Decimal(10, 7)
@@ -67,6 +96,7 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   isActive     Boolean  @default(true) @map("is_active")
+  tokenVersion Int      @default(0) @map("token_version")
   roleId       Int      @map("role_id")
   stationId    Int?     @map("station_id")
   createdAt    DateTime @default(now()) @map("created_at")

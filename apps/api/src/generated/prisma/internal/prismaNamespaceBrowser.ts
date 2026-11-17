@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   FuelType: 'FuelType',
   FuelPrice: 'FuelPrice',
+  FuelPriceRefresh: 'FuelPriceRefresh',
   Station: 'Station',
   User: 'User',
   Role: 'Role',
@@ -99,15 +100,41 @@ export const FuelPriceScalarFieldEnum = {
   priceMinor: 'priceMinor',
   currency: 'currency',
   source: 'source',
-  fetchedAt: 'fetchedAt'
+  fetchedAt: 'fetchedAt',
+  provenance: 'provenance',
+  provider: 'provider',
+  market: 'market',
+  fuelCode: 'fuelCode',
+  price: 'price',
+  providerFuelCode: 'providerFuelCode',
+  providerPrice: 'providerPrice',
+  providerUnit: 'providerUnit',
+  conversionDivisor: 'conversionDivisor',
+  unit: 'unit',
+  effectiveAt: 'effectiveAt',
+  seriesKey: 'seriesKey',
+  providerSeriesId: 'providerSeriesId',
+  kind: 'kind',
+  interval: 'interval',
+  freshness: 'freshness',
+  lastSeenAt: 'lastSeenAt'
 } as const
 
 export type FuelPriceScalarFieldEnum = (typeof FuelPriceScalarFieldEnum)[keyof typeof FuelPriceScalarFieldEnum]
 
 
+export const FuelPriceRefreshScalarFieldEnum = {
+  key: 'key',
+  nextAllowedAt: 'nextAllowedAt'
+} as const
+
+export type FuelPriceRefreshScalarFieldEnum = (typeof FuelPriceRefreshScalarFieldEnum)[keyof typeof FuelPriceRefreshScalarFieldEnum]
+
+
 export const StationScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  isActive: 'isActive',
   address: 'address',
   latitude: 'latitude',
   longitude: 'longitude',
@@ -125,6 +152,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
   isActive: 'isActive',
+  tokenVersion: 'tokenVersion',
   roleId: 'roleId',
   stationId: 'stationId',
   createdAt: 'createdAt',

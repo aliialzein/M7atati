@@ -447,10 +447,6 @@ export type RefreshSessionUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.RefreshSessionScalarWhereInput | Prisma.RefreshSessionScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type RefreshSessionCreateWithoutUserInput = {
   id?: string
   tokenHash: string
