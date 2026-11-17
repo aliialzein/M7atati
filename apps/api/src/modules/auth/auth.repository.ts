@@ -10,6 +10,7 @@ const userSelect = {
   email: true,
   passwordHash: true,
   isActive: true,
+  tokenVersion: true,
   stationId: true,
   role: {
     select: {
@@ -39,7 +40,7 @@ export const authRepository = {
   },
   async createCustomer(
     input: { name: string; email: string; passwordHash: string },
-    issueTokens: (userId: number) => TokenPair,
+    issueTokens: (userId: number, tokenVersion: number) => TokenPair,
   ): Promise<{ user: AuthUser; tokens: TokenPair }> {
     try {
       return await prisma.$transaction(async (tx) => {
@@ -47,7 +48,7 @@ export const authRepository = {
           data: { ...input, role: { connect: { name: 'CUSTOMER' } } },
           select: userSelect,
         });
-        const tokens = issueTokens(user.id);
+        const tokens = issueTokens(user.id, user.tokenVersion);
         await tx.refreshSession.create({ data: sessionData(user.id, tokens) });
         return { user, tokens };
       });
@@ -86,7 +87,7 @@ export const authRepository = {
         tokenHash: oldHash,
         revokedAt: null,
         expiresAt: { gt: now },
-        user: { isActive: true },
+        user: { isActive: true, tokenVersion: tokens.tokenVersion },
       },
       data: {
         tokenHash: tokens.tokenHash,

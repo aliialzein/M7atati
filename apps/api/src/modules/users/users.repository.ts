@@ -110,6 +110,7 @@ export const usersRepository = {
       roleId?: number;
       stationId?: number | null;
       isActive?: boolean;
+      tokenVersion?: Prisma.IntFieldUpdateOperationsInput;
     },
     tx: Prisma.TransactionClient,
   ) {
