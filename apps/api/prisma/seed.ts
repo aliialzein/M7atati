@@ -36,11 +36,13 @@ const permissionDefinitions = [
   { key: 'users.read', description: 'View users' },
   { key: 'users.create', description: 'Create users' },
   { key: 'users.update', description: 'Update users' },
+  { key: 'employees.transfer', description: 'Transfer employees between stations' },
 
   { key: 'devices.read', description: 'View registered devices' },
   { key: 'devices.manage', description: 'Manage registered devices' },
 
   { key: 'attendance.read', description: 'View attendance records' },
+  { key: 'shifts.read', description: 'View scheduled shifts' },
   { key: 'attendance.manage', description: 'Manage attendance records' },
 
   { key: 'orders.read', description: 'View orders' },
@@ -100,6 +102,8 @@ const rolePermissions: Record<string, string[]> = {
   ],
 
   HR: [
+    'employees.transfer',
+    'shifts.read',
     'users.read',
     'users.create',
     'users.update',

@@ -40,22 +40,29 @@ remain sanitized 500 responses.
 
 ## Scope policy
 
-The only architecture documentation available when this phase was implemented
-was `authentication.md`. It does not define HR station grants. The schema has
-no HR-to-station authorization relationship. Accordingly:
+User-management scope is specific to the requested operation:
 
 | Actor                        | User-management scope                                                   |
 | ---------------------------- | ----------------------------------------------------------------------- |
 | ADMIN                        | All users and stations, subject to integrity rules                      |
 | MANAGER                      | EMPLOYEE users assigned to stations managed through `Station.managerId` |
-| HR                           | Denied until an explicit authorized scope is modeled and approved       |
+| HR                           | Create/read EMPLOYEE accounts globally; dedicated transfers only        |
 | EMPLOYEE, SECURITY, CUSTOMER | No user-management scope                                                |
 
-HR's seeded user permissions do not override the missing resource scope. Even
-an HR user's `stationId` is not interpreted as an authorization grant. Adding
-HR scope later requires an explicit grant model (for example, a reviewed
-HR/station assignment relation) and policies for target roles. No such relation
-or workaround was introduced in this phase.
+HR Stage 1 reuses the seeded `users.read` and `users.create` grants for GET list,
+GET detail, and POST only. HR can create only EMPLOYEE accounts, with a required
+active station, and reads only EMPLOYEE accounts across stations. Every list
+filter is intersected with that employee-only scope for both rows and totals;
+requesting another role returns an empty list. Nonemployee detail targets return 404. Both generic PATCH and status PATCH remain denied even if HR has the seeded
+`users.update` permission. An HR user's own station assignment does not determine
+this scope, and the shared station-scope helper is unchanged.
+
+Existing databases with the seeded HR `users.read`/`users.create` links need no
+permission changes or migration. If those links are missing, provision only the
+two links using transactional permission/role-permission upserts following
+`scripts/station-permissions.ts`; preserve all other grants. Do not rerun the seed
+to repair grants: it replaces all role-permission assignments. No provisioning is
+performed at application startup or as part of Stage 1 implementation.
 
 Managers can create, read, rename, reassign, activate, and deactivate EMPLOYEE
 accounts only inside their managed stations. Manager reads are intentionally
@@ -98,7 +105,9 @@ Create accepts only `name`, `email`, `password`, `role`, and optional `stationId
 It reuses public registration's normalization and password requirements, plus
 the shared bcrypt hashing service. CUSTOMER creation is rejected here; public
 registration remains exclusively `/api/auth/register`. Only ADMIN can create
-ADMIN, MANAGER, HR, and SECURITY accounts. Managers can create only EMPLOYEE.
+ADMIN, MANAGER, HR, and SECURITY accounts. Managers and HR can create only EMPLOYEE;
+managers remain limited to their managed stations, while HR can select any active
+station. The existing active-station picker contract is unchanged.
 
 Station assignment policy:
 
@@ -123,6 +132,67 @@ name or account status. Role transitions must supply any necessary station
 assignment/null explicitly. Missing seeded roles produce 409 rather than being
 created implicitly. Database uniqueness handles duplicate emails, including
 concurrent creates.
+
+## HR Stage 3: immediate employee transfers
+
+`POST /api/users/:id/transfer` requires an ADMIN or HR actor and
+`employees.transfer`. Its body is strictly `{ "stationId": 20 }`, with a required
+positive integer destination; role, name, status, and other fields are rejected.
+Success returns 200 `{ user }` using the existing safe profile. Missing or
+non-EMPLOYEE targets return 404. Other roles are denied even if assigned the
+permission. HR still cannot use generic PATCH or status PATCH.
+
+The actor and target are re-read inside the existing Serializable transaction.
+An unchanged station is an immediate no-op: no writes, session revocation,
+destination validation, or operational conflict checks. This also succeeds at
+an inactive station. A changed destination must exist and be active; invalid
+destinations retain the existing 400 assignment error. An inactive source does
+not prevent transfer out.
+
+Before a changed assignment, source-station records for this employee are checked
+in the same transaction. Null clock-out attendance or any shift with `endsAt`
+strictly greater than the server's transfer-check time causes 409. A shift ending
+exactly at that time does not block. No attendance or shift is closed, moved,
+cancelled, or otherwise changed.
+
+Existing ADMIN/MANAGER generic station updates use these same conflict checks
+when either the original or resulting role is EMPLOYEE. This includes combined
+role/station changes and demotion with station clearing, checked against the
+original source. Manager target/destination boundaries remain relationship-based;
+unrelated edits and unchanged affiliations retain their existing behavior.
+
+The dedicated endpoint writes only `User.stationId` (plus Prisma's automatic
+updatedAt) and revokes refresh sessions atomically. Identity, role, status,
+credentials, and token version are preserved. Existing access JWTs remain valid
+for active users and resolve the new station because authentication reloads the
+current user on each request; previously authenticated in-flight requests are not
+cancelled. Refresh sessions are not restored. Historical reads use each record's
+stored station, so A's past work remains at A after transfer to B.
+
+Serialization failures retry the whole operation, including actor, target,
+destination and source-record checks, up to the existing three attempts. Failed
+session revocation rolls back assignment changes. No transfer auditing or new
+schema is introduced.
+
+For an established database with ADMIN and HR roles, provision only the new grant:
+
+```sh
+npm run provision-transfer-permissions --workspace @smart-fuel-station/api
+```
+
+The command idempotently upserts only `employees.transfer` and its ADMIN/HR links,
+preserving unrelated grants. It requires database configuration but no JWT keys,
+does not seed data, and never runs at startup. Fresh-install seed definitions
+include this permission; do not rerun the replacing seed on an existing database.
+Stage 3 needs no migration. Deploy Stage 2's shift/attendance migration first if
+it is still pending, and use its generated client.
+
+The disposable PostgreSQL verifier includes rollback and controlled concurrency
+checks, without changing application data in the development database:
+
+```sh
+node --import tsx apps/api/scripts/verify-stations-postgres.ts --transfers
+```
 
 ## Status, sessions, and concurrency
 
@@ -185,7 +255,11 @@ independently of those mocks. The token-version migration was explicitly applied
 to local development `m7atati` on 2026-11-17. Users/station acceptance suites were
 not repeated for the subsequent pricing-only conversion change, at the user's request.
 
-Before expanding access, agree on HR grants and station-management workflows.
+HR Stage 1 adds only employee registration and lookup. Shifts, attendance,
+transfers, Security workflows, hardware integration, and frontend work remain
+outside this stage. Its Jest/Supertest checks use mocked Prisma; the updated
+disposable PostgreSQL acceptance helper must be run separately to verify real
+storage behavior.
 Future credential changes, email verification, invitations, audit trails, and
 shared multi-instance rate limiting remain separate work. Preserve the existing
 CSRF and authentication protections when adding those features.

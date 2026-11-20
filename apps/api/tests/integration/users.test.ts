@@ -23,6 +23,8 @@ jest.mock('../../src/database/prisma.js', () => ({
     role: { findUnique: jest.fn() },
     station: { findFirst: jest.fn(), count: jest.fn() },
     refreshSession: { updateMany: jest.fn(), findUnique: jest.fn() },
+    attendanceRecord: { findFirst: jest.fn() },
+    shift: { findFirst: jest.fn() },
     $transaction: jest.fn(),
   },
 }));
@@ -42,6 +44,8 @@ type MockDatabase = {
   role: { findUnique: jest.Mock };
   station: { findFirst: jest.Mock; count: jest.Mock };
   refreshSession: { updateMany: jest.Mock; findUnique: jest.Mock };
+  attendanceRecord: { findFirst: jest.Mock };
+  shift: { findFirst: jest.Mock };
   $transaction: jest.Mock;
 };
 const db = prisma as unknown as MockDatabase;
@@ -68,6 +72,18 @@ const roleIds: Record<string, number> = {
 let users: Map<number, StoredUser>;
 let sessions: { userId: number; revokedAt: Date | null }[];
 let permissions: string[];
+let shiftRecords: {
+  id: number;
+  employeeId: number;
+  stationId: number;
+  endsAt: Date;
+}[];
+let attendanceRecords: {
+  id: number;
+  employeeId: number;
+  stationId: number;
+  clockOutAt: Date | null;
+}[];
 const stations = new Map([
   [10, { id: 10, managerId: 2, isActive: true }],
   [20, { id: 20, managerId: 9, isActive: true }],
@@ -137,13 +153,14 @@ function authenticated(
 beforeEach(() => {
   stations.get(10)!.isActive = true;
   stations.get(20)!.isActive = true;
+  stations.get(20)!.managerId = 9;
   jest.resetAllMocks();
   users = new Map([
     [1, user(1, 'ADMIN')],
     [2, user(2, 'MANAGER', 20)],
     [3, user(3, 'EMPLOYEE', 10)],
     [4, user(4, 'EMPLOYEE', 20)],
-    [5, user(5, 'HR', 10)],
+    [5, user(5, 'HR')],
     [6, user(6, 'ADMIN')],
     [7, user(7, 'SECURITY', 10)],
     [8, user(8, 'CUSTOMER')],
@@ -153,7 +170,40 @@ beforeEach(() => {
     { userId: 3, revokedAt: null },
     { userId: 4, revokedAt: null },
   ];
-  permissions = ['users.read', 'users.create', 'users.update'];
+  permissions = [
+    'users.read',
+    'users.create',
+    'users.update',
+    'employees.transfer',
+  ];
+  shiftRecords = [];
+  attendanceRecords = [];
+  db.shift.findFirst.mockImplementation(
+    async ({
+      where,
+    }: {
+      where: { employeeId: number; stationId: number; endsAt: { gt: Date } };
+    }) =>
+      shiftRecords.find(
+        (row) =>
+          row.employeeId === where.employeeId &&
+          row.stationId === where.stationId &&
+          row.endsAt > where.endsAt.gt,
+      ) ?? null,
+  );
+  db.attendanceRecord.findFirst.mockImplementation(
+    async ({
+      where,
+    }: {
+      where: { employeeId: number; stationId: number; clockOutAt: null };
+    }) =>
+      attendanceRecords.find(
+        (row) =>
+          row.employeeId === where.employeeId &&
+          row.stationId === where.stationId &&
+          row.clockOutAt === where.clockOutAt,
+      ) ?? null,
+  );
   jest.spyOn(passwordService, 'hash').mockResolvedValue('new-private-hash');
   db.$transaction.mockImplementation(
     async (work: (tx: MockDatabase) => Promise<unknown>) => {
@@ -500,7 +550,7 @@ describe('staff account creation', () => {
   );
 });
 
-describe('manager station boundaries and HR restrictions', () => {
+describe('manager station boundaries', () => {
   it('uses Station.managerId rather than the manager assigned station', async () => {
     const response = await authenticated('get', '', 2);
     expect(response.status).toBe(200);
@@ -561,31 +611,512 @@ describe('manager station boundaries and HR restrictions', () => {
         .status,
     ).toBe(200);
   });
+});
 
-  it.each([
-    ['get', ''],
-    ['get', '/3'],
-    ['post', ''],
-    ['patch', '/3'],
-    ['patch', '/3/status'],
-  ] as const)(
-    'denies unconfigured HR scope for %s %s despite permissions and station assignment',
-    async (method, path) => {
-      const response = await authenticated(method, path, 5).send(
-        method === 'post'
-          ? staffInput
-          : method === 'patch'
-            ? path.endsWith('status')
-              ? { isActive: false }
-              : { name: 'Changed' }
-            : undefined,
+describe('HR employee registration and lookup', () => {
+  it.each([10, 20])(
+    'creates an employee at active station %i',
+    async (stationId) => {
+      const response = await authenticated('post', '', 5).send({
+        ...staffInput,
+        stationId,
+      });
+      expect(response.status).toBe(201);
+      expect(response.body.user).toMatchObject({
+        name: 'New Employee',
+        email: 'new@example.com',
+        role: 'EMPLOYEE',
+        stationId,
+        isActive: true,
+      });
+      expect(passwordService.hash).toHaveBeenCalledWith(staffInput.password);
+      expect(db.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            passwordHash: 'new-private-hash',
+            roleId: roleIds.EMPLOYEE,
+            stationId,
+          }),
+        }),
       );
-      expect(response.status).toBe(403);
-      expect(db.user.create).not.toHaveBeenCalled();
-      expect(db.user.update).not.toHaveBeenCalled();
-      expect(db.user.findMany).not.toHaveBeenCalled();
+      expect(db.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+        isolationLevel: 'Serializable',
+      });
+      expect(response.text).not.toMatch(/password|private-hash|roleId|token/);
+      expect(response.headers['cache-control']).toBe('no-store');
     },
   );
+
+  it.each([null, 10])(
+    'finds employees across stations with HR station %s',
+    async (stationId) => {
+      users.get(5)!.stationId = stationId;
+      const response = await authenticated('get', '', 5);
+      expect(response.status).toBe(200);
+      expect(response.body.users.map((row: { id: number }) => row.id)).toEqual([
+        3, 4,
+      ]);
+      expect(response.body.pagination.total).toBe(2);
+      for (const [id, employeeStationId] of [
+        [3, 10],
+        [4, 20],
+      ]) {
+        const detail = await authenticated('get', `/${id}`, 5);
+        expect(detail.status).toBe(200);
+        expect(detail.body.user).toMatchObject({
+          id,
+          role: 'EMPLOYEE',
+          stationId: employeeStationId,
+        });
+        expect(detail.text).not.toMatch(/password|private-hash|roleId|token/);
+      }
+    },
+  );
+
+  it('paginates only employees and applies the same scope to totals', async () => {
+    const response = await authenticated('get', '?page=2&limit=1', 5);
+    expect(response.status).toBe(200);
+    expect(response.body.users.map((row: { id: number }) => row.id)).toEqual([
+      4,
+    ]);
+    expect(response.body.pagination).toEqual({
+      page: 2,
+      limit: 1,
+      total: 2,
+      totalPages: 2,
+    });
+    const where = db.user.findMany.mock.calls[0][0].where;
+    expect(where.AND[0]).toEqual({ role: { name: 'EMPLOYEE' } });
+    expect(db.user.count).toHaveBeenCalledWith({ where });
+  });
+
+  it.each(['ADMIN', 'MANAGER', 'HR', 'SECURITY', 'CUSTOMER'])(
+    'cannot widen results or totals using role=%s',
+    async (role) => {
+      const response = await authenticated('get', `?role=${role}&limit=1`, 5);
+      expect(response.status).toBe(200);
+      expect(response.body.users).toEqual([]);
+      expect(response.body.pagination).toEqual({
+        page: 1,
+        limit: 1,
+        total: 0,
+        totalPages: 0,
+      });
+    },
+  );
+
+  it('combines employee scope with station, role, search and status filters', async () => {
+    users.get(4)!.isActive = false;
+    const response = await authenticated(
+      'get',
+      '?stationId=20&role=EMPLOYEE&search=USER4@EXAMPLE.COM&isActive=false',
+      5,
+    );
+    expect(response.status).toBe(200);
+    expect(response.body.users.map((row: { id: number }) => row.id)).toEqual([
+      4,
+    ]);
+    expect(response.body.pagination.total).toBe(1);
+    expect(
+      (await authenticated('get', '?stationId=10', 5)).body.users.map(
+        (row: { id: number }) => row.id,
+      ),
+    ).toEqual([3]);
+  });
+
+  it.each([1, 2, 5, 6, 7, 8, 999])(
+    'hides nonemployees and missing targets: %i',
+    async (id) => {
+      const response = await authenticated('get', `/${id}`, 5);
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({ message: 'User not found' });
+    },
+  );
+
+  it.each(['ADMIN', 'MANAGER', 'HR', 'SECURITY', 'CUSTOMER'])(
+    'cannot create %s accounts',
+    async (role) => {
+      expect(
+        (await authenticated('post', '', 5).send({ ...staffInput, role }))
+          .status,
+      ).toBe(403);
+      expect(db.user.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([undefined, null, 999])(
+    'rejects missing or invalid station %s',
+    async (stationId) => {
+      const response = await authenticated('post', '', 5).send({
+        ...staffInput,
+        stationId,
+      });
+      expect(response.status).toBe(400);
+      expect(db.user.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects an inactive station with the existing assignment error', async () => {
+    stations.get(20)!.isActive = false;
+    const response = await authenticated('post', '', 5).send({
+      ...staffInput,
+      stationId: 20,
+    });
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: 'Station unavailable or outside authorized scope',
+    });
+    expect(db.user.create).not.toHaveBeenCalled();
+  });
+
+  it('returns the existing conflict for a normalized duplicate email', async () => {
+    const response = await authenticated('post', '', 5).send({
+      ...staffInput,
+      email: ' USER3@EXAMPLE.COM ',
+    });
+    expect(response.status).toBe(409);
+    expect(response.body).toEqual({ message: 'Email already registered' });
+    expect(users.size).toBe(8);
+  });
+
+  it.each([
+    ['/3', { name: 'Changed' }],
+    ['/3', { role: 'ADMIN', stationId: null }],
+    ['/3', { stationId: 20 }],
+    ['/3/status', { isActive: false }],
+    ['/3/status', { isActive: true }],
+  ])('denies PATCH %s even with users.update', async (path, input) => {
+    const response = await authenticated('patch', path, 5).send(input);
+    expect(response.status).toBe(403);
+    expect(db.user.update).not.toHaveBeenCalled();
+    expect(db.refreshSession.updateMany).not.toHaveBeenCalled();
+  });
+
+  it.each(['get', 'post'] as const)(
+    'still requires permissions for HR %s',
+    async (method) => {
+      permissions = [];
+      const response = await authenticated(method, '', 5).send(
+        method === 'post' ? staffInput : undefined,
+      );
+      expect(response.status).toBe(403);
+      expect(db.$transaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects HR creation without Origin and CSRF proof', async () => {
+    const response = await request(app)
+      .post('/api/users')
+      .set('Cookie', `${ACCESS_COOKIE}=${tokenService.issue(5).accessToken}`)
+      .send(staffInput);
+    expect(response.status).toBe(403);
+    expect(db.user.create).not.toHaveBeenCalled();
+  });
+
+  it('rechecks a now-demoted HR actor inside the creation transaction', async () => {
+    db.user.findFirst.mockResolvedValueOnce(user(5, 'EMPLOYEE', 10));
+    expect((await authenticated('post', '', 5).send(staffInput)).status).toBe(
+      403,
+    );
+    expect(db.user.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('immediate employee transfers', () => {
+  const at = new Date('2026-11-19T12:00:00Z');
+  beforeEach(() => {
+    jest.spyOn(Date, 'now').mockReturnValue(at.getTime());
+  });
+
+  it.each([1, 5])(
+    'allows actor %i to transfer out of an inactive source and resolves new auth station',
+    async (actorId) => {
+      stations.get(10)!.isActive = false;
+      const before = structuredClone(users.get(3)!);
+      const tokens = tokenService.issue(3);
+      const response = await authenticated('post', '/3/transfer', actorId).send(
+        { stationId: 20 },
+      );
+      expect(response.status).toBe(200);
+      expect(response.body.user).toMatchObject({
+        id: 3,
+        role: 'EMPLOYEE',
+        stationId: 20,
+      });
+      expect(users.get(3)).toEqual({ ...before, stationId: 20 });
+      expect(db.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: { stationId: 20 } }),
+      );
+      expect(
+        sessions.filter((s) => s.userId === 3).every((s) => s.revokedAt),
+      ).toBe(true);
+      expect(sessions.find((s) => s.userId === 4)!.revokedAt).toBeNull();
+      const me = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', `${ACCESS_COOKIE}=${tokens.accessToken}`);
+      expect(me.status).toBe(200);
+      expect(me.body.user.stationId).toBe(20);
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(response.text).not.toMatch(/password|token|roleId/);
+    },
+  );
+
+  it('treats same-station requests as no-ops even with conflicts and an inactive station', async () => {
+    stations.get(10)!.isActive = false;
+    attendanceRecords.push({
+      id: 1,
+      employeeId: 3,
+      stationId: 10,
+      clockOutAt: null,
+    });
+    const response = await authenticated('post', '/3/transfer', 5).send({
+      stationId: 10,
+    });
+    expect(response.status).toBe(200);
+    expect(db.user.update).not.toHaveBeenCalled();
+    expect(db.refreshSession.updateMany).not.toHaveBeenCalled();
+    expect(db.station.findFirst).not.toHaveBeenCalled();
+    expect(db.shift.findFirst).not.toHaveBeenCalled();
+    expect(db.attendanceRecord.findFirst).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {},
+    { stationId: null },
+    { stationId: '20' },
+    { stationId: 0 },
+    { stationId: 20, role: 'ADMIN' },
+    { stationId: 20, name: 'Changed' },
+    { stationId: 20, isActive: false },
+  ])('requires a strict transfer body %j', async (input) => {
+    expect(
+      (await authenticated('post', '/3/transfer', 5).send(input)).status,
+    ).toBe(400);
+    expect(db.user.update).not.toHaveBeenCalled();
+  });
+
+  it.each([999, 20])(
+    'rejects missing or inactive destination %i',
+    async (stationId) => {
+      stations.get(20)!.isActive = false;
+      const response = await authenticated('post', '/3/transfer', 5).send({
+        stationId,
+      });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: 'Station unavailable or outside authorized scope',
+      });
+      expect(db.user.update).not.toHaveBeenCalled();
+      expect(db.refreshSession.updateMany).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([1, 2, 5, 7, 8, 999])(
+    'hides nonemployee or missing target %i',
+    async (id) => {
+      expect(
+        (
+          await authenticated('post', `/${id}/transfer`, 5).send({
+            stationId: 20,
+          })
+        ).status,
+      ).toBe(404);
+      expect(db.user.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([2, 3, 7, 8])(
+    'denies caller %i even with employees.transfer',
+    async (id) => {
+      const row = users.get(id)!;
+      db.user.findUnique.mockResolvedValueOnce({
+        ...row,
+        role: {
+          name: row.role.name,
+          permissions: [{ permission: { key: 'employees.transfer' } }],
+        },
+      });
+      expect(
+        (await authenticated('post', '/3/transfer', id).send({ stationId: 20 }))
+          .status,
+      ).toBe(403);
+      expect(db.user.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it('requires authentication, permission, and CSRF proof', async () => {
+    expect(
+      (
+        await request(app)
+          .post('/api/users/3/transfer')
+          .set('Origin', 'http://localhost:3000')
+          .set('X-CSRF-Protection', '1')
+          .send({ stationId: 20 })
+      ).status,
+    ).toBe(401);
+    permissions = [];
+    expect(
+      (await authenticated('post', '/3/transfer', 5).send({ stationId: 20 }))
+        .status,
+    ).toBe(403);
+    expect(
+      (
+        await request(app)
+          .post('/api/users/3/transfer')
+          .set(
+            'Cookie',
+            `${ACCESS_COOKIE}=${tokenService.issue(5).accessToken}`,
+          )
+          .send({ stationId: 20 })
+      ).status,
+    ).toBe(403);
+    expect(db.user.update).not.toHaveBeenCalled();
+  });
+
+  it.each(['open attendance', 'ongoing shift', 'future shift'])(
+    'blocks %s without modifying assignment or records',
+    async (conflict) => {
+      if (conflict === 'open attendance')
+        attendanceRecords.push({
+          id: 1,
+          employeeId: 3,
+          stationId: 10,
+          clockOutAt: null,
+        });
+      else
+        shiftRecords.push({
+          id: 1,
+          employeeId: 3,
+          stationId: 10,
+          endsAt: new Date(
+            at.getTime() + (conflict === 'ongoing shift' ? 1000 : 86400000),
+          ),
+        });
+      const before = structuredClone({ attendanceRecords, shiftRecords });
+      expect(
+        (await authenticated('post', '/3/transfer', 5).send({ stationId: 20 }))
+          .status,
+      ).toBe(409);
+      expect(users.get(3)!.stationId).toBe(10);
+      expect({ attendanceRecords, shiftRecords }).toEqual(before);
+      expect(db.user.update).not.toHaveBeenCalled();
+      expect(db.refreshSession.updateMany).not.toHaveBeenCalled();
+    },
+  );
+
+  it('allows a shift ending exactly now and ignores other employees/stations', async () => {
+    shiftRecords.push(
+      { id: 1, employeeId: 3, stationId: 10, endsAt: at },
+      {
+        id: 2,
+        employeeId: 4,
+        stationId: 10,
+        endsAt: new Date(at.getTime() + 1000),
+      },
+    );
+    attendanceRecords.push({
+      id: 1,
+      employeeId: 3,
+      stationId: 20,
+      clockOutAt: null,
+    });
+    expect(
+      (await authenticated('post', '/3/transfer', 5).send({ stationId: 20 }))
+        .status,
+    ).toBe(200);
+    expect(shiftRecords[0].stationId).toBe(10);
+    expect(db.shift.findFirst.mock.calls[0][0].where.endsAt).toEqual({
+      gt: at,
+    });
+  });
+
+  it.each([
+    { stationId: 20 },
+    { stationId: 20, role: 'SECURITY' },
+    { stationId: null, role: 'HR' },
+  ])('prevents generic update bypass with %j', async (input) => {
+    attendanceRecords.push({
+      id: 1,
+      employeeId: 3,
+      stationId: 10,
+      clockOutAt: null,
+    });
+    expect((await authenticated('patch', '/3').send(input)).status).toBe(409);
+    expect(users.get(3)!.role.name).toBe('EMPLOYEE');
+    expect(users.get(3)!.stationId).toBe(10);
+  });
+
+  it('checks station changes when the resulting role is EMPLOYEE too', async () => {
+    shiftRecords.push({
+      id: 1,
+      employeeId: 7,
+      stationId: 10,
+      endsAt: new Date(at.getTime() + 1000),
+    });
+    expect(
+      (
+        await authenticated('patch', '/7').send({
+          role: 'EMPLOYEE',
+          stationId: 20,
+        })
+      ).status,
+    ).toBe(409);
+    expect(users.get(7)!.role.name).toBe('SECURITY');
+  });
+
+  it('keeps manager scope and applies conflicts when both stations are managed', async () => {
+    stations.get(20)!.managerId = 2;
+    attendanceRecords.push({
+      id: 1,
+      employeeId: 3,
+      stationId: 10,
+      clockOutAt: null,
+    });
+    expect(
+      (await authenticated('patch', '/3', 2).send({ stationId: 20 })).status,
+    ).toBe(409);
+    expect(
+      (await authenticated('patch', '/3', 2).send({ name: 'Unrelated rename' }))
+        .status,
+    ).toBe(200);
+    attendanceRecords = [];
+    expect(
+      (await authenticated('patch', '/3', 2).send({ stationId: 20 })).status,
+    ).toBe(200);
+  });
+
+  it.each(['post', 'patch'] as const)(
+    'rolls back assignment and session revocation together for %s',
+    async (method) => {
+      db.refreshSession.updateMany.mockImplementationOnce(async () => {
+        sessions[0].revokedAt = at;
+        throw new Error('test failure');
+      });
+      const response = await authenticated(
+        method,
+        method === 'post' ? '/3/transfer' : '/3',
+        method === 'post' ? 5 : 1,
+      ).send({ stationId: 20 });
+      expect(response.status).toBe(500);
+      expect(users.get(3)!.stationId).toBe(10);
+      expect(
+        sessions
+          .filter((s) => s.userId === 3)
+          .every((s) => s.revokedAt === null),
+      ).toBe(true);
+    },
+  );
+
+  it('rechecks actor and target when a serialization failure retries', async () => {
+    db.$transaction.mockRejectedValueOnce({ code: 'P2034' });
+    db.user.findFirst.mockResolvedValueOnce(user(5, 'MANAGER'));
+    expect(
+      (await authenticated('post', '/3/transfer', 5).send({ stationId: 20 }))
+        .status,
+    ).toBe(403);
+    expect(db.$transaction).toHaveBeenCalledTimes(2);
+    expect(db.user.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('updates, deactivation, and integrity', () => {

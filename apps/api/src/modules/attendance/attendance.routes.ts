@@ -1,0 +1,31 @@
+import { Router } from 'express';
+import type { RequestHandler } from 'express';
+import { authenticate } from '../../middleware/authenticate.js';
+import { authorize } from '../../middleware/authorize.js';
+import { HttpError } from '../../types/http-error.js';
+import { attendanceController } from './attendance.controller.js';
+
+function readRouter(permission: string, handler: RequestHandler) {
+  const router = Router();
+  router.use((_req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
+  router.use(authenticate);
+  router.use((req, _res, next) => {
+    if (!['ADMIN', 'HR'].includes(req.auth!.user.role))
+      return next(new HttpError('Insufficient permissions', 403));
+    next();
+  });
+  router.get('/', authorize(permission), handler);
+  return router;
+}
+
+export const shiftsRouter = readRouter(
+  'shifts.read',
+  attendanceController.shifts,
+);
+export const attendanceRouter = readRouter(
+  'attendance.read',
+  attendanceController.attendance,
+);

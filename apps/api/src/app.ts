@@ -9,6 +9,10 @@ import { authRouter } from './modules/auth/auth.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
 import { stationsRouter } from './modules/stations/stations.routes.js';
 import { fuelPricesRouter } from './modules/fuel-prices/fuel-prices.routes.js';
+import {
+  shiftsRouter,
+  attendanceRouter,
+} from './modules/attendance/attendance.routes.js';
 
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
@@ -34,6 +38,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/stations', stationsRouter);
 app.use('/api/fuel-prices', fuelPricesRouter);
+app.use('/api/shifts', shiftsRouter);
+app.use('/api/attendance', attendanceRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

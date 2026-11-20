@@ -13,12 +13,23 @@ import type {
   UpdateUserInput,
 } from './users.validation.js';
 
-function managementScope(actor: UserProfile): Prisma.UserWhereInput {
+type ManagementOperation = 'read' | 'create' | 'update' | 'transfer';
+
+function managementScope(
+  actor: UserProfile,
+  operation: ManagementOperation,
+): Prisma.UserWhereInput {
   if (actor.role === 'ADMIN') return {};
+  if (operation === 'transfer') {
+    if (actor.role === 'HR') return { role: { name: 'EMPLOYEE' } };
+    throw new HttpError('No authorized employee-transfer scope', 403);
+  }
   if (actor.role === 'MANAGER') {
     return { role: { name: 'EMPLOYEE' }, station: { is: stationScope(actor) } };
   }
-  // There is no modeled HR station grant. Assignment alone is not authorization.
+  if (actor.role === 'HR' && operation !== 'update') {
+    return { role: { name: 'EMPLOYEE' } };
+  }
   throw new HttpError('No authorized user-management scope', 403);
 }
 
@@ -31,12 +42,13 @@ export class UsersService {
   private async actor(
     context: AuthContext,
     tx: Prisma.TransactionClient,
+    operation: ManagementOperation,
   ): Promise<UserProfile> {
     // Re-read inside the transaction so concurrent deactivation/demotion is observed on retry.
     const current = await this.repository.findUser(context.user.id, {}, tx);
     if (!current?.isActive) throw new HttpError('Unauthenticated', 401);
     const actor = managedUser(current);
-    managementScope(actor);
+    managementScope(actor, operation);
     return actor;
   }
 
@@ -45,7 +57,11 @@ export class UsersService {
     actor: UserProfile,
     tx: Prisma.TransactionClient,
   ): Promise<UserRecord> {
-    const user = await this.repository.findUser(id, managementScope(actor), tx);
+    const user = await this.repository.findUser(
+      id,
+      managementScope(actor, 'read'),
+      tx,
+    );
     if (!user) throw new HttpError('User not found', 404);
     return user;
   }
@@ -57,6 +73,9 @@ export class UsersService {
     tx: Prisma.TransactionClient,
     newAssignment = true,
   ): Promise<void> {
+    if (actor.role === 'HR' && role !== 'EMPLOYEE') {
+      throw new HttpError('HR may create EMPLOYEE accounts only', 403);
+    }
     if (role === 'CUSTOMER')
       throw new HttpError('Customer role transitions are not supported', 400);
     if (actor.role === 'MANAGER' && role !== 'EMPLOYEE') {
@@ -73,7 +92,7 @@ export class UsersService {
         {
           AND: [
             { id: stationId },
-            stationScope(actor),
+            actor.role === 'HR' ? {} : stationScope(actor),
             ...(newAssignment ? [{ isActive: true }] : []),
           ],
         },
@@ -89,7 +108,7 @@ export class UsersService {
 
   async list(context: AuthContext, input: ListUsersInput) {
     return this.repository.transaction(async (tx) => {
-      const actor = await this.actor(context, tx);
+      const actor = await this.actor(context, tx, 'read');
       const filters: Prisma.UserWhereInput = {
         ...(input.role !== undefined ? { role: { name: input.role } } : {}),
         ...(input.stationId !== undefined
@@ -106,7 +125,7 @@ export class UsersService {
           : {}),
       };
       const { users, total } = await this.repository.list(
-        { AND: [managementScope(actor), filters] },
+        { AND: [managementScope(actor, 'read'), filters] },
         input,
         tx,
       );
@@ -124,7 +143,7 @@ export class UsersService {
 
   async get(context: AuthContext, id: number) {
     return this.repository.transaction(async (tx) => {
-      const actor = await this.actor(context, tx);
+      const actor = await this.actor(context, tx, 'read');
       return managedUser(await this.target(id, actor, tx));
     });
   }
@@ -133,7 +152,7 @@ export class UsersService {
     // Expensive hashing stays outside retryable database transactions.
     const passwordHash = await this.passwords.hash(input.password);
     return this.repository.transaction(async (tx) => {
-      const actor = await this.actor(context, tx);
+      const actor = await this.actor(context, tx, 'create');
       const stationId = input.stationId ?? null;
       await this.assignment(actor, input.role, stationId, tx);
       const role = await this.repository.findRole(input.role, tx);
@@ -155,7 +174,7 @@ export class UsersService {
 
   async update(context: AuthContext, id: number, input: UpdateUserInput) {
     return this.repository.transaction(async (tx) => {
-      const actor = await this.actor(context, tx);
+      const actor = await this.actor(context, tx, 'update');
       const target = await this.target(id, actor, tx);
       const nextRole = input.role ?? target.role.name;
       const stationId =
@@ -175,6 +194,13 @@ export class UsersService {
           tx,
           stationId !== target.stationId,
         );
+      }
+      // Check the original assignment even when this request changes role too.
+      if (
+        stationId !== target.stationId &&
+        (target.role.name === 'EMPLOYEE' || nextRole === 'EMPLOYEE')
+      ) {
+        await this.requireTransferable(target, tx);
       }
       const roleChanged = nextRole !== target.role.name;
       if (
@@ -210,6 +236,41 @@ export class UsersService {
     });
   }
 
+  private async requireTransferable(
+    target: UserRecord,
+    tx: Prisma.TransactionClient,
+  ) {
+    if (
+      target.stationId !== null &&
+      (await this.repository.hasTransferConflict(
+        target.id,
+        target.stationId,
+        new Date(Date.now()),
+        tx,
+      ))
+    ) {
+      throw new HttpError(
+        'Employee has open attendance or ongoing or future shifts at the source station',
+        409,
+      );
+    }
+  }
+
+  async transfer(context: AuthContext, id: number, stationId: number) {
+    return this.repository.transaction(async (tx) => {
+      const actor = await this.actor(context, tx, 'transfer');
+      const target = await this.target(id, actor, tx);
+      if (target.role.name !== 'EMPLOYEE')
+        throw new HttpError('User not found', 404);
+      if (target.stationId === stationId) return managedUser(target);
+      await this.assignment(actor, 'EMPLOYEE', stationId, tx);
+      await this.requireTransferable(target, tx);
+      const updated = await this.repository.update(id, { stationId }, tx);
+      await this.repository.revokeSessions(id, tx);
+      return managedUser(updated);
+    });
+  }
+
   private async protectFinalAdmin(tx: Prisma.TransactionClient): Promise<void> {
     if ((await this.repository.countActiveAdmins(tx)) <= 1) {
       throw new HttpError('Cannot remove the final active ADMIN', 409);
@@ -218,7 +279,7 @@ export class UsersService {
 
   async setStatus(context: AuthContext, id: number, isActive: boolean) {
     return this.repository.transaction(async (tx) => {
-      const actor = await this.actor(context, tx);
+      const actor = await this.actor(context, tx, 'update');
       const target = await this.target(id, actor, tx);
       if (!isActive && target.isActive && target.role.name === 'ADMIN')
         await this.protectFinalAdmin(tx);

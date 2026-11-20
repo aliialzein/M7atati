@@ -11,7 +11,9 @@
     "lint": "eslint . --ext .ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "provision-station-permissions": "tsx scripts/provision-station-permissions.ts",
-    "provision-pricing-permissions": "tsx scripts/provision-pricing-permissions.ts"
+    "provision-pricing-permissions": "tsx scripts/provision-pricing-permissions.ts",
+    "provision-attendance-permissions": "tsx scripts/provision-attendance-permissions.ts",
+    "provision-transfer-permissions": "tsx scripts/provision-transfer-permissions.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

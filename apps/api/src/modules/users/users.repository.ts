@@ -3,6 +3,7 @@ import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../database/prisma.js';
 import { HttpError } from '../../types/http-error.js';
 import type { ListUsersInput } from './users.validation.js';
+import type { UserRecord } from './users.types.js';
 
 const userSelect = {
   id: true,
@@ -68,7 +69,7 @@ export const usersRepository = {
     id: number,
     scope: Prisma.UserWhereInput,
     tx: Prisma.TransactionClient,
-  ) {
+  ): Promise<UserRecord | null> {
     return tx.user.findFirst({
       where: { AND: [scope, { id }] },
       select: userSelect,
@@ -90,6 +91,24 @@ export const usersRepository = {
   },
   countManagedStations(userId: number, tx: Prisma.TransactionClient) {
     return tx.station.count({ where: { managerId: userId } });
+  },
+  async hasTransferConflict(
+    employeeId: number,
+    stationId: number,
+    at: Date,
+    tx: Prisma.TransactionClient,
+  ) {
+    const [attendance, shift] = await Promise.all([
+      tx.attendanceRecord.findFirst({
+        where: { employeeId, stationId, clockOutAt: null },
+        select: { id: true },
+      }),
+      tx.shift.findFirst({
+        where: { employeeId, stationId, endsAt: { gt: at } },
+        select: { id: true },
+      }),
+    ]);
+    return attendance !== null || shift !== null;
   },
   create(
     input: {
@@ -113,7 +132,7 @@ export const usersRepository = {
       tokenVersion?: Prisma.IntFieldUpdateOperationsInput;
     },
     tx: Prisma.TransactionClient,
-  ) {
+  ): Promise<UserRecord> {
     return tx.user.update({ where: { id }, data, select: userSelect });
   },
   revokeSessions(userId: number, tx: Prisma.TransactionClient) {

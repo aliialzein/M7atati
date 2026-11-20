@@ -108,6 +108,7 @@ async function main() {
       '20261117090000_add_user_token_version',
       '20261117100000_add_reference_fuel_prices',
       '20261117110000_preserve_provider_price_units',
+      '20261119090000_add_shifts_and_attendance',
     ]);
     cpSync(
       'apps/api/prisma/migrations/migration_lock.toml',
@@ -304,7 +305,18 @@ async function main() {
       where: { id: legacyId },
       data: { managerId: manager.id },
     });
-    if (process.argv.includes('--prices')) {
+    if (process.argv.includes('--transfers')) {
+      stage =
+        'employee transfer PostgreSQL transaction and concurrency acceptance';
+      const { verifyTransfersPostgres } =
+        await import('./verify-transfers-postgres.js');
+      await verifyTransfersPostgres(prisma, scratch);
+    } else if (process.argv.includes('--attendance')) {
+      stage = 'shift and attendance PostgreSQL and in-process HTTP acceptance';
+      const { verifyAttendancePostgres } =
+        await import('./verify-attendance-postgres.js');
+      await verifyAttendancePostgres(prisma, scratch);
+    } else if (process.argv.includes('--prices')) {
       stage = 'reference-price PostgreSQL and in-process HTTP acceptance';
       const { verifyPricesPostgres } =
         await import('./verify-prices-postgres.js');
@@ -342,7 +354,18 @@ async function main() {
     console.info(
       'PASS: isolated migration metadata recheck; acceptance outcomes are reported individually above',
     );
-  } catch {
+  } catch (error) {
+    // Report only the source location, never raw database errors or credentials.
+    const location =
+      error instanceof Error
+        ? error.stack
+            ?.split('\n')
+            .filter((line) =>
+              /verify-(attendance|transfers)-postgres\.ts:/.test(line),
+            )
+            .join('\n')
+        : undefined;
+    if (location) console.error(location.trim());
     console.error(
       `FAIL: ${stage}; details withheld to protect configuration and test credentials`,
     );
