@@ -41,6 +41,9 @@ export const updateUserSchema = z
   .strict()
   .refine((value) => Object.keys(value).length > 0);
 export const userStatusSchema = z.object({ isActive: z.boolean() }).strict();
+export const transferUserSchema = z
+  .object({ stationId: stationId.unwrap() })
+  .strict();
 
 export type ListUsersInput = z.infer<typeof listUsersSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;

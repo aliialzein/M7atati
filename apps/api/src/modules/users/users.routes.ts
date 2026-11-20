@@ -13,6 +13,11 @@ usersRouter.use(authenticate);
 usersRouter.get('/', authorize('users.read'), usersController.list);
 usersRouter.get('/:id', authorize('users.read'), usersController.get);
 usersRouter.post('/', authorize('users.create'), usersController.create);
+usersRouter.post(
+  '/:id/transfer',
+  authorize('employees.transfer'),
+  usersController.transfer,
+);
 usersRouter.patch('/:id', authorize('users.update'), usersController.update);
 usersRouter.patch(
   '/:id/status',

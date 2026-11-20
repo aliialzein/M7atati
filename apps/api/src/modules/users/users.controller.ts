@@ -6,9 +6,20 @@ import {
   updateUserSchema,
   userIdSchema,
   userStatusSchema,
+  transferUserSchema,
 } from './users.validation.js';
 
 export const usersController = {
+  transfer: asyncHandler(async (req, res) => {
+    const { stationId } = transferUserSchema.parse(req.body);
+    res.json({
+      user: await usersService.transfer(
+        req.auth!,
+        userIdSchema.parse(req.params.id),
+        stationId,
+      ),
+    });
+  }),
   list: asyncHandler(async (req, res) => {
     res.json(
       await usersService.list(req.auth!, listUsersSchema.parse(req.query)),
@@ -23,14 +34,12 @@ export const usersController = {
     });
   }),
   create: asyncHandler(async (req, res) => {
-    res
-      .status(201)
-      .json({
-        user: await usersService.create(
-          req.auth!,
-          createUserSchema.parse(req.body),
-        ),
-      });
+    res.status(201).json({
+      user: await usersService.create(
+        req.auth!,
+        createUserSchema.parse(req.body),
+      ),
+    });
   }),
   update: asyncHandler(async (req, res) => {
     res.json({

@@ -24,7 +24,7 @@ export * as $Enums from './enums.js'
 export * from "./enums.js"
 /**
  * ## Prisma Client
- *
+ * 
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -34,7 +34,7 @@ export * from "./enums.js"
  * // Fetch zero or more FuelTypes
  * const fuelTypes = await prisma.fuelType.findMany()
  * ```
- *
+ * 
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -43,81 +43,91 @@ export { Prisma }
 
 /**
  * Model FuelType
- *
+ * 
  */
 export type FuelType = Prisma.FuelTypeModel
 /**
  * Model FuelPrice
- *
+ * 
  */
 export type FuelPrice = Prisma.FuelPriceModel
 /**
  * Model FuelPriceRefresh
- *
+ * 
  */
 export type FuelPriceRefresh = Prisma.FuelPriceRefreshModel
 /**
  * Model Station
- *
+ * 
  */
 export type Station = Prisma.StationModel
 /**
  * Model User
- *
+ * 
  */
 export type User = Prisma.UserModel
 /**
  * Model Role
- *
+ * 
  */
 export type Role = Prisma.RoleModel
 /**
+ * Model Shift
+ * 
+ */
+export type Shift = Prisma.ShiftModel
+/**
+ * Model AttendanceRecord
+ * 
+ */
+export type AttendanceRecord = Prisma.AttendanceRecordModel
+/**
  * Model Permission
- *
+ * 
  */
 export type Permission = Prisma.PermissionModel
 /**
  * Model RolePermission
- *
+ * 
  */
 export type RolePermission = Prisma.RolePermissionModel
 /**
  * Model RefreshSession
- *
+ * 
  */
 export type RefreshSession = Prisma.RefreshSessionModel
 /**
  * Model Tank
- *
+ * 
  */
 export type Tank = Prisma.TankModel
 /**
  * Model SensorReading
- *
+ * 
  */
 export type SensorReading = Prisma.SensorReadingModel
 /**
  * Model Pump
- *
+ * 
  */
 export type Pump = Prisma.PumpModel
 /**
  * Model FuelOrder
- *
+ * 
  */
 export type FuelOrder = Prisma.FuelOrderModel
 /**
  * Model OrderEvent
- *
+ * 
  */
 export type OrderEvent = Prisma.OrderEventModel
 /**
  * Model Payment
- *
+ * 
  */
 export type Payment = Prisma.PaymentModel
 /**
  * Model CallSession
- *
+ * 
  */
 export type CallSession = Prisma.CallSessionModel

@@ -85,6 +85,8 @@ model Station {
   pumps        Pump[]
   orders       FuelOrder[]
   callSessions CallSession[]
+  shifts       Shift[]
+  attendance   AttendanceRecord[]
 
   @@index([managerId])
   @@map("stations")
@@ -110,6 +112,8 @@ model User {
   orderEvents         OrderEvent[]     @relation("OrderEventActor")
   handledCallSessions CallSession[]    @relation("CallSessionHandoff")
   refreshSessions     RefreshSession[]
+  shifts              Shift[]
+  attendance          AttendanceRecord[]
 
   @@index([roleId])
   @@index([stationId])
@@ -125,6 +129,42 @@ model Role {
   permissions RolePermission[]
 
   @@map("roles")
+}
+
+// Planned work and actual attendance are independent records. Their station
+// reflects where work was recorded, not the employee's current assignment.
+model Shift {
+  id         Int      @id @default(autoincrement())
+  employeeId Int      @map("employee_id")
+  stationId  Int      @map("station_id")
+  startsAt   DateTime @map("starts_at") @db.Timestamptz(3)
+  endsAt     DateTime @map("ends_at") @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  employee User    @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  station  Station @relation(fields: [stationId], references: [id], onDelete: Restrict)
+
+  @@index([startsAt, id])
+  @@index([stationId, startsAt])
+  @@index([employeeId, startsAt])
+  @@map("shifts")
+}
+
+model AttendanceRecord {
+  id         Int       @id @default(autoincrement())
+  employeeId Int       @map("employee_id")
+  stationId  Int       @map("station_id")
+  clockInAt  DateTime  @map("clock_in_at") @db.Timestamptz(3)
+  clockOutAt DateTime? @map("clock_out_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  employee User    @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  station  Station @relation(fields: [stationId], references: [id], onDelete: Restrict)
+
+  @@index([clockInAt, id])
+  @@index([stationId, clockInAt])
+  @@index([employeeId, clockInAt])
+  @@map("attendance_records")
 }
 
 model Permission {

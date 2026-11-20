@@ -276,6 +276,8 @@ export type UserWhereInput = {
   orderEvents?: Prisma.OrderEventListRelationFilter
   handledCallSessions?: Prisma.CallSessionListRelationFilter
   refreshSessions?: Prisma.RefreshSessionListRelationFilter
+  shifts?: Prisma.ShiftListRelationFilter
+  attendance?: Prisma.AttendanceRecordListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -297,6 +299,8 @@ export type UserOrderByWithRelationInput = {
   orderEvents?: Prisma.OrderEventOrderByRelationAggregateInput
   handledCallSessions?: Prisma.CallSessionOrderByRelationAggregateInput
   refreshSessions?: Prisma.RefreshSessionOrderByRelationAggregateInput
+  shifts?: Prisma.ShiftOrderByRelationAggregateInput
+  attendance?: Prisma.AttendanceRecordOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -321,6 +325,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   orderEvents?: Prisma.OrderEventListRelationFilter
   handledCallSessions?: Prisma.CallSessionListRelationFilter
   refreshSessions?: Prisma.RefreshSessionListRelationFilter
+  shifts?: Prisma.ShiftListRelationFilter
+  attendance?: Prisma.AttendanceRecordListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -373,6 +379,8 @@ export type UserCreateInput = {
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -392,6 +400,8 @@ export type UserUncheckedCreateInput = {
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUpdateInput = {
@@ -410,6 +420,8 @@ export type UserUpdateInput = {
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -429,6 +441,8 @@ export type UserUncheckedUpdateInput = {
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -640,6 +654,34 @@ export type UserUncheckedUpdateManyWithoutRoleNestedInput = {
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
+export type UserCreateNestedOneWithoutShiftsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutShiftsInput, Prisma.UserUncheckedCreateWithoutShiftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutShiftsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutShiftsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutShiftsInput, Prisma.UserUncheckedCreateWithoutShiftsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutShiftsInput
+  upsert?: Prisma.UserUpsertWithoutShiftsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutShiftsInput, Prisma.UserUpdateWithoutShiftsInput>, Prisma.UserUncheckedUpdateWithoutShiftsInput>
+}
+
+export type UserCreateNestedOneWithoutAttendanceInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAttendanceInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAttendanceNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAttendanceInput
+  upsert?: Prisma.UserUpsertWithoutAttendanceInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAttendanceInput, Prisma.UserUpdateWithoutAttendanceInput>, Prisma.UserUncheckedUpdateWithoutAttendanceInput>
+}
+
 export type UserCreateNestedOneWithoutRefreshSessionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRefreshSessionsInput, Prisma.UserUncheckedCreateWithoutRefreshSessionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRefreshSessionsInput
@@ -733,6 +775,8 @@ export type UserCreateWithoutManagedStationsInput = {
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutManagedStationsInput = {
@@ -751,6 +795,8 @@ export type UserUncheckedCreateWithoutManagedStationsInput = {
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutManagedStationsInput = {
@@ -773,6 +819,8 @@ export type UserCreateWithoutStationInput = {
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutStationInput = {
@@ -791,6 +839,8 @@ export type UserUncheckedCreateWithoutStationInput = {
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutStationInput = {
@@ -829,6 +879,8 @@ export type UserUpdateWithoutManagedStationsInput = {
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutManagedStationsInput = {
@@ -847,6 +899,8 @@ export type UserUncheckedUpdateWithoutManagedStationsInput = {
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutStationInput = {
@@ -896,6 +950,8 @@ export type UserCreateWithoutRoleInput = {
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutRoleInput = {
@@ -914,6 +970,8 @@ export type UserUncheckedCreateWithoutRoleInput = {
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutRoleInput = {
@@ -942,6 +1000,194 @@ export type UserUpdateManyWithWhereWithoutRoleInput = {
   data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutRoleInput>
 }
 
+export type UserCreateWithoutShiftsInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserUncheckedCreateWithoutShiftsInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  roleId: number
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserCreateOrConnectWithoutShiftsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutShiftsInput, Prisma.UserUncheckedCreateWithoutShiftsInput>
+}
+
+export type UserUpsertWithoutShiftsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutShiftsInput, Prisma.UserUncheckedUpdateWithoutShiftsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutShiftsInput, Prisma.UserUncheckedCreateWithoutShiftsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutShiftsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutShiftsInput, Prisma.UserUncheckedUpdateWithoutShiftsInput>
+}
+
+export type UserUpdateWithoutShiftsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserUncheckedUpdateWithoutShiftsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserCreateWithoutAttendanceInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserUncheckedCreateWithoutAttendanceInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  roleId: number
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type UserCreateOrConnectWithoutAttendanceInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+}
+
+export type UserUpsertWithoutAttendanceInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAttendanceInput, Prisma.UserUncheckedUpdateWithoutAttendanceInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAttendanceInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAttendanceInput, Prisma.UserUncheckedUpdateWithoutAttendanceInput>
+}
+
+export type UserUpdateWithoutAttendanceInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAttendanceInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
 export type UserCreateWithoutRefreshSessionsInput = {
   name: string
   email: string
@@ -957,6 +1203,8 @@ export type UserCreateWithoutRefreshSessionsInput = {
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutRefreshSessionsInput = {
@@ -975,6 +1223,8 @@ export type UserUncheckedCreateWithoutRefreshSessionsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutRefreshSessionsInput = {
@@ -1008,6 +1258,8 @@ export type UserUpdateWithoutRefreshSessionsInput = {
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
@@ -1026,6 +1278,8 @@ export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutCustomerOrdersInput = {
@@ -1043,6 +1297,8 @@ export type UserCreateWithoutCustomerOrdersInput = {
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutCustomerOrdersInput = {
@@ -1061,6 +1317,8 @@ export type UserUncheckedCreateWithoutCustomerOrdersInput = {
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutCustomerOrdersInput = {
@@ -1083,6 +1341,8 @@ export type UserCreateWithoutCreatedOrdersInput = {
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutCreatedOrdersInput = {
@@ -1101,6 +1361,8 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutCreatedOrdersInput = {
@@ -1134,6 +1396,8 @@ export type UserUpdateWithoutCustomerOrdersInput = {
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
@@ -1152,6 +1416,8 @@ export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUpsertWithoutCreatedOrdersInput = {
@@ -1180,6 +1446,8 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
@@ -1198,6 +1466,8 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutOrderEventsInput = {
@@ -1215,6 +1485,8 @@ export type UserCreateWithoutOrderEventsInput = {
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutOrderEventsInput = {
@@ -1233,6 +1505,8 @@ export type UserUncheckedCreateWithoutOrderEventsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutOrderEventsInput = {
@@ -1266,6 +1540,8 @@ export type UserUpdateWithoutOrderEventsInput = {
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrderEventsInput = {
@@ -1284,6 +1560,8 @@ export type UserUncheckedUpdateWithoutOrderEventsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateWithoutHandledCallSessionsInput = {
@@ -1301,6 +1579,8 @@ export type UserCreateWithoutHandledCallSessionsInput = {
   createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
@@ -1319,6 +1599,8 @@ export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
   orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type UserCreateOrConnectWithoutHandledCallSessionsInput = {
@@ -1352,6 +1634,8 @@ export type UserUpdateWithoutHandledCallSessionsInput = {
   createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
@@ -1370,6 +1654,8 @@ export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
   createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserCreateManyStationInput = {
@@ -1399,6 +1685,8 @@ export type UserUpdateWithoutStationInput = {
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStationInput = {
@@ -1417,6 +1705,8 @@ export type UserUncheckedUpdateWithoutStationInput = {
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutStationInput = {
@@ -1458,6 +1748,8 @@ export type UserUpdateWithoutRoleInput = {
   orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoleInput = {
@@ -1476,6 +1768,8 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutRoleInput = {
@@ -1502,6 +1796,8 @@ export type UserCountOutputType = {
   orderEvents: number
   handledCallSessions: number
   refreshSessions: number
+  shifts: number
+  attendance: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1511,6 +1807,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   orderEvents?: boolean | UserCountOutputTypeCountOrderEventsArgs
   handledCallSessions?: boolean | UserCountOutputTypeCountHandledCallSessionsArgs
   refreshSessions?: boolean | UserCountOutputTypeCountRefreshSessionsArgs
+  shifts?: boolean | UserCountOutputTypeCountShiftsArgs
+  attendance?: boolean | UserCountOutputTypeCountAttendanceArgs
 }
 
 /**
@@ -1565,6 +1863,20 @@ export type UserCountOutputTypeCountRefreshSessionsArgs<ExtArgs extends runtime.
   where?: Prisma.RefreshSessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountShiftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ShiftWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAttendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttendanceRecordWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1585,6 +1897,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   orderEvents?: boolean | Prisma.User$orderEventsArgs<ExtArgs>
   handledCallSessions?: boolean | Prisma.User$handledCallSessionsArgs<ExtArgs>
   refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
+  shifts?: boolean | Prisma.User$shiftsArgs<ExtArgs>
+  attendance?: boolean | Prisma.User$attendanceArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1641,6 +1955,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   orderEvents?: boolean | Prisma.User$orderEventsArgs<ExtArgs>
   handledCallSessions?: boolean | Prisma.User$handledCallSessionsArgs<ExtArgs>
   refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
+  shifts?: boolean | Prisma.User$shiftsArgs<ExtArgs>
+  attendance?: boolean | Prisma.User$attendanceArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1663,6 +1979,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     orderEvents: Prisma.$OrderEventPayload<ExtArgs>[]
     handledCallSessions: Prisma.$CallSessionPayload<ExtArgs>[]
     refreshSessions: Prisma.$RefreshSessionPayload<ExtArgs>[]
+    shifts: Prisma.$ShiftPayload<ExtArgs>[]
+    attendance: Prisma.$AttendanceRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -2077,6 +2395,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   orderEvents<T extends Prisma.User$orderEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orderEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   handledCallSessions<T extends Prisma.User$handledCallSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$handledCallSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CallSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   refreshSessions<T extends Prisma.User$refreshSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  shifts<T extends Prisma.User$shiftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  attendance<T extends Prisma.User$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2677,6 +2997,54 @@ export type User$refreshSessionsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.RefreshSessionScalarFieldEnum | Prisma.RefreshSessionScalarFieldEnum[]
+}
+
+/**
+ * User.shifts
+ */
+export type User$shiftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Shift
+   */
+  select?: Prisma.ShiftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Shift
+   */
+  omit?: Prisma.ShiftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ShiftInclude<ExtArgs> | null
+  where?: Prisma.ShiftWhereInput
+  orderBy?: Prisma.ShiftOrderByWithRelationInput | Prisma.ShiftOrderByWithRelationInput[]
+  cursor?: Prisma.ShiftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ShiftScalarFieldEnum | Prisma.ShiftScalarFieldEnum[]
+}
+
+/**
+ * User.attendance
+ */
+export type User$attendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AttendanceRecord
+   */
+  select?: Prisma.AttendanceRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AttendanceRecord
+   */
+  omit?: Prisma.AttendanceRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttendanceRecordInclude<ExtArgs> | null
+  where?: Prisma.AttendanceRecordWhereInput
+  orderBy?: Prisma.AttendanceRecordOrderByWithRelationInput | Prisma.AttendanceRecordOrderByWithRelationInput[]
+  cursor?: Prisma.AttendanceRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttendanceRecordScalarFieldEnum | Prisma.AttendanceRecordScalarFieldEnum[]
 }
 
 /**

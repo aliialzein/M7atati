@@ -266,6 +266,8 @@ export type StationWhereInput = {
   pumps?: Prisma.PumpListRelationFilter
   orders?: Prisma.FuelOrderListRelationFilter
   callSessions?: Prisma.CallSessionListRelationFilter
+  shifts?: Prisma.ShiftListRelationFilter
+  attendance?: Prisma.AttendanceRecordListRelationFilter
 }
 
 export type StationOrderByWithRelationInput = {
@@ -284,6 +286,8 @@ export type StationOrderByWithRelationInput = {
   pumps?: Prisma.PumpOrderByRelationAggregateInput
   orders?: Prisma.FuelOrderOrderByRelationAggregateInput
   callSessions?: Prisma.CallSessionOrderByRelationAggregateInput
+  shifts?: Prisma.ShiftOrderByRelationAggregateInput
+  attendance?: Prisma.AttendanceRecordOrderByRelationAggregateInput
 }
 
 export type StationWhereUniqueInput = Prisma.AtLeast<{
@@ -305,6 +309,8 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   pumps?: Prisma.PumpListRelationFilter
   orders?: Prisma.FuelOrderListRelationFilter
   callSessions?: Prisma.CallSessionListRelationFilter
+  shifts?: Prisma.ShiftListRelationFilter
+  attendance?: Prisma.AttendanceRecordListRelationFilter
 }, "id" | "deviceKeyHash">
 
 export type StationOrderByWithAggregationInput = {
@@ -353,6 +359,8 @@ export type StationCreateInput = {
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateInput = {
@@ -370,6 +378,8 @@ export type StationUncheckedCreateInput = {
   pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationUpdateInput = {
@@ -386,6 +396,8 @@ export type StationUpdateInput = {
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateInput = {
@@ -403,6 +415,8 @@ export type StationUncheckedUpdateInput = {
   pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateManyInput = {
@@ -571,6 +585,34 @@ export type StationUncheckedUpdateManyWithoutManagerNestedInput = {
   deleteMany?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
 }
 
+export type StationCreateNestedOneWithoutShiftsInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutShiftsInput, Prisma.StationUncheckedCreateWithoutShiftsInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutShiftsInput
+  connect?: Prisma.StationWhereUniqueInput
+}
+
+export type StationUpdateOneRequiredWithoutShiftsNestedInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutShiftsInput, Prisma.StationUncheckedCreateWithoutShiftsInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutShiftsInput
+  upsert?: Prisma.StationUpsertWithoutShiftsInput
+  connect?: Prisma.StationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutShiftsInput, Prisma.StationUpdateWithoutShiftsInput>, Prisma.StationUncheckedUpdateWithoutShiftsInput>
+}
+
+export type StationCreateNestedOneWithoutAttendanceInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutAttendanceInput, Prisma.StationUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutAttendanceInput
+  connect?: Prisma.StationWhereUniqueInput
+}
+
+export type StationUpdateOneRequiredWithoutAttendanceNestedInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutAttendanceInput, Prisma.StationUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutAttendanceInput
+  upsert?: Prisma.StationUpsertWithoutAttendanceInput
+  connect?: Prisma.StationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutAttendanceInput, Prisma.StationUpdateWithoutAttendanceInput>, Prisma.StationUncheckedUpdateWithoutAttendanceInput>
+}
+
 export type StationCreateNestedOneWithoutTanksInput = {
   create?: Prisma.XOR<Prisma.StationCreateWithoutTanksInput, Prisma.StationUncheckedCreateWithoutTanksInput>
   connectOrCreate?: Prisma.StationCreateOrConnectWithoutTanksInput
@@ -640,6 +682,8 @@ export type StationCreateWithoutUsersInput = {
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutUsersInput = {
@@ -656,6 +700,8 @@ export type StationUncheckedCreateWithoutUsersInput = {
   pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutUsersInput = {
@@ -676,6 +722,8 @@ export type StationCreateWithoutManagerInput = {
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutManagerInput = {
@@ -692,6 +740,8 @@ export type StationUncheckedCreateWithoutManagerInput = {
   pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutManagerInput = {
@@ -728,6 +778,8 @@ export type StationUpdateWithoutUsersInput = {
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutUsersInput = {
@@ -744,6 +796,8 @@ export type StationUncheckedUpdateWithoutUsersInput = {
   pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationUpsertWithWhereUniqueWithoutManagerInput = {
@@ -777,6 +831,178 @@ export type StationScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
 }
 
+export type StationCreateWithoutShiftsInput = {
+  name: string
+  isActive?: boolean
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deviceKeyHash?: string | null
+  createdAt?: Date | string
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  users?: Prisma.UserCreateNestedManyWithoutStationInput
+  tanks?: Prisma.TankCreateNestedManyWithoutStationInput
+  pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
+  orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
+  callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
+}
+
+export type StationUncheckedCreateWithoutShiftsInput = {
+  id?: number
+  name: string
+  isActive?: boolean
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  managerId?: number | null
+  deviceKeyHash?: string | null
+  createdAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutStationInput
+  tanks?: Prisma.TankUncheckedCreateNestedManyWithoutStationInput
+  pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
+  orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
+  callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
+}
+
+export type StationCreateOrConnectWithoutShiftsInput = {
+  where: Prisma.StationWhereUniqueInput
+  create: Prisma.XOR<Prisma.StationCreateWithoutShiftsInput, Prisma.StationUncheckedCreateWithoutShiftsInput>
+}
+
+export type StationUpsertWithoutShiftsInput = {
+  update: Prisma.XOR<Prisma.StationUpdateWithoutShiftsInput, Prisma.StationUncheckedUpdateWithoutShiftsInput>
+  create: Prisma.XOR<Prisma.StationCreateWithoutShiftsInput, Prisma.StationUncheckedCreateWithoutShiftsInput>
+  where?: Prisma.StationWhereInput
+}
+
+export type StationUpdateToOneWithWhereWithoutShiftsInput = {
+  where?: Prisma.StationWhereInput
+  data: Prisma.XOR<Prisma.StationUpdateWithoutShiftsInput, Prisma.StationUncheckedUpdateWithoutShiftsInput>
+}
+
+export type StationUpdateWithoutShiftsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  users?: Prisma.UserUpdateManyWithoutStationNestedInput
+  tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
+  pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
+  orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
+  callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
+}
+
+export type StationUncheckedUpdateWithoutShiftsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutStationNestedInput
+  tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
+  pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
+  orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
+  callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
+}
+
+export type StationCreateWithoutAttendanceInput = {
+  name: string
+  isActive?: boolean
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deviceKeyHash?: string | null
+  createdAt?: Date | string
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  users?: Prisma.UserCreateNestedManyWithoutStationInput
+  tanks?: Prisma.TankCreateNestedManyWithoutStationInput
+  pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
+  orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
+  callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+}
+
+export type StationUncheckedCreateWithoutAttendanceInput = {
+  id?: number
+  name: string
+  isActive?: boolean
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  managerId?: number | null
+  deviceKeyHash?: string | null
+  createdAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutStationInput
+  tanks?: Prisma.TankUncheckedCreateNestedManyWithoutStationInput
+  pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
+  orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
+  callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+}
+
+export type StationCreateOrConnectWithoutAttendanceInput = {
+  where: Prisma.StationWhereUniqueInput
+  create: Prisma.XOR<Prisma.StationCreateWithoutAttendanceInput, Prisma.StationUncheckedCreateWithoutAttendanceInput>
+}
+
+export type StationUpsertWithoutAttendanceInput = {
+  update: Prisma.XOR<Prisma.StationUpdateWithoutAttendanceInput, Prisma.StationUncheckedUpdateWithoutAttendanceInput>
+  create: Prisma.XOR<Prisma.StationCreateWithoutAttendanceInput, Prisma.StationUncheckedCreateWithoutAttendanceInput>
+  where?: Prisma.StationWhereInput
+}
+
+export type StationUpdateToOneWithWhereWithoutAttendanceInput = {
+  where?: Prisma.StationWhereInput
+  data: Prisma.XOR<Prisma.StationUpdateWithoutAttendanceInput, Prisma.StationUncheckedUpdateWithoutAttendanceInput>
+}
+
+export type StationUpdateWithoutAttendanceInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  users?: Prisma.UserUpdateManyWithoutStationNestedInput
+  tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
+  pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
+  orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
+  callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+}
+
+export type StationUncheckedUpdateWithoutAttendanceInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutStationNestedInput
+  tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
+  pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
+  orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
+  callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+}
+
 export type StationCreateWithoutTanksInput = {
   name: string
   isActive?: boolean
@@ -790,6 +1016,8 @@ export type StationCreateWithoutTanksInput = {
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutTanksInput = {
@@ -806,6 +1034,8 @@ export type StationUncheckedCreateWithoutTanksInput = {
   pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutTanksInput = {
@@ -837,6 +1067,8 @@ export type StationUpdateWithoutTanksInput = {
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutTanksInput = {
@@ -853,6 +1085,8 @@ export type StationUncheckedUpdateWithoutTanksInput = {
   pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateWithoutPumpsInput = {
@@ -868,6 +1102,8 @@ export type StationCreateWithoutPumpsInput = {
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutPumpsInput = {
@@ -884,6 +1120,8 @@ export type StationUncheckedCreateWithoutPumpsInput = {
   tanks?: Prisma.TankUncheckedCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutPumpsInput = {
@@ -915,6 +1153,8 @@ export type StationUpdateWithoutPumpsInput = {
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutPumpsInput = {
@@ -931,6 +1171,8 @@ export type StationUncheckedUpdateWithoutPumpsInput = {
   tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateWithoutOrdersInput = {
@@ -946,6 +1188,8 @@ export type StationCreateWithoutOrdersInput = {
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutOrdersInput = {
@@ -962,6 +1206,8 @@ export type StationUncheckedCreateWithoutOrdersInput = {
   tanks?: Prisma.TankUncheckedCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
   callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutOrdersInput = {
@@ -993,6 +1239,8 @@ export type StationUpdateWithoutOrdersInput = {
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutOrdersInput = {
@@ -1009,6 +1257,8 @@ export type StationUncheckedUpdateWithoutOrdersInput = {
   tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateWithoutCallSessionsInput = {
@@ -1024,6 +1274,8 @@ export type StationCreateWithoutCallSessionsInput = {
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutCallSessionsInput = {
@@ -1040,6 +1292,8 @@ export type StationUncheckedCreateWithoutCallSessionsInput = {
   tanks?: Prisma.TankUncheckedCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpUncheckedCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutStationInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutStationInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutCallSessionsInput = {
@@ -1071,6 +1325,8 @@ export type StationUpdateWithoutCallSessionsInput = {
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutCallSessionsInput = {
@@ -1087,6 +1343,8 @@ export type StationUncheckedUpdateWithoutCallSessionsInput = {
   tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateManyManagerInput = {
@@ -1113,6 +1371,8 @@ export type StationUpdateWithoutManagerInput = {
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutManagerInput = {
@@ -1129,6 +1389,8 @@ export type StationUncheckedUpdateWithoutManagerInput = {
   pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
   callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateManyWithoutManagerInput = {
@@ -1153,6 +1415,8 @@ export type StationCountOutputType = {
   pumps: number
   orders: number
   callSessions: number
+  shifts: number
+  attendance: number
 }
 
 export type StationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1161,6 +1425,8 @@ export type StationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   pumps?: boolean | StationCountOutputTypeCountPumpsArgs
   orders?: boolean | StationCountOutputTypeCountOrdersArgs
   callSessions?: boolean | StationCountOutputTypeCountCallSessionsArgs
+  shifts?: boolean | StationCountOutputTypeCountShiftsArgs
+  attendance?: boolean | StationCountOutputTypeCountAttendanceArgs
 }
 
 /**
@@ -1208,6 +1474,20 @@ export type StationCountOutputTypeCountCallSessionsArgs<ExtArgs extends runtime.
   where?: Prisma.CallSessionWhereInput
 }
 
+/**
+ * StationCountOutputType without action
+ */
+export type StationCountOutputTypeCountShiftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ShiftWhereInput
+}
+
+/**
+ * StationCountOutputType without action
+ */
+export type StationCountOutputTypeCountAttendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttendanceRecordWhereInput
+}
+
 
 export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1225,6 +1505,8 @@ export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   pumps?: boolean | Prisma.Station$pumpsArgs<ExtArgs>
   orders?: boolean | Prisma.Station$ordersArgs<ExtArgs>
   callSessions?: boolean | Prisma.Station$callSessionsArgs<ExtArgs>
+  shifts?: boolean | Prisma.Station$shiftsArgs<ExtArgs>
+  attendance?: boolean | Prisma.Station$attendanceArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["station"]>
 
@@ -1274,6 +1556,8 @@ export type StationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   pumps?: boolean | Prisma.Station$pumpsArgs<ExtArgs>
   orders?: boolean | Prisma.Station$ordersArgs<ExtArgs>
   callSessions?: boolean | Prisma.Station$callSessionsArgs<ExtArgs>
+  shifts?: boolean | Prisma.Station$shiftsArgs<ExtArgs>
+  attendance?: boolean | Prisma.Station$attendanceArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1292,6 +1576,8 @@ export type $StationPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     pumps: Prisma.$PumpPayload<ExtArgs>[]
     orders: Prisma.$FuelOrderPayload<ExtArgs>[]
     callSessions: Prisma.$CallSessionPayload<ExtArgs>[]
+    shifts: Prisma.$ShiftPayload<ExtArgs>[]
+    attendance: Prisma.$AttendanceRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1703,6 +1989,8 @@ export interface Prisma__StationClient<T, Null = never, ExtArgs extends runtime.
   pumps<T extends Prisma.Station$pumpsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$pumpsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PumpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Station$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuelOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   callSessions<T extends Prisma.Station$callSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$callSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CallSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  shifts<T extends Prisma.Station$shiftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  attendance<T extends Prisma.Station$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2278,6 +2566,54 @@ export type Station$callSessionsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.CallSessionScalarFieldEnum | Prisma.CallSessionScalarFieldEnum[]
+}
+
+/**
+ * Station.shifts
+ */
+export type Station$shiftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Shift
+   */
+  select?: Prisma.ShiftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Shift
+   */
+  omit?: Prisma.ShiftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ShiftInclude<ExtArgs> | null
+  where?: Prisma.ShiftWhereInput
+  orderBy?: Prisma.ShiftOrderByWithRelationInput | Prisma.ShiftOrderByWithRelationInput[]
+  cursor?: Prisma.ShiftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ShiftScalarFieldEnum | Prisma.ShiftScalarFieldEnum[]
+}
+
+/**
+ * Station.attendance
+ */
+export type Station$attendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AttendanceRecord
+   */
+  select?: Prisma.AttendanceRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AttendanceRecord
+   */
+  omit?: Prisma.AttendanceRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttendanceRecordInclude<ExtArgs> | null
+  where?: Prisma.AttendanceRecordWhereInput
+  orderBy?: Prisma.AttendanceRecordOrderByWithRelationInput | Prisma.AttendanceRecordOrderByWithRelationInput[]
+  cursor?: Prisma.AttendanceRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttendanceRecordScalarFieldEnum | Prisma.AttendanceRecordScalarFieldEnum[]
 }
 
 /**

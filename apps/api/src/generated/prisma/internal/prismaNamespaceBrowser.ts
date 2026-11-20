@@ -57,6 +57,8 @@ export const ModelName = {
   Station: 'Station',
   User: 'User',
   Role: 'Role',
+  Shift: 'Shift',
+  AttendanceRecord: 'AttendanceRecord',
   Permission: 'Permission',
   RolePermission: 'RolePermission',
   RefreshSession: 'RefreshSession',
@@ -169,6 +171,30 @@ export const RoleScalarFieldEnum = {
 } as const
 
 export type RoleScalarFieldEnum = (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum]
+
+
+export const ShiftScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  stationId: 'stationId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ShiftScalarFieldEnum = (typeof ShiftScalarFieldEnum)[keyof typeof ShiftScalarFieldEnum]
+
+
+export const AttendanceRecordScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  stationId: 'stationId',
+  clockInAt: 'clockInAt',
+  clockOutAt: 'clockOutAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AttendanceRecordScalarFieldEnum = (typeof AttendanceRecordScalarFieldEnum)[keyof typeof AttendanceRecordScalarFieldEnum]
 
 
 export const PermissionScalarFieldEnum = {

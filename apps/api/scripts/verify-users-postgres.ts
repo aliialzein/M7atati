@@ -861,7 +861,65 @@ export async function verifyUsersPostgres(
       }
     },
   );
-  for (const role of ['HR', 'EMPLOYEE', 'SECURITY', 'CUSTOMER'])
+  await check(
+    'HR creates and finds only employees across stations, without update access',
+    async () => {
+      const cookie = actor('HR').cookie;
+      const list = await send('get', '/api/users?limit=100', 200, undefined, {
+        cookie,
+      });
+      assert(
+        list.body.users.every((u: { role: string }) => u.role === 'EMPLOYEE'),
+      );
+      assert.equal(
+        list.body.pagination.total,
+        await prisma.user.count({ where: { role: { name: 'EMPLOYEE' } } }),
+      );
+      for (const id of [employeeA, employeeB.id])
+        await send('get', `/api/users/${id}`, 200, undefined, { cookie });
+      await send('get', `/api/users/${adminId}`, 404, undefined, { cookie });
+      const filtered = await send(
+        'get',
+        '/api/users?role=ADMIN',
+        200,
+        undefined,
+        { cookie },
+      );
+      assert.equal(filtered.body.pagination.total, 0);
+      assert.deepEqual(filtered.body.users, []);
+      for (const stationId of [stationA, stationB.id])
+        await send(
+          'post',
+          '/api/users',
+          201,
+          {
+            name: 'HR-created employee',
+            email: `hr-created-${stationId}@stage1.invalid`,
+            password,
+            role: 'EMPLOYEE',
+            stationId,
+          },
+          { cookie },
+        );
+      await send(
+        'post',
+        '/api/users',
+        403,
+        {
+          name: 'Forbidden role',
+          email: 'hr-forbidden@stage1.invalid',
+          password,
+          role: 'ADMIN',
+        },
+        { cookie },
+      );
+      for (const op of operations(employeeA).filter(
+        (op) => op.method === 'patch',
+      ))
+        await send(op.method, op.path, 403, op.body, { cookie });
+    },
+  );
+  for (const role of ['EMPLOYEE', 'SECURITY', 'CUSTOMER'])
     await check(
       `${role} follows actual service scope even with users permissions`,
       async () => {
