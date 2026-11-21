@@ -39,6 +39,7 @@ export type AttendanceRecordSumAggregateOutputType = {
 }
 
 export type AttendanceRecordMinAggregateOutputType = {
+  checkInRequestId: string | null
   id: number | null
   employeeId: number | null
   stationId: number | null
@@ -48,6 +49,7 @@ export type AttendanceRecordMinAggregateOutputType = {
 }
 
 export type AttendanceRecordMaxAggregateOutputType = {
+  checkInRequestId: string | null
   id: number | null
   employeeId: number | null
   stationId: number | null
@@ -57,6 +59,7 @@ export type AttendanceRecordMaxAggregateOutputType = {
 }
 
 export type AttendanceRecordCountAggregateOutputType = {
+  checkInRequestId: number
   id: number
   employeeId: number
   stationId: number
@@ -80,6 +83,7 @@ export type AttendanceRecordSumAggregateInputType = {
 }
 
 export type AttendanceRecordMinAggregateInputType = {
+  checkInRequestId?: true
   id?: true
   employeeId?: true
   stationId?: true
@@ -89,6 +93,7 @@ export type AttendanceRecordMinAggregateInputType = {
 }
 
 export type AttendanceRecordMaxAggregateInputType = {
+  checkInRequestId?: true
   id?: true
   employeeId?: true
   stationId?: true
@@ -98,6 +103,7 @@ export type AttendanceRecordMaxAggregateInputType = {
 }
 
 export type AttendanceRecordCountAggregateInputType = {
+  checkInRequestId?: true
   id?: true
   employeeId?: true
   stationId?: true
@@ -194,6 +200,7 @@ export type AttendanceRecordGroupByArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 export type AttendanceRecordGroupByOutputType = {
+  checkInRequestId: string | null
   id: number
   employeeId: number
   stationId: number
@@ -226,6 +233,7 @@ export type AttendanceRecordWhereInput = {
   AND?: Prisma.AttendanceRecordWhereInput | Prisma.AttendanceRecordWhereInput[]
   OR?: Prisma.AttendanceRecordWhereInput[]
   NOT?: Prisma.AttendanceRecordWhereInput | Prisma.AttendanceRecordWhereInput[]
+  checkInRequestId?: Prisma.UuidNullableFilter<"AttendanceRecord"> | string | null
   id?: Prisma.IntFilter<"AttendanceRecord"> | number
   employeeId?: Prisma.IntFilter<"AttendanceRecord"> | number
   stationId?: Prisma.IntFilter<"AttendanceRecord"> | number
@@ -237,6 +245,7 @@ export type AttendanceRecordWhereInput = {
 }
 
 export type AttendanceRecordOrderByWithRelationInput = {
+  checkInRequestId?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
@@ -249,9 +258,11 @@ export type AttendanceRecordOrderByWithRelationInput = {
 
 export type AttendanceRecordWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  employeeId_checkInRequestId?: Prisma.AttendanceRecordEmployeeIdCheckInRequestIdCompoundUniqueInput
   AND?: Prisma.AttendanceRecordWhereInput | Prisma.AttendanceRecordWhereInput[]
   OR?: Prisma.AttendanceRecordWhereInput[]
   NOT?: Prisma.AttendanceRecordWhereInput | Prisma.AttendanceRecordWhereInput[]
+  checkInRequestId?: Prisma.UuidNullableFilter<"AttendanceRecord"> | string | null
   employeeId?: Prisma.IntFilter<"AttendanceRecord"> | number
   stationId?: Prisma.IntFilter<"AttendanceRecord"> | number
   clockInAt?: Prisma.DateTimeFilter<"AttendanceRecord"> | Date | string
@@ -259,9 +270,10 @@ export type AttendanceRecordWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"AttendanceRecord"> | Date | string
   employee?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
-}, "id">
+}, "id" | "employeeId_checkInRequestId">
 
 export type AttendanceRecordOrderByWithAggregationInput = {
+  checkInRequestId?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
@@ -279,6 +291,7 @@ export type AttendanceRecordScalarWhereWithAggregatesInput = {
   AND?: Prisma.AttendanceRecordScalarWhereWithAggregatesInput | Prisma.AttendanceRecordScalarWhereWithAggregatesInput[]
   OR?: Prisma.AttendanceRecordScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AttendanceRecordScalarWhereWithAggregatesInput | Prisma.AttendanceRecordScalarWhereWithAggregatesInput[]
+  checkInRequestId?: Prisma.UuidNullableWithAggregatesFilter<"AttendanceRecord"> | string | null
   id?: Prisma.IntWithAggregatesFilter<"AttendanceRecord"> | number
   employeeId?: Prisma.IntWithAggregatesFilter<"AttendanceRecord"> | number
   stationId?: Prisma.IntWithAggregatesFilter<"AttendanceRecord"> | number
@@ -288,6 +301,7 @@ export type AttendanceRecordScalarWhereWithAggregatesInput = {
 }
 
 export type AttendanceRecordCreateInput = {
+  checkInRequestId?: string | null
   clockInAt: Date | string
   clockOutAt?: Date | string | null
   createdAt?: Date | string
@@ -296,6 +310,7 @@ export type AttendanceRecordCreateInput = {
 }
 
 export type AttendanceRecordUncheckedCreateInput = {
+  checkInRequestId?: string | null
   id?: number
   employeeId: number
   stationId: number
@@ -305,6 +320,7 @@ export type AttendanceRecordUncheckedCreateInput = {
 }
 
 export type AttendanceRecordUpdateInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clockOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -313,6 +329,7 @@ export type AttendanceRecordUpdateInput = {
 }
 
 export type AttendanceRecordUncheckedUpdateInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.IntFieldUpdateOperationsInput | number
   employeeId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -322,6 +339,7 @@ export type AttendanceRecordUncheckedUpdateInput = {
 }
 
 export type AttendanceRecordCreateManyInput = {
+  checkInRequestId?: string | null
   id?: number
   employeeId: number
   stationId: number
@@ -331,12 +349,14 @@ export type AttendanceRecordCreateManyInput = {
 }
 
 export type AttendanceRecordUpdateManyMutationInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clockOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AttendanceRecordUncheckedUpdateManyInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.IntFieldUpdateOperationsInput | number
   employeeId?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -355,7 +375,13 @@ export type AttendanceRecordOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type AttendanceRecordEmployeeIdCheckInRequestIdCompoundUniqueInput = {
+  employeeId: number
+  checkInRequestId: string
+}
+
 export type AttendanceRecordCountOrderByAggregateInput = {
+  checkInRequestId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
@@ -371,6 +397,7 @@ export type AttendanceRecordAvgOrderByAggregateInput = {
 }
 
 export type AttendanceRecordMaxOrderByAggregateInput = {
+  checkInRequestId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
@@ -380,6 +407,7 @@ export type AttendanceRecordMaxOrderByAggregateInput = {
 }
 
 export type AttendanceRecordMinOrderByAggregateInput = {
+  checkInRequestId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   employeeId?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
@@ -479,6 +507,7 @@ export type AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput = {
 }
 
 export type AttendanceRecordCreateWithoutStationInput = {
+  checkInRequestId?: string | null
   clockInAt: Date | string
   clockOutAt?: Date | string | null
   createdAt?: Date | string
@@ -486,6 +515,7 @@ export type AttendanceRecordCreateWithoutStationInput = {
 }
 
 export type AttendanceRecordUncheckedCreateWithoutStationInput = {
+  checkInRequestId?: string | null
   id?: number
   employeeId: number
   clockInAt: Date | string
@@ -523,6 +553,7 @@ export type AttendanceRecordScalarWhereInput = {
   AND?: Prisma.AttendanceRecordScalarWhereInput | Prisma.AttendanceRecordScalarWhereInput[]
   OR?: Prisma.AttendanceRecordScalarWhereInput[]
   NOT?: Prisma.AttendanceRecordScalarWhereInput | Prisma.AttendanceRecordScalarWhereInput[]
+  checkInRequestId?: Prisma.UuidNullableFilter<"AttendanceRecord"> | string | null
   id?: Prisma.IntFilter<"AttendanceRecord"> | number
   employeeId?: Prisma.IntFilter<"AttendanceRecord"> | number
   stationId?: Prisma.IntFilter<"AttendanceRecord"> | number
@@ -532,6 +563,7 @@ export type AttendanceRecordScalarWhereInput = {
 }
 
 export type AttendanceRecordCreateWithoutEmployeeInput = {
+  checkInRequestId?: string | null
   clockInAt: Date | string
   clockOutAt?: Date | string | null
   createdAt?: Date | string
@@ -539,6 +571,7 @@ export type AttendanceRecordCreateWithoutEmployeeInput = {
 }
 
 export type AttendanceRecordUncheckedCreateWithoutEmployeeInput = {
+  checkInRequestId?: string | null
   id?: number
   stationId: number
   clockInAt: Date | string
@@ -573,6 +606,7 @@ export type AttendanceRecordUpdateManyWithWhereWithoutEmployeeInput = {
 }
 
 export type AttendanceRecordCreateManyStationInput = {
+  checkInRequestId?: string | null
   id?: number
   employeeId: number
   clockInAt: Date | string
@@ -581,6 +615,7 @@ export type AttendanceRecordCreateManyStationInput = {
 }
 
 export type AttendanceRecordUpdateWithoutStationInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clockOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -588,6 +623,7 @@ export type AttendanceRecordUpdateWithoutStationInput = {
 }
 
 export type AttendanceRecordUncheckedUpdateWithoutStationInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.IntFieldUpdateOperationsInput | number
   employeeId?: Prisma.IntFieldUpdateOperationsInput | number
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -596,6 +632,7 @@ export type AttendanceRecordUncheckedUpdateWithoutStationInput = {
 }
 
 export type AttendanceRecordUncheckedUpdateManyWithoutStationInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.IntFieldUpdateOperationsInput | number
   employeeId?: Prisma.IntFieldUpdateOperationsInput | number
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -604,6 +641,7 @@ export type AttendanceRecordUncheckedUpdateManyWithoutStationInput = {
 }
 
 export type AttendanceRecordCreateManyEmployeeInput = {
+  checkInRequestId?: string | null
   id?: number
   stationId: number
   clockInAt: Date | string
@@ -612,6 +650,7 @@ export type AttendanceRecordCreateManyEmployeeInput = {
 }
 
 export type AttendanceRecordUpdateWithoutEmployeeInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clockOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -619,6 +658,7 @@ export type AttendanceRecordUpdateWithoutEmployeeInput = {
 }
 
 export type AttendanceRecordUncheckedUpdateWithoutEmployeeInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -627,6 +667,7 @@ export type AttendanceRecordUncheckedUpdateWithoutEmployeeInput = {
 }
 
 export type AttendanceRecordUncheckedUpdateManyWithoutEmployeeInput = {
+  checkInRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
   clockInAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -637,6 +678,7 @@ export type AttendanceRecordUncheckedUpdateManyWithoutEmployeeInput = {
 
 
 export type AttendanceRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  checkInRequestId?: boolean
   id?: boolean
   employeeId?: boolean
   stationId?: boolean
@@ -648,6 +690,7 @@ export type AttendanceRecordSelect<ExtArgs extends runtime.Types.Extensions.Inte
 }, ExtArgs["result"]["attendanceRecord"]>
 
 export type AttendanceRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  checkInRequestId?: boolean
   id?: boolean
   employeeId?: boolean
   stationId?: boolean
@@ -659,6 +702,7 @@ export type AttendanceRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
 }, ExtArgs["result"]["attendanceRecord"]>
 
 export type AttendanceRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  checkInRequestId?: boolean
   id?: boolean
   employeeId?: boolean
   stationId?: boolean
@@ -670,6 +714,7 @@ export type AttendanceRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
 }, ExtArgs["result"]["attendanceRecord"]>
 
 export type AttendanceRecordSelectScalar = {
+  checkInRequestId?: boolean
   id?: boolean
   employeeId?: boolean
   stationId?: boolean
@@ -678,7 +723,7 @@ export type AttendanceRecordSelectScalar = {
   createdAt?: boolean
 }
 
-export type AttendanceRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "employeeId" | "stationId" | "clockInAt" | "clockOutAt" | "createdAt", ExtArgs["result"]["attendanceRecord"]>
+export type AttendanceRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"checkInRequestId" | "id" | "employeeId" | "stationId" | "clockInAt" | "clockOutAt" | "createdAt", ExtArgs["result"]["attendanceRecord"]>
 export type AttendanceRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
@@ -699,6 +744,7 @@ export type $AttendanceRecordPayload<ExtArgs extends runtime.Types.Extensions.In
     station: Prisma.$StationPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    checkInRequestId: string | null
     id: number
     employeeId: number
     stationId: number
@@ -788,8 +834,8 @@ export interface AttendanceRecordDelegate<ExtArgs extends runtime.Types.Extensio
    * // Get first 10 AttendanceRecords
    * const attendanceRecords = await prisma.attendanceRecord.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const attendanceRecordWithIdOnly = await prisma.attendanceRecord.findMany({ select: { id: true } })
+   * // Only select the `checkInRequestId`
+   * const attendanceRecordWithCheckInRequestIdOnly = await prisma.attendanceRecord.findMany({ select: { checkInRequestId: true } })
    * 
    */
   findMany<T extends AttendanceRecordFindManyArgs>(args?: Prisma.SelectSubset<T, AttendanceRecordFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -833,9 +879,9 @@ export interface AttendanceRecordDelegate<ExtArgs extends runtime.Types.Extensio
    *   ]
    * })
    * 
-   * // Create many AttendanceRecords and only return the `id`
-   * const attendanceRecordWithIdOnly = await prisma.attendanceRecord.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many AttendanceRecords and only return the `checkInRequestId`
+   * const attendanceRecordWithCheckInRequestIdOnly = await prisma.attendanceRecord.createManyAndReturn({
+   *   select: { checkInRequestId: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -924,9 +970,9 @@ export interface AttendanceRecordDelegate<ExtArgs extends runtime.Types.Extensio
    *   ]
    * })
    * 
-   * // Update zero or more AttendanceRecords and only return the `id`
-   * const attendanceRecordWithIdOnly = await prisma.attendanceRecord.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more AttendanceRecords and only return the `checkInRequestId`
+   * const attendanceRecordWithCheckInRequestIdOnly = await prisma.attendanceRecord.updateManyAndReturn({
+   *   select: { checkInRequestId: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1130,6 +1176,7 @@ export interface Prisma__AttendanceRecordClient<T, Null = never, ExtArgs extends
  * Fields of the AttendanceRecord model
  */
 export interface AttendanceRecordFieldRefs {
+  readonly checkInRequestId: Prisma.FieldRef<"AttendanceRecord", 'String'>
   readonly id: Prisma.FieldRef<"AttendanceRecord", 'Int'>
   readonly employeeId: Prisma.FieldRef<"AttendanceRecord", 'Int'>
   readonly stationId: Prisma.FieldRef<"AttendanceRecord", 'Int'>

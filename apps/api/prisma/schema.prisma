@@ -109,6 +109,7 @@ model User {
   managedStations     Station[]        @relation("StationManager")
   customerOrders      FuelOrder[]      @relation("OrderCustomer")
   createdOrders       FuelOrder[]      @relation("OrderCreator")
+  assignedOrders      FuelOrder[]      @relation("OrderAssignee")
   orderEvents         OrderEvent[]     @relation("OrderEventActor")
   handledCallSessions CallSession[]    @relation("CallSessionHandoff")
   refreshSessions     RefreshSession[]
@@ -151,6 +152,8 @@ model Shift {
 }
 
 model AttendanceRecord {
+  // One open record per employee is enforced by the partial index in SQL.
+  checkInRequestId String? @map("check_in_request_id") @db.Uuid
   id         Int       @id @default(autoincrement())
   employeeId Int       @map("employee_id")
   stationId  Int       @map("station_id")
@@ -164,6 +167,7 @@ model AttendanceRecord {
   @@index([clockInAt, id])
   @@index([stationId, clockInAt])
   @@index([employeeId, clockInAt])
+  @@unique([employeeId, checkInRequestId], map: "attendance_employee_request_key")
   @@map("attendance_records")
 }
 
@@ -263,6 +267,8 @@ model FuelOrder {
   pumpId             Int       @map("pump_id")
   userId             Int?      @map("user_id")
   createdBy          Int?      @map("created_by")
+  assignedEmployeeId Int?      @map("assigned_employee_id")
+  claimedAt          DateTime? @map("claimed_at") @db.Timestamptz(3)
   fuelTypeId         Int       @map("fuel_type_id")
   source             String
   status             String
@@ -283,12 +289,14 @@ model FuelOrder {
   pump         Pump          @relation(fields: [pumpId], references: [id], onDelete: Restrict)
   user         User?         @relation("OrderCustomer", fields: [userId], references: [id], onDelete: SetNull)
   creator      User?         @relation("OrderCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  assignee     User?         @relation("OrderAssignee", fields: [assignedEmployeeId], references: [id], onDelete: Restrict)
   fuelType     FuelType      @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
   events       OrderEvent[]
   payments     Payment[]
   callSessions CallSession[]
 
   @@index([stationId, status])
+  @@index([assignedEmployeeId, stationId, status])
   @@index([pumpId])
   @@index([userId])
   @@index([fuelTypeId])
