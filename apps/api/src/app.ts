@@ -9,9 +9,12 @@ import { authRouter } from './modules/auth/auth.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
 import { stationsRouter } from './modules/stations/stations.routes.js';
 import { fuelPricesRouter } from './modules/fuel-prices/fuel-prices.routes.js';
+import { managerOrdersRouter } from './modules/orders/orders.routes.js';
+import { managerAnalyticsRouter } from './modules/analytics/analytics.routes.js';
 import {
   shiftsRouter,
   attendanceRouter,
+  managerAttendanceRouter,
 } from './modules/attendance/attendance.routes.js';
 
 import { errorHandler } from './middleware/errorHandler.js';
@@ -40,6 +43,9 @@ app.use('/api/stations', stationsRouter);
 app.use('/api/fuel-prices', fuelPricesRouter);
 app.use('/api/shifts', shiftsRouter);
 app.use('/api/attendance', attendanceRouter);
+app.use('/api/manager', managerOrdersRouter);
+app.use('/api/manager', managerAnalyticsRouter);
+app.use('/api/manager', managerAttendanceRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
