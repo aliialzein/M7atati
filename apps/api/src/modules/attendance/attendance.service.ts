@@ -1,13 +1,19 @@
 import type { Prisma } from '../../generated/prisma/client.js';
-import type { UserProfile } from '../auth/auth.types.js';
+import type { AuthContext, UserProfile } from '../auth/auth.types.js';
 import { requireManagedStation } from '../../utils/accessScope.js';
 import { HttpError } from '../../types/http-error.js';
-import { attendanceRepository } from './attendance.repository.js';
+import {
+  attendanceRepository,
+  employeeAttendanceRepository,
+} from './attendance.repository.js';
 import { attendanceWhere } from './attendance.query.js';
-import type {
-  AttendanceExportInput,
-  ListWorkRecordsInput,
-  ManagerAttendanceInput,
+import {
+  SHIFT_TIMEZONE,
+  shiftWeekBounds,
+  type AttendanceExportInput,
+  type ListWorkRecordsInput,
+  type ManagerAttendanceInput,
+  type EmployeeShiftsInput,
 } from './attendance.validation.js';
 
 export const ATTENDANCE_EXPORT_LIMIT = 5000;
@@ -91,3 +97,112 @@ export class AttendanceService {
 }
 
 export const attendanceService = new AttendanceService();
+
+export class EmployeeAttendanceService {
+  constructor(private readonly repository = employeeAttendanceRepository) {}
+
+  private async employee(context: AuthContext, tx: Prisma.TransactionClient) {
+    const employee = await this.repository.employee(context.user.id, tx);
+    if (!employee?.isActive) throw new HttpError('Unauthenticated', 401);
+    if (employee.role.name !== 'EMPLOYEE')
+      throw new HttpError('Insufficient permissions', 403);
+    return employee;
+  }
+
+  current(context: AuthContext) {
+    return this.repository.transaction(async (tx) => {
+      const employee = await this.employee(context, tx);
+      const openRecord = await this.repository.open(employee.id, tx);
+      const canWrite = context.permissions.includes('attendance.self.write');
+      return {
+        state: openRecord ? 'CHECKED_IN' : 'CHECKED_OUT',
+        openRecord,
+        assignedStation: employee.station,
+        canCheckIn:
+          canWrite && !openRecord && employee.station?.isActive === true,
+        canCheckOut: canWrite && openRecord !== null,
+      };
+    });
+  }
+
+  checkIn(context: AuthContext, requestId: string) {
+    return this.repository.transaction(async (tx) => {
+      const employee = await this.employee(context, tx);
+      const original = await this.repository.request(
+        employee.id,
+        requestId,
+        tx,
+      );
+      // Retry resolution precedes assignment checks, including after transfer or closure.
+      if (original) return { record: original };
+      if (await this.repository.open(employee.id, tx))
+        throw new HttpError('Already checked in with a different request', 409);
+      if (!employee.station?.isActive || employee.stationId === null)
+        throw new HttpError(
+          'An active assigned station is required to check in',
+          409,
+        );
+      return {
+        record: await this.repository.create(
+          employee.id,
+          employee.stationId,
+          requestId,
+          tx,
+        ),
+      };
+    });
+  }
+
+  checkOut(context: AuthContext, recordId: number) {
+    return this.repository.transaction(async (tx) => {
+      const employee = await this.employee(context, tx);
+      const record = await this.repository.record(employee.id, recordId, tx);
+      if (!record) throw new HttpError('Attendance record not found', 404);
+      if (record.clockOutAt !== null) return { record };
+      const now = new Date();
+      if (now < record.clockInAt)
+        throw new HttpError(
+          'Clock-in is in the future; attendance requires review',
+          409,
+        );
+      await this.repository.close(employee.id, record.id, now, tx);
+      return {
+        record: await this.repository.record(employee.id, record.id, tx),
+      };
+    });
+  }
+}
+
+export const employeeAttendanceService = new EmployeeAttendanceService();
+
+export const employeeShiftsService = {
+  async list(actor: UserProfile, input: EmployeeShiftsInput) {
+    if (actor.role !== 'EMPLOYEE')
+      throw new HttpError('Insufficient permissions', 403);
+    const { from, to } = shiftWeekBounds(input.weekStart);
+    return attendanceRepository.transaction(async (tx) => {
+      const { shifts, total } = await attendanceRepository.shifts(
+        {
+          employeeId: actor.id,
+          startsAt: { lt: to },
+          endsAt: { gt: from },
+        },
+        input,
+        tx,
+      );
+      return {
+        weekStart: input.weekStart,
+        timezone: SHIFT_TIMEZONE,
+        from,
+        to,
+        shifts,
+        pagination: {
+          page: input.page,
+          limit: input.limit,
+          total,
+          totalPages: Math.ceil(total / input.limit),
+        },
+      };
+    });
+  },
+};

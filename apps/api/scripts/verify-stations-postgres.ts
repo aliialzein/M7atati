@@ -109,6 +109,7 @@ async function main() {
       '20261117100000_add_reference_fuel_prices',
       '20261117110000_preserve_provider_price_units',
       '20261119090000_add_shifts_and_attendance',
+      '20261121130000_employee_attendance',
     ]);
     cpSync(
       'apps/api/prisma/migrations/migration_lock.toml',

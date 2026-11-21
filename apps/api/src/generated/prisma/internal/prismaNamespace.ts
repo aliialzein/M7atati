@@ -1904,6 +1904,7 @@ export type ShiftScalarFieldEnum = (typeof ShiftScalarFieldEnum)[keyof typeof Sh
 
 
 export const AttendanceRecordScalarFieldEnum = {
+  checkInRequestId: 'checkInRequestId',
   id: 'id',
   employeeId: 'employeeId',
   stationId: 'stationId',
@@ -1982,6 +1983,8 @@ export const FuelOrderScalarFieldEnum = {
   pumpId: 'pumpId',
   userId: 'userId',
   createdBy: 'createdBy',
+  assignedEmployeeId: 'assignedEmployeeId',
+  claimedAt: 'claimedAt',
   fuelTypeId: 'fuelTypeId',
   source: 'source',
   status: 'status',

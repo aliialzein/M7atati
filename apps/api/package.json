@@ -13,9 +13,13 @@
     "provision-station-permissions": "tsx scripts/provision-station-permissions.ts",
     "provision-pricing-permissions": "tsx scripts/provision-pricing-permissions.ts",
     "provision-attendance-permissions": "tsx scripts/provision-attendance-permissions.ts",
+    "provision-employee-attendance-permissions": "tsx scripts/provision-employee-attendance-permissions.ts",
+    "provision-employee-shift-permissions": "tsx scripts/provision-employee-shift-permissions.ts",
+    "fixture-employee-orders": "tsx scripts/employee-orders-fixture.ts",
     "provision-transfer-permissions": "tsx scripts/provision-transfer-permissions.ts"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

@@ -38,6 +38,47 @@ body {
   padding: 3rem;
 }
 
+.hero-card + .hero-card {
+  margin-top: 1.5rem;
+}
+.hero-card h2 {
+  margin: 1.5rem 0 0.75rem;
+}
+.hero-card label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+}
+.hero-card input {
+  width: 100%;
+  max-width: 28rem;
+  padding: 0.7rem;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  font: inherit;
+}
+.hero-card button {
+  margin: 0.75rem 0.75rem 0.75rem 0;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+.hero-card button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.hero-card :focus-visible {
+  outline: 3px solid #0f172a;
+  outline-offset: 3px;
+}
+.hero-card [role='alert'] {
+  color: #9f1239;
+}
+
 .eyebrow {
   margin: 0 0 1rem;
   color: var(--accent);
