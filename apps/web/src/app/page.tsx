@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { SessionPanel } from '../components/session-panel';
 
 type ApiStatus = 'checking' | 'connected' | 'unavailable' | 'unconfigured';
 
@@ -74,6 +75,7 @@ export default function HomePage() {
                 : 'Unavailable'}
         </p>
       </section>
+      <SessionPanel />
     </main>
   );
 }
