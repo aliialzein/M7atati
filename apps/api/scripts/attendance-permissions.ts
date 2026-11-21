@@ -10,14 +10,14 @@ export const attendancePermissionDefinitions = [
 export async function provisionAttendancePermissions(database: PrismaClient) {
   await database.$transaction(async (tx) => {
     const roles = [];
-    for (const name of ['ADMIN', 'HR']) {
+    for (const name of ['ADMIN', 'HR', 'MANAGER']) {
       const role = await tx.role.findUnique({
         where: { name },
         select: { id: true },
       });
       if (!role)
         throw new HttpError(`Seeded ${name} role is not configured`, 409);
-      roles.push(role);
+      roles.push({ ...role, name });
     }
     for (const definition of attendancePermissionDefinitions) {
       const permission = await tx.permission.upsert({
@@ -26,7 +26,9 @@ export async function provisionAttendancePermissions(database: PrismaClient) {
         create: definition,
         select: { id: true },
       });
-      for (const role of roles)
+      for (const role of roles) {
+        if (role.name === 'MANAGER' && definition.key !== 'attendance.read')
+          continue;
         await tx.rolePermission.upsert({
           where: {
             roleId_permissionId: {
@@ -37,6 +39,7 @@ export async function provisionAttendancePermissions(database: PrismaClient) {
           update: {},
           create: { roleId: role.id, permissionId: permission.id },
         });
+      }
     }
   });
 }

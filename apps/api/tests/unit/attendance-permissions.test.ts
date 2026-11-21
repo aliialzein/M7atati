@@ -22,14 +22,14 @@ beforeEach(() => {
   );
   db.role.findUnique.mockImplementation(
     async ({ where }: { where: { name: string } }) => ({
-      id: where.name === 'ADMIN' ? 7 : 8,
+      id: where.name === 'ADMIN' ? 7 : where.name === 'HR' ? 8 : 9,
     }),
   );
 });
 it('does not provision on import', () => {
   expect(db.$transaction).not.toHaveBeenCalled();
 });
-it('idempotently reuses attendance.read and adds only HR/ADMIN read grants', async () => {
+it('idempotently preserves grants and gives MANAGER attendance.read without shifts.read', async () => {
   const permissions = new Map([
     ['users.read', 1],
     ['attendance.read', 2],
@@ -62,9 +62,10 @@ it('idempotently reuses attendance.read and adds only HR/ADMIN read grants', asy
     'attendance.read',
     'shifts.read',
   ]);
-  expect([...links]).toEqual(['2:1', '3:2', '7:2', '8:2', '7:3', '8:3']);
+  expect([...links]).toEqual(['2:1', '3:2', '7:2', '8:2', '9:2', '7:3', '8:3']);
+  expect(links.has('9:3')).toBe(false);
 });
-it.each(['ADMIN', 'HR'])(
+it.each(['ADMIN', 'HR', 'MANAGER'])(
   'requires configured %s before any permission writes',
   async (missingRole) => {
     db.role.findUnique.mockImplementation(

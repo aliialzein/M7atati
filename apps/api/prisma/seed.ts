@@ -71,6 +71,7 @@ const rolePermissions: Record<string, string[]> = {
   ADMIN: permissionDefinitions.map(({ key }) => key),
 
   MANAGER: [
+    'attendance.read',
     'users.read',
     'users.create',
     'users.update',

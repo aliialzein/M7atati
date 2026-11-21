@@ -1,4 +1,6 @@
 import type { Prisma } from '../../generated/prisma/client.js';
+import type { UserProfile } from '../auth/auth.types.js';
+import { stationScope } from '../../utils/accessScope.js';
 import { HttpError } from '../../types/http-error.js';
 import { stationsRepository } from './stations.repository.js';
 import { managedStation, pickerStation } from './stations.types.js';
@@ -11,6 +13,15 @@ import type {
 
 export class StationsService {
   constructor(private readonly repository = stationsRepository) {}
+
+  async managed(actor: UserProfile) {
+    if (actor.role !== 'MANAGER')
+      throw new HttpError('Insufficient permissions', 403);
+    const stations = await this.repository.managed(stationScope(actor));
+    return {
+      stations: stations.map(({ id, name, isActive }) => ({ id, name, isActive })),
+    };
+  }
 
   private async requireStation(id: number, tx: Prisma.TransactionClient) {
     const station = await this.repository.find(id, tx);

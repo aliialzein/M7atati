@@ -29,3 +29,24 @@ export const attendanceRouter = readRouter(
   'attendance.read',
   attendanceController.attendance,
 );
+
+export const managerAttendanceRouter = Router();
+managerAttendanceRouter.use((_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+managerAttendanceRouter.use(authenticate);
+managerAttendanceRouter.use((req, _res, next) => {
+  if (req.auth!.user.role !== 'MANAGER')
+    return next(new HttpError('Insufficient permissions', 403));
+  next();
+});
+managerAttendanceRouter.use(authorize('attendance.read'));
+managerAttendanceRouter.get(
+  '/stations/:stationId/attendance',
+  attendanceController.managerList,
+);
+managerAttendanceRouter.get(
+  '/stations/:stationId/attendance/export',
+  attendanceController.managerExport,
+);

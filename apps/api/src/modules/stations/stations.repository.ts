@@ -14,6 +14,13 @@ const orderBy = [
 ] satisfies Prisma.StationOrderByWithRelationInput[];
 
 export const stationsRepository = {
+  managed(where: Prisma.StationWhereInput) {
+    return prisma.station.findMany({
+      where,
+      select: { id: true, name: true, isActive: true },
+      orderBy,
+    });
+  },
   async transaction<T>(
     work: (tx: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {

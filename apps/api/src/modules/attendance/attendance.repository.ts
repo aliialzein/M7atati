@@ -4,6 +4,19 @@ import { shiftSelect, attendanceSelect } from './attendance.types.js';
 import type { ListWorkRecordsInput } from './attendance.validation.js';
 
 export const attendanceRepository = {
+  exportAttendance(
+    where: Prisma.AttendanceRecordWhereInput,
+    limit: number,
+    tx: Prisma.TransactionClient,
+  ) {
+    // One sentinel row detects an oversized selection without loading all rows.
+    return tx.attendanceRecord.findMany({
+      where,
+      select: attendanceSelect,
+      take: limit + 1,
+      orderBy: [{ clockInAt: 'asc' }, { id: 'asc' }],
+    });
+  },
   // Rows and count must see the same snapshot, even during future imports/writes.
   transaction<T>(
     work: (tx: Prisma.TransactionClient) => Promise<T>,
