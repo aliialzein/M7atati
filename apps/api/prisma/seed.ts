@@ -44,6 +44,7 @@ const permissionDefinitions = [
   { key: 'attendance.read', description: 'View attendance records' },
   { key: 'shifts.read', description: 'View scheduled shifts' },
   { key: 'attendance.manage', description: 'Manage attendance records' },
+  { key: 'attendance.self.write', description: 'Check in and out of own attendance' },
 
   { key: 'orders.read', description: 'View orders' },
   { key: 'orders.create', description: 'Create orders' },
@@ -94,6 +95,8 @@ const rolePermissions: Record<string, string[]> = {
   ],
 
   EMPLOYEE: [
+    'shifts.read',
+    'attendance.self.write',
     'attendance.read',
     'orders.read',
     'orders.create',

@@ -28,3 +28,18 @@ export const listOrdersSchema = z
   );
 
 export type ListOrdersInput = z.infer<typeof listOrdersSchema>;
+
+export const employeeOrdersSchema = z
+  .object({
+    status: z.literal('PENDING').default('PENDING'),
+    page: positiveInteger.refine((value) => value <= 1000000).default('1'),
+    limit: positiveInteger.refine((value) => value <= 100).default('20'),
+  })
+  .strict();
+export type EmployeeOrdersInput = z.infer<typeof employeeOrdersSchema>;
+
+export const employeeWorkSchema = employeeOrdersSchema.extend({
+  status: z.literal('IN_PROGRESS').default('IN_PROGRESS'),
+});
+export type EmployeeWorkInput = z.infer<typeof employeeWorkSchema>;
+export const emptyOrderInput = z.object({}).strict();
