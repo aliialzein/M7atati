@@ -63,12 +63,17 @@ npx prisma generate --config apps/api/prisma.config.ts
 npm run provision-attendance-permissions --workspace @smart-fuel-station/api
 ```
 
-The targeted provisioning command requires existing ADMIN and HR roles and
-idempotently upserts only `shifts.read`, `attendance.read`, and their links to
-those roles. Existing permissions and unrelated role grants are preserved. It
+The targeted provisioning command requires existing ADMIN, HR, and MANAGER roles
+and idempotently upserts `shifts.read` and `attendance.read` for ADMIN/HR, plus
+only `attendance.read` for MANAGER. Existing permissions and unrelated role grants
+are preserved. It
 requires database configuration, not JWT signing keys. It never seeds data or
 runs at application startup. Fresh-install seed definitions include shifts.read;
 do not rerun the replacing permission seed on an established database.
+
+Global HR/Admin routes remain unchanged. Manager station discovery and scoped
+JSON/CSV/PDF endpoints are documented in
+[manager attendance](manager-attendance.md).
 
 ## Verification and demo data
 

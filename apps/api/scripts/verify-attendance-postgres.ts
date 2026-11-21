@@ -39,7 +39,7 @@ export async function verifyAttendancePostgres(
           item.permissionId === grant.permissionId,
       ),
     );
-  assert.equal(once.length, originalGrants.length + 4);
+  assert.equal(once.length, originalGrants.length + 5);
   console.info(
     'PASS: targeted read provisioning twice preserves all unrelated grants',
   );
@@ -273,6 +273,32 @@ export async function verifyAttendancePostgres(
     });
     for (const path of ['shifts', 'attendance'])
       await get(path, {}, user.id, 403);
+    if (name === 'MANAGER') {
+      await prisma.station.update({ where: { id: stationA.id }, data: { managerId: user.id } });
+      const second = await prisma.station.create({ data: { name: 'TEST second managed station', managerId: user.id } });
+      const discovered = await get('stations/managed', {}, user.id);
+      assert.deepEqual(new Set(discovered.stations.map((s: { id: number }) => s.id)), new Set([stationA.id, second.id]));
+      const path = `manager/stations/${stationA.id}/attendance`;
+      const historical = await get(path, { limit: 1 }, user.id);
+      assert.equal(historical.pagination.total, 4);
+      assert.equal(historical.attendance[0].stationId, stationA.id);
+      assert.equal(historical.attendance[0].employee.isActive, false);
+      for (const suffix of ['', '/export?format=csv', '/export?format=pdf']) {
+        await get(`manager/stations/${stationB.id}/attendance${suffix}`, {}, user.id, 404);
+        await get('manager/stations/2147483647/attendance' + suffix, {}, user.id, 404);
+      }
+      for (const format of ['csv', 'pdf']) {
+        const exported = await request(app).get(`/api/${path}/export`)
+          .query({ format, employeeId: employeeA.id, from: '2026-11-19T00:00:00Z', to: '2026-11-19T01:00:00Z' })
+          .set('Cookie', `${ACCESS_COOKIE}=${tokenService.issue(user.id).accessToken}`);
+        assert.equal(exported.status, 200);
+        assert.equal(exported.headers['cache-control'], 'no-store');
+        assert(exported.headers['content-disposition'].includes('attachment'));
+        if (format === 'csv') assert(exported.text.includes(employeeA.name));
+        else assert.equal(exported.body.subarray(0, 5).toString(), '%PDF-');
+      }
+      console.info('PASS: manager discovery and stored-station historical list/CSV/PDF; unmanaged/unknown station denial');
+    }
   }
   console.info(
     'PASS: real API cross-station HR/ADMIN reads, permission/role denial, stored station/inactive history, filters/counts/pages, boundaries/overnight/open and empty tables',

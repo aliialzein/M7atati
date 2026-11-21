@@ -26,7 +26,9 @@ async function main(): Promise<void> {
     const { provisionAttendancePermissions } =
       await import('./attendance-permissions.js');
     await provisionAttendancePermissions(prisma);
-    console.info('Attendance permissions provisioned for ADMIN and HR');
+    console.info(
+      'Attendance reads provisioned for ADMIN/HR; attendance.read for MANAGER',
+    );
   } catch (error) {
     console.error(
       error instanceof HttpError

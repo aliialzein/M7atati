@@ -11,6 +11,11 @@ stationsRouter.use((_req, res, next) => {
 });
 stationsRouter.get('/picker', stationsController.picker);
 stationsRouter.use(authenticate);
+stationsRouter.get('/managed', (req, res, next) => {
+  if (req.auth!.user.role !== 'MANAGER')
+    return next(new HttpError('Insufficient permissions', 403));
+  return stationsController.managed(req, res, next);
+});
 stationsRouter.use((req, _res, next) => {
   if (req.auth!.user.role !== 'ADMIN')
     return next(new HttpError('Insufficient permissions', 403));

@@ -9,6 +9,9 @@ import {
 } from './stations.validation.js';
 
 export const stationsController = {
+  managed: asyncHandler(async (req, res) => {
+    res.json(await stationsService.managed(req.auth!.user));
+  }),
   picker: asyncHandler(async (_req, res) => {
     res.json(await stationsService.picker());
   }),
