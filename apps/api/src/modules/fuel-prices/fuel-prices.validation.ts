@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { positiveInteger, timestamp } from '../../utils/query.validation.js';
 
 export const fuelCodeSchema = z.enum(['gasoline_95', 'diesel']);
 export const dateSchema = z
@@ -27,3 +28,29 @@ export const historySchema = z
   .refine((q) => !q.from || !q.to || q.from <= q.to);
 export const emptySchema = z.object({}).strict();
 export type HistoryInput = z.infer<typeof historySchema>;
+
+export const currencySchema = z.enum(['USD', 'LBP']);
+export type Currency = z.infer<typeof currencySchema>;
+export const decimalInput = z
+  .string()
+  .max(32)
+  .regex(/^(0|[1-9]\d*)(\.\d+)?$/);
+export const sellingPriceSchema = z
+  .object({
+    fuelTypeId: z.number().int().positive().max(2147483647),
+    currency: currencySchema,
+    unitPrice: decimalInput,
+    effectiveAt: timestamp,
+  })
+  .strict();
+export const sellingPriceQuery = z
+  .object({
+    fuelTypeId: positiveInteger.optional(),
+    currency: currencySchema.optional(),
+    page: positiveInteger.refine((n) => n <= 1000000).default('1'),
+    limit: positiveInteger.refine((n) => n <= 100).default('20'),
+  })
+  .strict();
+export const currentSellingPriceQuery = z
+  .object({ fuelTypeId: positiveInteger, currency: currencySchema })
+  .strict();
