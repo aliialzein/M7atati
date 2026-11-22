@@ -60,6 +60,11 @@ export type FuelOrderMinAggregateOutputType = {
   id: number | null
   stationId: number | null
   pumpId: number | null
+  currency: string | null
+  fulfillmentType: string | null
+  quoteId: string | null
+  creationKey: string | null
+  creationRequestHash: string | null
   userId: number | null
   createdBy: number | null
   assignedEmployeeId: number | null
@@ -85,6 +90,11 @@ export type FuelOrderMaxAggregateOutputType = {
   id: number | null
   stationId: number | null
   pumpId: number | null
+  currency: string | null
+  fulfillmentType: string | null
+  quoteId: string | null
+  creationKey: string | null
+  creationRequestHash: string | null
   userId: number | null
   createdBy: number | null
   assignedEmployeeId: number | null
@@ -110,6 +120,11 @@ export type FuelOrderCountAggregateOutputType = {
   id: number
   stationId: number
   pumpId: number
+  currency: number
+  fulfillmentType: number
+  quoteId: number
+  creationKey: number
+  creationRequestHash: number
   userId: number
   createdBy: number
   assignedEmployeeId: number
@@ -167,6 +182,11 @@ export type FuelOrderMinAggregateInputType = {
   id?: true
   stationId?: true
   pumpId?: true
+  currency?: true
+  fulfillmentType?: true
+  quoteId?: true
+  creationKey?: true
+  creationRequestHash?: true
   userId?: true
   createdBy?: true
   assignedEmployeeId?: true
@@ -192,6 +212,11 @@ export type FuelOrderMaxAggregateInputType = {
   id?: true
   stationId?: true
   pumpId?: true
+  currency?: true
+  fulfillmentType?: true
+  quoteId?: true
+  creationKey?: true
+  creationRequestHash?: true
   userId?: true
   createdBy?: true
   assignedEmployeeId?: true
@@ -217,6 +242,11 @@ export type FuelOrderCountAggregateInputType = {
   id?: true
   stationId?: true
   pumpId?: true
+  currency?: true
+  fulfillmentType?: true
+  quoteId?: true
+  creationKey?: true
+  creationRequestHash?: true
   userId?: true
   createdBy?: true
   assignedEmployeeId?: true
@@ -328,7 +358,12 @@ export type FuelOrderGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type FuelOrderGroupByOutputType = {
   id: number
   stationId: number
-  pumpId: number
+  pumpId: number | null
+  currency: string | null
+  fulfillmentType: string | null
+  quoteId: string | null
+  creationKey: string | null
+  creationRequestHash: string | null
   userId: number | null
   createdBy: number | null
   assignedEmployeeId: number | null
@@ -376,7 +411,12 @@ export type FuelOrderWhereInput = {
   NOT?: Prisma.FuelOrderWhereInput | Prisma.FuelOrderWhereInput[]
   id?: Prisma.IntFilter<"FuelOrder"> | number
   stationId?: Prisma.IntFilter<"FuelOrder"> | number
-  pumpId?: Prisma.IntFilter<"FuelOrder"> | number
+  pumpId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
+  currency?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
+  fulfillmentType?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
+  quoteId?: Prisma.UuidNullableFilter<"FuelOrder"> | string | null
+  creationKey?: Prisma.UuidNullableFilter<"FuelOrder"> | string | null
+  creationRequestHash?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
   userId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
   createdBy?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
   assignedEmployeeId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
@@ -397,7 +437,8 @@ export type FuelOrderWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"FuelOrder"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FuelOrder"> | Date | string
   station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
-  pump?: Prisma.XOR<Prisma.PumpScalarRelationFilter, Prisma.PumpWhereInput>
+  pump?: Prisma.XOR<Prisma.PumpNullableScalarRelationFilter, Prisma.PumpWhereInput> | null
+  quote?: Prisma.XOR<Prisma.OrderQuoteNullableScalarRelationFilter, Prisma.OrderQuoteWhereInput> | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   creator?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   assignee?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -410,7 +451,12 @@ export type FuelOrderWhereInput = {
 export type FuelOrderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
-  pumpId?: Prisma.SortOrder
+  pumpId?: Prisma.SortOrderInput | Prisma.SortOrder
+  currency?: Prisma.SortOrderInput | Prisma.SortOrder
+  fulfillmentType?: Prisma.SortOrderInput | Prisma.SortOrder
+  quoteId?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedEmployeeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -432,6 +478,7 @@ export type FuelOrderOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   station?: Prisma.StationOrderByWithRelationInput
   pump?: Prisma.PumpOrderByWithRelationInput
+  quote?: Prisma.OrderQuoteOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   creator?: Prisma.UserOrderByWithRelationInput
   assignee?: Prisma.UserOrderByWithRelationInput
@@ -443,11 +490,16 @@ export type FuelOrderOrderByWithRelationInput = {
 
 export type FuelOrderWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  quoteId?: string
+  creationKey?: string
   AND?: Prisma.FuelOrderWhereInput | Prisma.FuelOrderWhereInput[]
   OR?: Prisma.FuelOrderWhereInput[]
   NOT?: Prisma.FuelOrderWhereInput | Prisma.FuelOrderWhereInput[]
   stationId?: Prisma.IntFilter<"FuelOrder"> | number
-  pumpId?: Prisma.IntFilter<"FuelOrder"> | number
+  pumpId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
+  currency?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
+  fulfillmentType?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
+  creationRequestHash?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
   userId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
   createdBy?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
   assignedEmployeeId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
@@ -468,7 +520,8 @@ export type FuelOrderWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"FuelOrder"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FuelOrder"> | Date | string
   station?: Prisma.XOR<Prisma.StationScalarRelationFilter, Prisma.StationWhereInput>
-  pump?: Prisma.XOR<Prisma.PumpScalarRelationFilter, Prisma.PumpWhereInput>
+  pump?: Prisma.XOR<Prisma.PumpNullableScalarRelationFilter, Prisma.PumpWhereInput> | null
+  quote?: Prisma.XOR<Prisma.OrderQuoteNullableScalarRelationFilter, Prisma.OrderQuoteWhereInput> | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   creator?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   assignee?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -476,12 +529,17 @@ export type FuelOrderWhereUniqueInput = Prisma.AtLeast<{
   events?: Prisma.OrderEventListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
   callSessions?: Prisma.CallSessionListRelationFilter
-}, "id">
+}, "id" | "quoteId" | "creationKey">
 
 export type FuelOrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
-  pumpId?: Prisma.SortOrder
+  pumpId?: Prisma.SortOrderInput | Prisma.SortOrder
+  currency?: Prisma.SortOrderInput | Prisma.SortOrder
+  fulfillmentType?: Prisma.SortOrderInput | Prisma.SortOrder
+  quoteId?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedEmployeeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -514,7 +572,12 @@ export type FuelOrderScalarWhereWithAggregatesInput = {
   NOT?: Prisma.FuelOrderScalarWhereWithAggregatesInput | Prisma.FuelOrderScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"FuelOrder"> | number
   stationId?: Prisma.IntWithAggregatesFilter<"FuelOrder"> | number
-  pumpId?: Prisma.IntWithAggregatesFilter<"FuelOrder"> | number
+  pumpId?: Prisma.IntNullableWithAggregatesFilter<"FuelOrder"> | number | null
+  currency?: Prisma.StringNullableWithAggregatesFilter<"FuelOrder"> | string | null
+  fulfillmentType?: Prisma.StringNullableWithAggregatesFilter<"FuelOrder"> | string | null
+  quoteId?: Prisma.UuidNullableWithAggregatesFilter<"FuelOrder"> | string | null
+  creationKey?: Prisma.UuidNullableWithAggregatesFilter<"FuelOrder"> | string | null
+  creationRequestHash?: Prisma.StringNullableWithAggregatesFilter<"FuelOrder"> | string | null
   userId?: Prisma.IntNullableWithAggregatesFilter<"FuelOrder"> | number | null
   createdBy?: Prisma.IntNullableWithAggregatesFilter<"FuelOrder"> | number | null
   assignedEmployeeId?: Prisma.IntNullableWithAggregatesFilter<"FuelOrder"> | number | null
@@ -537,6 +600,10 @@ export type FuelOrderScalarWhereWithAggregatesInput = {
 }
 
 export type FuelOrderCreateInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -553,7 +620,8 @@ export type FuelOrderCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -566,7 +634,12 @@ export type FuelOrderCreateInput = {
 export type FuelOrderUncheckedCreateInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -592,6 +665,10 @@ export type FuelOrderUncheckedCreateInput = {
 }
 
 export type FuelOrderUpdateInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -608,7 +685,8 @@ export type FuelOrderUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -621,7 +699,12 @@ export type FuelOrderUpdateInput = {
 export type FuelOrderUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -649,7 +732,12 @@ export type FuelOrderUncheckedUpdateInput = {
 export type FuelOrderCreateManyInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -672,6 +760,10 @@ export type FuelOrderCreateManyInput = {
 }
 
 export type FuelOrderUpdateManyMutationInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -692,7 +784,12 @@ export type FuelOrderUpdateManyMutationInput = {
 export type FuelOrderUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -724,10 +821,20 @@ export type FuelOrderOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type FuelOrderNullableScalarRelationFilter = {
+  is?: Prisma.FuelOrderWhereInput | null
+  isNot?: Prisma.FuelOrderWhereInput | null
+}
+
 export type FuelOrderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   pumpId?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fulfillmentType?: Prisma.SortOrder
+  quoteId?: Prisma.SortOrder
+  creationKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   assignedEmployeeId?: Prisma.SortOrder
@@ -768,6 +875,11 @@ export type FuelOrderMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   pumpId?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fulfillmentType?: Prisma.SortOrder
+  quoteId?: Prisma.SortOrder
+  creationKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   assignedEmployeeId?: Prisma.SortOrder
@@ -793,6 +905,11 @@ export type FuelOrderMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   stationId?: Prisma.SortOrder
   pumpId?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  fulfillmentType?: Prisma.SortOrder
+  quoteId?: Prisma.SortOrder
+  creationKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   assignedEmployeeId?: Prisma.SortOrder
@@ -832,11 +949,6 @@ export type FuelOrderSumOrderByAggregateInput = {
 export type FuelOrderScalarRelationFilter = {
   is?: Prisma.FuelOrderWhereInput
   isNot?: Prisma.FuelOrderWhereInput
-}
-
-export type FuelOrderNullableScalarRelationFilter = {
-  is?: Prisma.FuelOrderWhereInput | null
-  isNot?: Prisma.FuelOrderWhereInput | null
 }
 
 export type FuelOrderCreateNestedManyWithoutFuelTypeInput = {
@@ -879,6 +991,38 @@ export type FuelOrderUncheckedUpdateManyWithoutFuelTypeNestedInput = {
   update?: Prisma.FuelOrderUpdateWithWhereUniqueWithoutFuelTypeInput | Prisma.FuelOrderUpdateWithWhereUniqueWithoutFuelTypeInput[]
   updateMany?: Prisma.FuelOrderUpdateManyWithWhereWithoutFuelTypeInput | Prisma.FuelOrderUpdateManyWithWhereWithoutFuelTypeInput[]
   deleteMany?: Prisma.FuelOrderScalarWhereInput | Prisma.FuelOrderScalarWhereInput[]
+}
+
+export type FuelOrderCreateNestedOneWithoutQuoteInput = {
+  create?: Prisma.XOR<Prisma.FuelOrderCreateWithoutQuoteInput, Prisma.FuelOrderUncheckedCreateWithoutQuoteInput>
+  connectOrCreate?: Prisma.FuelOrderCreateOrConnectWithoutQuoteInput
+  connect?: Prisma.FuelOrderWhereUniqueInput
+}
+
+export type FuelOrderUncheckedCreateNestedOneWithoutQuoteInput = {
+  create?: Prisma.XOR<Prisma.FuelOrderCreateWithoutQuoteInput, Prisma.FuelOrderUncheckedCreateWithoutQuoteInput>
+  connectOrCreate?: Prisma.FuelOrderCreateOrConnectWithoutQuoteInput
+  connect?: Prisma.FuelOrderWhereUniqueInput
+}
+
+export type FuelOrderUpdateOneWithoutQuoteNestedInput = {
+  create?: Prisma.XOR<Prisma.FuelOrderCreateWithoutQuoteInput, Prisma.FuelOrderUncheckedCreateWithoutQuoteInput>
+  connectOrCreate?: Prisma.FuelOrderCreateOrConnectWithoutQuoteInput
+  upsert?: Prisma.FuelOrderUpsertWithoutQuoteInput
+  disconnect?: Prisma.FuelOrderWhereInput | boolean
+  delete?: Prisma.FuelOrderWhereInput | boolean
+  connect?: Prisma.FuelOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FuelOrderUpdateToOneWithWhereWithoutQuoteInput, Prisma.FuelOrderUpdateWithoutQuoteInput>, Prisma.FuelOrderUncheckedUpdateWithoutQuoteInput>
+}
+
+export type FuelOrderUncheckedUpdateOneWithoutQuoteNestedInput = {
+  create?: Prisma.XOR<Prisma.FuelOrderCreateWithoutQuoteInput, Prisma.FuelOrderUncheckedCreateWithoutQuoteInput>
+  connectOrCreate?: Prisma.FuelOrderCreateOrConnectWithoutQuoteInput
+  upsert?: Prisma.FuelOrderUpsertWithoutQuoteInput
+  disconnect?: Prisma.FuelOrderWhereInput | boolean
+  delete?: Prisma.FuelOrderWhereInput | boolean
+  connect?: Prisma.FuelOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FuelOrderUpdateToOneWithWhereWithoutQuoteInput, Prisma.FuelOrderUpdateWithoutQuoteInput>, Prisma.FuelOrderUncheckedUpdateWithoutQuoteInput>
 }
 
 export type FuelOrderCreateNestedManyWithoutStationInput = {
@@ -1136,6 +1280,10 @@ export type FuelOrderUpdateOneWithoutCallSessionsNestedInput = {
 }
 
 export type FuelOrderCreateWithoutFuelTypeInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1152,7 +1300,8 @@ export type FuelOrderCreateWithoutFuelTypeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -1164,7 +1313,12 @@ export type FuelOrderCreateWithoutFuelTypeInput = {
 export type FuelOrderUncheckedCreateWithoutFuelTypeInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -1220,7 +1374,12 @@ export type FuelOrderScalarWhereInput = {
   NOT?: Prisma.FuelOrderScalarWhereInput | Prisma.FuelOrderScalarWhereInput[]
   id?: Prisma.IntFilter<"FuelOrder"> | number
   stationId?: Prisma.IntFilter<"FuelOrder"> | number
-  pumpId?: Prisma.IntFilter<"FuelOrder"> | number
+  pumpId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
+  currency?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
+  fulfillmentType?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
+  quoteId?: Prisma.UuidNullableFilter<"FuelOrder"> | string | null
+  creationKey?: Prisma.UuidNullableFilter<"FuelOrder"> | string | null
+  creationRequestHash?: Prisma.StringNullableFilter<"FuelOrder"> | string | null
   userId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
   createdBy?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
   assignedEmployeeId?: Prisma.IntNullableFilter<"FuelOrder"> | number | null
@@ -1242,7 +1401,11 @@ export type FuelOrderScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"FuelOrder"> | Date | string
 }
 
-export type FuelOrderCreateWithoutStationInput = {
+export type FuelOrderCreateWithoutQuoteInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1258,7 +1421,150 @@ export type FuelOrderCreateWithoutStationInput = {
   expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  station: Prisma.StationCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
+  creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
+  assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
+  fuelType: Prisma.FuelTypeCreateNestedOneWithoutOrdersInput
+  events?: Prisma.OrderEventCreateNestedManyWithoutOrderInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
+  callSessions?: Prisma.CallSessionCreateNestedManyWithoutOrderInput
+}
+
+export type FuelOrderUncheckedCreateWithoutQuoteInput = {
+  id?: number
+  stationId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
+  userId?: number | null
+  createdBy?: number | null
+  assignedEmployeeId?: number | null
+  claimedAt?: Date | string | null
+  fuelTypeId: number
+  source: string
+  status: string
+  unitPriceMinor: number
+  orderedVolume: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orderedAmountMinor: number
+  dispensedVolume?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  finalMinor?: number | null
+  customerName?: string | null
+  customerPhone?: string | null
+  scheduledFor?: Date | string | null
+  notes?: string | null
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  events?: Prisma.OrderEventUncheckedCreateNestedManyWithoutOrderInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
+  callSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type FuelOrderCreateOrConnectWithoutQuoteInput = {
+  where: Prisma.FuelOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.FuelOrderCreateWithoutQuoteInput, Prisma.FuelOrderUncheckedCreateWithoutQuoteInput>
+}
+
+export type FuelOrderUpsertWithoutQuoteInput = {
+  update: Prisma.XOR<Prisma.FuelOrderUpdateWithoutQuoteInput, Prisma.FuelOrderUncheckedUpdateWithoutQuoteInput>
+  create: Prisma.XOR<Prisma.FuelOrderCreateWithoutQuoteInput, Prisma.FuelOrderUncheckedCreateWithoutQuoteInput>
+  where?: Prisma.FuelOrderWhereInput
+}
+
+export type FuelOrderUpdateToOneWithWhereWithoutQuoteInput = {
+  where?: Prisma.FuelOrderWhereInput
+  data: Prisma.XOR<Prisma.FuelOrderUpdateWithoutQuoteInput, Prisma.FuelOrderUncheckedUpdateWithoutQuoteInput>
+}
+
+export type FuelOrderUpdateWithoutQuoteInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  unitPriceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  orderedVolume?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orderedAmountMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  dispensedVolume?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  finalMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
+  creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
+  assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
+  fuelType?: Prisma.FuelTypeUpdateOneRequiredWithoutOrdersNestedInput
+  events?: Prisma.OrderEventUpdateManyWithoutOrderNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
+  callSessions?: Prisma.CallSessionUpdateManyWithoutOrderNestedInput
+}
+
+export type FuelOrderUncheckedUpdateWithoutQuoteInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fuelTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  unitPriceMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  orderedVolume?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  orderedAmountMinor?: Prisma.IntFieldUpdateOperationsInput | number
+  dispensedVolume?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  finalMinor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledFor?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.OrderEventUncheckedUpdateManyWithoutOrderNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
+  callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutOrderNestedInput
+}
+
+export type FuelOrderCreateWithoutStationInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
+  claimedAt?: Date | string | null
+  source: string
+  status: string
+  unitPriceMinor: number
+  orderedVolume: runtime.Decimal | runtime.DecimalJsLike | number | string
+  orderedAmountMinor: number
+  dispensedVolume?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  finalMinor?: number | null
+  customerName?: string | null
+  customerPhone?: string | null
+  scheduledFor?: Date | string | null
+  notes?: string | null
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -1270,7 +1576,12 @@ export type FuelOrderCreateWithoutStationInput = {
 
 export type FuelOrderUncheckedCreateWithoutStationInput = {
   id?: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -1322,6 +1633,10 @@ export type FuelOrderUpdateManyWithWhereWithoutStationInput = {
 }
 
 export type FuelOrderCreateWithoutUserInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1338,7 +1653,8 @@ export type FuelOrderCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
   fuelType: Prisma.FuelTypeCreateNestedOneWithoutOrdersInput
@@ -1350,7 +1666,12 @@ export type FuelOrderCreateWithoutUserInput = {
 export type FuelOrderUncheckedCreateWithoutUserInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
   claimedAt?: Date | string | null
@@ -1385,6 +1706,10 @@ export type FuelOrderCreateManyUserInputEnvelope = {
 }
 
 export type FuelOrderCreateWithoutCreatorInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1401,7 +1726,8 @@ export type FuelOrderCreateWithoutCreatorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
   fuelType: Prisma.FuelTypeCreateNestedOneWithoutOrdersInput
@@ -1413,7 +1739,12 @@ export type FuelOrderCreateWithoutCreatorInput = {
 export type FuelOrderUncheckedCreateWithoutCreatorInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   assignedEmployeeId?: number | null
   claimedAt?: Date | string | null
@@ -1448,6 +1779,10 @@ export type FuelOrderCreateManyCreatorInputEnvelope = {
 }
 
 export type FuelOrderCreateWithoutAssigneeInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1464,7 +1799,8 @@ export type FuelOrderCreateWithoutAssigneeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   fuelType: Prisma.FuelTypeCreateNestedOneWithoutOrdersInput
@@ -1476,7 +1812,12 @@ export type FuelOrderCreateWithoutAssigneeInput = {
 export type FuelOrderUncheckedCreateWithoutAssigneeInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   claimedAt?: Date | string | null
@@ -1559,6 +1900,10 @@ export type FuelOrderUpdateManyWithWhereWithoutAssigneeInput = {
 }
 
 export type FuelOrderCreateWithoutPumpInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1575,6 +1920,7 @@ export type FuelOrderCreateWithoutPumpInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -1587,6 +1933,11 @@ export type FuelOrderCreateWithoutPumpInput = {
 export type FuelOrderUncheckedCreateWithoutPumpInput = {
   id?: number
   stationId: number
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -1638,6 +1989,10 @@ export type FuelOrderUpdateManyWithWhereWithoutPumpInput = {
 }
 
 export type FuelOrderCreateWithoutEventsInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1654,7 +2009,8 @@ export type FuelOrderCreateWithoutEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -1666,7 +2022,12 @@ export type FuelOrderCreateWithoutEventsInput = {
 export type FuelOrderUncheckedCreateWithoutEventsInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -1707,6 +2068,10 @@ export type FuelOrderUpdateToOneWithWhereWithoutEventsInput = {
 }
 
 export type FuelOrderUpdateWithoutEventsInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1723,7 +2088,8 @@ export type FuelOrderUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -1735,7 +2101,12 @@ export type FuelOrderUpdateWithoutEventsInput = {
 export type FuelOrderUncheckedUpdateWithoutEventsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1760,6 +2131,10 @@ export type FuelOrderUncheckedUpdateWithoutEventsInput = {
 }
 
 export type FuelOrderCreateWithoutPaymentsInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1776,7 +2151,8 @@ export type FuelOrderCreateWithoutPaymentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -1788,7 +2164,12 @@ export type FuelOrderCreateWithoutPaymentsInput = {
 export type FuelOrderUncheckedCreateWithoutPaymentsInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -1829,6 +2210,10 @@ export type FuelOrderUpdateToOneWithWhereWithoutPaymentsInput = {
 }
 
 export type FuelOrderUpdateWithoutPaymentsInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1845,7 +2230,8 @@ export type FuelOrderUpdateWithoutPaymentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -1857,7 +2243,12 @@ export type FuelOrderUpdateWithoutPaymentsInput = {
 export type FuelOrderUncheckedUpdateWithoutPaymentsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1882,6 +2273,10 @@ export type FuelOrderUncheckedUpdateWithoutPaymentsInput = {
 }
 
 export type FuelOrderCreateWithoutCallSessionsInput = {
+  currency?: string | null
+  fulfillmentType?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   claimedAt?: Date | string | null
   source: string
   status: string
@@ -1898,7 +2293,8 @@ export type FuelOrderCreateWithoutCallSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   station: Prisma.StationCreateNestedOneWithoutOrdersInput
-  pump: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  pump?: Prisma.PumpCreateNestedOneWithoutOrdersInput
+  quote?: Prisma.OrderQuoteCreateNestedOneWithoutOrderInput
   user?: Prisma.UserCreateNestedOneWithoutCustomerOrdersInput
   creator?: Prisma.UserCreateNestedOneWithoutCreatedOrdersInput
   assignee?: Prisma.UserCreateNestedOneWithoutAssignedOrdersInput
@@ -1910,7 +2306,12 @@ export type FuelOrderCreateWithoutCallSessionsInput = {
 export type FuelOrderUncheckedCreateWithoutCallSessionsInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -1951,6 +2352,10 @@ export type FuelOrderUpdateToOneWithWhereWithoutCallSessionsInput = {
 }
 
 export type FuelOrderUpdateWithoutCallSessionsInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1967,7 +2372,8 @@ export type FuelOrderUpdateWithoutCallSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -1979,7 +2385,12 @@ export type FuelOrderUpdateWithoutCallSessionsInput = {
 export type FuelOrderUncheckedUpdateWithoutCallSessionsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2006,7 +2417,12 @@ export type FuelOrderUncheckedUpdateWithoutCallSessionsInput = {
 export type FuelOrderCreateManyFuelTypeInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -2028,6 +2444,10 @@ export type FuelOrderCreateManyFuelTypeInput = {
 }
 
 export type FuelOrderUpdateWithoutFuelTypeInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2044,7 +2464,8 @@ export type FuelOrderUpdateWithoutFuelTypeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -2056,7 +2477,12 @@ export type FuelOrderUpdateWithoutFuelTypeInput = {
 export type FuelOrderUncheckedUpdateWithoutFuelTypeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2083,7 +2509,12 @@ export type FuelOrderUncheckedUpdateWithoutFuelTypeInput = {
 export type FuelOrderUncheckedUpdateManyWithoutFuelTypeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2106,7 +2537,12 @@ export type FuelOrderUncheckedUpdateManyWithoutFuelTypeInput = {
 
 export type FuelOrderCreateManyStationInput = {
   id?: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -2129,6 +2565,10 @@ export type FuelOrderCreateManyStationInput = {
 }
 
 export type FuelOrderUpdateWithoutStationInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2144,7 +2584,8 @@ export type FuelOrderUpdateWithoutStationInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -2156,7 +2597,12 @@ export type FuelOrderUpdateWithoutStationInput = {
 
 export type FuelOrderUncheckedUpdateWithoutStationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2183,7 +2629,12 @@ export type FuelOrderUncheckedUpdateWithoutStationInput = {
 
 export type FuelOrderUncheckedUpdateManyWithoutStationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2208,7 +2659,12 @@ export type FuelOrderUncheckedUpdateManyWithoutStationInput = {
 export type FuelOrderCreateManyUserInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
   claimedAt?: Date | string | null
@@ -2232,7 +2688,12 @@ export type FuelOrderCreateManyUserInput = {
 export type FuelOrderCreateManyCreatorInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   assignedEmployeeId?: number | null
   claimedAt?: Date | string | null
@@ -2256,7 +2717,12 @@ export type FuelOrderCreateManyCreatorInput = {
 export type FuelOrderCreateManyAssigneeInput = {
   id?: number
   stationId: number
-  pumpId: number
+  pumpId?: number | null
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   claimedAt?: Date | string | null
@@ -2278,6 +2744,10 @@ export type FuelOrderCreateManyAssigneeInput = {
 }
 
 export type FuelOrderUpdateWithoutUserInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2294,7 +2764,8 @@ export type FuelOrderUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
   fuelType?: Prisma.FuelTypeUpdateOneRequiredWithoutOrdersNestedInput
@@ -2306,7 +2777,12 @@ export type FuelOrderUpdateWithoutUserInput = {
 export type FuelOrderUncheckedUpdateWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2333,7 +2809,12 @@ export type FuelOrderUncheckedUpdateWithoutUserInput = {
 export type FuelOrderUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2355,6 +2836,10 @@ export type FuelOrderUncheckedUpdateManyWithoutUserInput = {
 }
 
 export type FuelOrderUpdateWithoutCreatorInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2371,7 +2856,8 @@ export type FuelOrderUpdateWithoutCreatorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
   fuelType?: Prisma.FuelTypeUpdateOneRequiredWithoutOrdersNestedInput
@@ -2383,7 +2869,12 @@ export type FuelOrderUpdateWithoutCreatorInput = {
 export type FuelOrderUncheckedUpdateWithoutCreatorInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2410,7 +2901,12 @@ export type FuelOrderUncheckedUpdateWithoutCreatorInput = {
 export type FuelOrderUncheckedUpdateManyWithoutCreatorInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2432,6 +2928,10 @@ export type FuelOrderUncheckedUpdateManyWithoutCreatorInput = {
 }
 
 export type FuelOrderUpdateWithoutAssigneeInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2448,7 +2948,8 @@ export type FuelOrderUpdateWithoutAssigneeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
-  pump?: Prisma.PumpUpdateOneRequiredWithoutOrdersNestedInput
+  pump?: Prisma.PumpUpdateOneWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   fuelType?: Prisma.FuelTypeUpdateOneRequiredWithoutOrdersNestedInput
@@ -2460,7 +2961,12 @@ export type FuelOrderUpdateWithoutAssigneeInput = {
 export type FuelOrderUncheckedUpdateWithoutAssigneeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2487,7 +2993,12 @@ export type FuelOrderUncheckedUpdateWithoutAssigneeInput = {
 export type FuelOrderUncheckedUpdateManyWithoutAssigneeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
-  pumpId?: Prisma.IntFieldUpdateOperationsInput | number
+  pumpId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2511,6 +3022,11 @@ export type FuelOrderUncheckedUpdateManyWithoutAssigneeInput = {
 export type FuelOrderCreateManyPumpInput = {
   id?: number
   stationId: number
+  currency?: string | null
+  fulfillmentType?: string | null
+  quoteId?: string | null
+  creationKey?: string | null
+  creationRequestHash?: string | null
   userId?: number | null
   createdBy?: number | null
   assignedEmployeeId?: number | null
@@ -2533,6 +3049,10 @@ export type FuelOrderCreateManyPumpInput = {
 }
 
 export type FuelOrderUpdateWithoutPumpInput = {
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2549,6 +3069,7 @@ export type FuelOrderUpdateWithoutPumpInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   station?: Prisma.StationUpdateOneRequiredWithoutOrdersNestedInput
+  quote?: Prisma.OrderQuoteUpdateOneWithoutOrderNestedInput
   user?: Prisma.UserUpdateOneWithoutCustomerOrdersNestedInput
   creator?: Prisma.UserUpdateOneWithoutCreatedOrdersNestedInput
   assignee?: Prisma.UserUpdateOneWithoutAssignedOrdersNestedInput
@@ -2561,6 +3082,11 @@ export type FuelOrderUpdateWithoutPumpInput = {
 export type FuelOrderUncheckedUpdateWithoutPumpInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2588,6 +3114,11 @@ export type FuelOrderUncheckedUpdateWithoutPumpInput = {
 export type FuelOrderUncheckedUpdateManyWithoutPumpInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   stationId?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fulfillmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   assignedEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2662,6 +3193,11 @@ export type FuelOrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   id?: boolean
   stationId?: boolean
   pumpId?: boolean
+  currency?: boolean
+  fulfillmentType?: boolean
+  quoteId?: boolean
+  creationKey?: boolean
+  creationRequestHash?: boolean
   userId?: boolean
   createdBy?: boolean
   assignedEmployeeId?: boolean
@@ -2682,7 +3218,8 @@ export type FuelOrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdAt?: boolean
   updatedAt?: boolean
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
-  pump?: boolean | Prisma.PumpDefaultArgs<ExtArgs>
+  pump?: boolean | Prisma.FuelOrder$pumpArgs<ExtArgs>
+  quote?: boolean | Prisma.FuelOrder$quoteArgs<ExtArgs>
   user?: boolean | Prisma.FuelOrder$userArgs<ExtArgs>
   creator?: boolean | Prisma.FuelOrder$creatorArgs<ExtArgs>
   assignee?: boolean | Prisma.FuelOrder$assigneeArgs<ExtArgs>
@@ -2697,6 +3234,11 @@ export type FuelOrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   stationId?: boolean
   pumpId?: boolean
+  currency?: boolean
+  fulfillmentType?: boolean
+  quoteId?: boolean
+  creationKey?: boolean
+  creationRequestHash?: boolean
   userId?: boolean
   createdBy?: boolean
   assignedEmployeeId?: boolean
@@ -2717,7 +3259,8 @@ export type FuelOrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   createdAt?: boolean
   updatedAt?: boolean
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
-  pump?: boolean | Prisma.PumpDefaultArgs<ExtArgs>
+  pump?: boolean | Prisma.FuelOrder$pumpArgs<ExtArgs>
+  quote?: boolean | Prisma.FuelOrder$quoteArgs<ExtArgs>
   user?: boolean | Prisma.FuelOrder$userArgs<ExtArgs>
   creator?: boolean | Prisma.FuelOrder$creatorArgs<ExtArgs>
   assignee?: boolean | Prisma.FuelOrder$assigneeArgs<ExtArgs>
@@ -2728,6 +3271,11 @@ export type FuelOrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   stationId?: boolean
   pumpId?: boolean
+  currency?: boolean
+  fulfillmentType?: boolean
+  quoteId?: boolean
+  creationKey?: boolean
+  creationRequestHash?: boolean
   userId?: boolean
   createdBy?: boolean
   assignedEmployeeId?: boolean
@@ -2748,7 +3296,8 @@ export type FuelOrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   createdAt?: boolean
   updatedAt?: boolean
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
-  pump?: boolean | Prisma.PumpDefaultArgs<ExtArgs>
+  pump?: boolean | Prisma.FuelOrder$pumpArgs<ExtArgs>
+  quote?: boolean | Prisma.FuelOrder$quoteArgs<ExtArgs>
   user?: boolean | Prisma.FuelOrder$userArgs<ExtArgs>
   creator?: boolean | Prisma.FuelOrder$creatorArgs<ExtArgs>
   assignee?: boolean | Prisma.FuelOrder$assigneeArgs<ExtArgs>
@@ -2759,6 +3308,11 @@ export type FuelOrderSelectScalar = {
   id?: boolean
   stationId?: boolean
   pumpId?: boolean
+  currency?: boolean
+  fulfillmentType?: boolean
+  quoteId?: boolean
+  creationKey?: boolean
+  creationRequestHash?: boolean
   userId?: boolean
   createdBy?: boolean
   assignedEmployeeId?: boolean
@@ -2780,10 +3334,11 @@ export type FuelOrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FuelOrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stationId" | "pumpId" | "userId" | "createdBy" | "assignedEmployeeId" | "claimedAt" | "fuelTypeId" | "source" | "status" | "unitPriceMinor" | "orderedVolume" | "orderedAmountMinor" | "dispensedVolume" | "finalMinor" | "customerName" | "customerPhone" | "scheduledFor" | "notes" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["fuelOrder"]>
+export type FuelOrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "stationId" | "pumpId" | "currency" | "fulfillmentType" | "quoteId" | "creationKey" | "creationRequestHash" | "userId" | "createdBy" | "assignedEmployeeId" | "claimedAt" | "fuelTypeId" | "source" | "status" | "unitPriceMinor" | "orderedVolume" | "orderedAmountMinor" | "dispensedVolume" | "finalMinor" | "customerName" | "customerPhone" | "scheduledFor" | "notes" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["fuelOrder"]>
 export type FuelOrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
-  pump?: boolean | Prisma.PumpDefaultArgs<ExtArgs>
+  pump?: boolean | Prisma.FuelOrder$pumpArgs<ExtArgs>
+  quote?: boolean | Prisma.FuelOrder$quoteArgs<ExtArgs>
   user?: boolean | Prisma.FuelOrder$userArgs<ExtArgs>
   creator?: boolean | Prisma.FuelOrder$creatorArgs<ExtArgs>
   assignee?: boolean | Prisma.FuelOrder$assigneeArgs<ExtArgs>
@@ -2795,7 +3350,8 @@ export type FuelOrderInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 export type FuelOrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
-  pump?: boolean | Prisma.PumpDefaultArgs<ExtArgs>
+  pump?: boolean | Prisma.FuelOrder$pumpArgs<ExtArgs>
+  quote?: boolean | Prisma.FuelOrder$quoteArgs<ExtArgs>
   user?: boolean | Prisma.FuelOrder$userArgs<ExtArgs>
   creator?: boolean | Prisma.FuelOrder$creatorArgs<ExtArgs>
   assignee?: boolean | Prisma.FuelOrder$assigneeArgs<ExtArgs>
@@ -2803,7 +3359,8 @@ export type FuelOrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 }
 export type FuelOrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   station?: boolean | Prisma.StationDefaultArgs<ExtArgs>
-  pump?: boolean | Prisma.PumpDefaultArgs<ExtArgs>
+  pump?: boolean | Prisma.FuelOrder$pumpArgs<ExtArgs>
+  quote?: boolean | Prisma.FuelOrder$quoteArgs<ExtArgs>
   user?: boolean | Prisma.FuelOrder$userArgs<ExtArgs>
   creator?: boolean | Prisma.FuelOrder$creatorArgs<ExtArgs>
   assignee?: boolean | Prisma.FuelOrder$assigneeArgs<ExtArgs>
@@ -2814,7 +3371,8 @@ export type $FuelOrderPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   name: "FuelOrder"
   objects: {
     station: Prisma.$StationPayload<ExtArgs>
-    pump: Prisma.$PumpPayload<ExtArgs>
+    pump: Prisma.$PumpPayload<ExtArgs> | null
+    quote: Prisma.$OrderQuotePayload<ExtArgs> | null
     user: Prisma.$UserPayload<ExtArgs> | null
     creator: Prisma.$UserPayload<ExtArgs> | null
     assignee: Prisma.$UserPayload<ExtArgs> | null
@@ -2826,7 +3384,12 @@ export type $FuelOrderPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     stationId: number
-    pumpId: number
+    pumpId: number | null
+    currency: string | null
+    fulfillmentType: string | null
+    quoteId: string | null
+    creationKey: string | null
+    creationRequestHash: string | null
     userId: number | null
     createdBy: number | null
     assignedEmployeeId: number | null
@@ -3241,7 +3804,8 @@ readonly fields: FuelOrderFieldRefs;
 export interface Prisma__FuelOrderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   station<T extends Prisma.StationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StationDefaultArgs<ExtArgs>>): Prisma.Prisma__StationClient<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  pump<T extends Prisma.PumpDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PumpDefaultArgs<ExtArgs>>): Prisma.Prisma__PumpClient<runtime.Types.Result.GetResult<Prisma.$PumpPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  pump<T extends Prisma.FuelOrder$pumpArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelOrder$pumpArgs<ExtArgs>>): Prisma.Prisma__PumpClient<runtime.Types.Result.GetResult<Prisma.$PumpPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  quote<T extends Prisma.FuelOrder$quoteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelOrder$quoteArgs<ExtArgs>>): Prisma.Prisma__OrderQuoteClient<runtime.Types.Result.GetResult<Prisma.$OrderQuotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.FuelOrder$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelOrder$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   creator<T extends Prisma.FuelOrder$creatorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelOrder$creatorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignee<T extends Prisma.FuelOrder$assigneeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelOrder$assigneeArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -3281,6 +3845,11 @@ export interface FuelOrderFieldRefs {
   readonly id: Prisma.FieldRef<"FuelOrder", 'Int'>
   readonly stationId: Prisma.FieldRef<"FuelOrder", 'Int'>
   readonly pumpId: Prisma.FieldRef<"FuelOrder", 'Int'>
+  readonly currency: Prisma.FieldRef<"FuelOrder", 'String'>
+  readonly fulfillmentType: Prisma.FieldRef<"FuelOrder", 'String'>
+  readonly quoteId: Prisma.FieldRef<"FuelOrder", 'String'>
+  readonly creationKey: Prisma.FieldRef<"FuelOrder", 'String'>
+  readonly creationRequestHash: Prisma.FieldRef<"FuelOrder", 'String'>
   readonly userId: Prisma.FieldRef<"FuelOrder", 'Int'>
   readonly createdBy: Prisma.FieldRef<"FuelOrder", 'Int'>
   readonly assignedEmployeeId: Prisma.FieldRef<"FuelOrder", 'Int'>
@@ -3698,6 +4267,44 @@ export type FuelOrderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many FuelOrders to delete.
    */
   limit?: number
+}
+
+/**
+ * FuelOrder.pump
+ */
+export type FuelOrder$pumpArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Pump
+   */
+  select?: Prisma.PumpSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Pump
+   */
+  omit?: Prisma.PumpOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PumpInclude<ExtArgs> | null
+  where?: Prisma.PumpWhereInput
+}
+
+/**
+ * FuelOrder.quote
+ */
+export type FuelOrder$quoteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderQuote
+   */
+  select?: Prisma.OrderQuoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderQuote
+   */
+  omit?: Prisma.OrderQuoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderQuoteInclude<ExtArgs> | null
+  where?: Prisma.OrderQuoteWhereInput
 }
 
 /**

@@ -54,6 +54,8 @@ export const ModelName = {
   FuelType: 'FuelType',
   FuelPrice: 'FuelPrice',
   FuelPriceRefresh: 'FuelPriceRefresh',
+  SellingPrice: 'SellingPrice',
+  OrderQuote: 'OrderQuote',
   Station: 'Station',
   User: 'User',
   Role: 'Role',
@@ -131,6 +133,40 @@ export const FuelPriceRefreshScalarFieldEnum = {
 } as const
 
 export type FuelPriceRefreshScalarFieldEnum = (typeof FuelPriceRefreshScalarFieldEnum)[keyof typeof FuelPriceRefreshScalarFieldEnum]
+
+
+export const SellingPriceScalarFieldEnum = {
+  id: 'id',
+  fuelTypeId: 'fuelTypeId',
+  currency: 'currency',
+  unitPriceMinor: 'unitPriceMinor',
+  effectiveAt: 'effectiveAt',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt'
+} as const
+
+export type SellingPriceScalarFieldEnum = (typeof SellingPriceScalarFieldEnum)[keyof typeof SellingPriceScalarFieldEnum]
+
+
+export const OrderQuoteScalarFieldEnum = {
+  id: 'id',
+  stationId: 'stationId',
+  fuelTypeId: 'fuelTypeId',
+  sellingPriceId: 'sellingPriceId',
+  customerId: 'customerId',
+  guestTokenHash: 'guestTokenHash',
+  fulfillmentType: 'fulfillmentType',
+  currency: 'currency',
+  unitPriceMinor: 'unitPriceMinor',
+  quantity: 'quantity',
+  totalMinor: 'totalMinor',
+  inputMode: 'inputMode',
+  requestedValue: 'requestedValue',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderQuoteScalarFieldEnum = (typeof OrderQuoteScalarFieldEnum)[keyof typeof OrderQuoteScalarFieldEnum]
 
 
 export const StationScalarFieldEnum = {
@@ -263,6 +299,11 @@ export const FuelOrderScalarFieldEnum = {
   id: 'id',
   stationId: 'stationId',
   pumpId: 'pumpId',
+  currency: 'currency',
+  fulfillmentType: 'fulfillmentType',
+  quoteId: 'quoteId',
+  creationKey: 'creationKey',
+  creationRequestHash: 'creationRequestHash',
   userId: 'userId',
   createdBy: 'createdBy',
   assignedEmployeeId: 'assignedEmployeeId',
@@ -311,7 +352,9 @@ export const PaymentScalarFieldEnum = {
   capturedMinor: 'capturedMinor',
   status: 'status',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  confirmedById: 'confirmedById',
+  confirmedAt: 'confirmedAt'
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
