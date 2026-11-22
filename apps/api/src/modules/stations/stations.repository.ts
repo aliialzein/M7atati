@@ -1,6 +1,7 @@
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../database/prisma.js';
 import { HttpError } from '../../types/http-error.js';
+import { orderStatus } from '../orders/orders.types.js';
 import { pickerSelect, stationSelect } from './stations.types.js';
 import type {
   CreateStationInput,
@@ -14,6 +15,19 @@ const orderBy = [
 ] satisfies Prisma.StationOrderByWithRelationInput[];
 
 export const stationsRepository = {
+  async lockStation(id: number, tx: Prisma.TransactionClient) {
+    // Status changes lock only the station, never employees or orders. This
+    // avoids reversing the employee -> station lock order of fulfillment.
+    await tx.$queryRaw`SELECT id FROM stations WHERE id = ${id} FOR UPDATE`;
+  },
+  async hasInProgressOrder(stationId: number, tx: Prisma.TransactionClient) {
+    return (
+      (await tx.fuelOrder.findFirst({
+        where: { stationId, status: orderStatus.IN_PROGRESS },
+        select: { id: true },
+      })) !== null
+    );
+  },
   managed(where: Prisma.StationWhereInput) {
     return prisma.station.findMany({
       where,

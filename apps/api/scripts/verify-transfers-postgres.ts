@@ -338,19 +338,29 @@ export async function verifyTransfersPostgres(
     releaseCommit = resolve;
   });
   let secondTargetReads = 0;
+  let secondLockAttempts = 0;
   function raceRepository(second: boolean): typeof usersRepository {
-    let firstTargetRead = true;
+    let firstLock = true;
     return {
       ...usersRepository,
+      async lockUser(id, tx) {
+        if (id === race.id) {
+          if (second) secondLockAttempts++;
+          if (firstLock) {
+            firstLock = false;
+            // Both transaction snapshots exist before either target lock.
+            // Waiting after locking would deadlock the test barrier itself.
+            if (++arrivals === 2) releaseReads();
+            await readsReady;
+            if (second) await committed;
+          }
+        }
+        return usersRepository.lockUser(id, tx);
+      },
       async findUser(id, scope, tx) {
         const result = await usersRepository.findUser(id, scope, tx);
         if (id === race.id) {
           if (second) secondTargetReads++;
-          if (firstTargetRead) {
-            firstTargetRead = false;
-            if (++arrivals === 2) releaseReads();
-            await readsReady;
-          }
         }
         return result;
       },
@@ -392,7 +402,14 @@ export async function verifyTransfersPostgres(
   assert.equal(outcomes[1].status, 'rejected');
   if (outcomes[1].status === 'rejected')
     assert.equal(outcomes[1].reason.statusCode, 409);
-  assert(secondTargetReads >= 2, 'Serialization retry must re-read the target');
+  assert(
+    secondLockAttempts >= 2,
+    'Serialization retry must acquire the target lock again',
+  );
+  assert(
+    secondTargetReads >= 1,
+    'Retried transaction must read the current target',
+  );
   assert.equal(
     (await prisma.user.findUniqueOrThrow({ where: { id: race.id } })).stationId,
     stationB.id,

@@ -56,7 +56,9 @@ export class UsersService {
     id: number,
     actor: UserProfile,
     tx: Prisma.TransactionClient,
+    lock = false,
   ): Promise<UserRecord> {
+    if (lock) await this.repository.lockUser(id, tx);
     const user = await this.repository.findUser(
       id,
       managementScope(actor, 'read'),
@@ -175,7 +177,7 @@ export class UsersService {
   async update(context: AuthContext, id: number, input: UpdateUserInput) {
     return this.repository.transaction(async (tx) => {
       const actor = await this.actor(context, tx, 'update');
-      const target = await this.target(id, actor, tx);
+      const target = await this.target(id, actor, tx, true);
       const nextRole = input.role ?? target.role.name;
       const stationId =
         input.stationId === undefined ? target.stationId : input.stationId;
@@ -203,6 +205,11 @@ export class UsersService {
         await this.requireTransferable(target, tx);
       }
       const roleChanged = nextRole !== target.role.name;
+      if (
+        stationId !== target.stationId ||
+        (roleChanged && nextRole !== 'EMPLOYEE')
+      )
+        await this.requireNoClaimedOrders(id, tx);
       if (
         roleChanged &&
         target.role.name === 'MANAGER' &&
@@ -256,14 +263,26 @@ export class UsersService {
     }
   }
 
+  private async requireNoClaimedOrders(
+    id: number,
+    tx: Prisma.TransactionClient,
+  ) {
+    if (await this.repository.hasActiveClaimedOrder(id, tx))
+      throw new HttpError(
+        'Employee has active claimed orders; complete them before changing station, role, or active status',
+        409,
+      );
+  }
+
   async transfer(context: AuthContext, id: number, stationId: number) {
     return this.repository.transaction(async (tx) => {
       const actor = await this.actor(context, tx, 'transfer');
-      const target = await this.target(id, actor, tx);
+      const target = await this.target(id, actor, tx, true);
       if (target.role.name !== 'EMPLOYEE')
         throw new HttpError('User not found', 404);
       if (target.stationId === stationId) return managedUser(target);
       await this.assignment(actor, 'EMPLOYEE', stationId, tx);
+      await this.requireNoClaimedOrders(id, tx);
       await this.requireTransferable(target, tx);
       const updated = await this.repository.update(id, { stationId }, tx);
       await this.repository.revokeSessions(id, tx);
@@ -280,7 +299,9 @@ export class UsersService {
   async setStatus(context: AuthContext, id: number, isActive: boolean) {
     return this.repository.transaction(async (tx) => {
       const actor = await this.actor(context, tx, 'update');
-      const target = await this.target(id, actor, tx);
+      const target = await this.target(id, actor, tx, true);
+      if (!isActive && target.isActive)
+        await this.requireNoClaimedOrders(id, tx);
       if (!isActive && target.isActive && target.role.name === 'ADMIN')
         await this.protectFinalAdmin(tx);
       const updated = await this.repository.update(

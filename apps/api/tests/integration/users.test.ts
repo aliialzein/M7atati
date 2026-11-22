@@ -25,6 +25,8 @@ jest.mock('../../src/database/prisma.js', () => ({
     refreshSession: { updateMany: jest.fn(), findUnique: jest.fn() },
     attendanceRecord: { findFirst: jest.fn() },
     shift: { findFirst: jest.fn() },
+    fuelOrder: { findFirst: jest.fn() },
+    $queryRaw: jest.fn(),
     $transaction: jest.fn(),
   },
 }));
@@ -46,6 +48,8 @@ type MockDatabase = {
   refreshSession: { updateMany: jest.Mock; findUnique: jest.Mock };
   attendanceRecord: { findFirst: jest.Mock };
   shift: { findFirst: jest.Mock };
+  fuelOrder: { findFirst: jest.Mock };
+  $queryRaw: jest.Mock;
   $transaction: jest.Mock;
 };
 const db = prisma as unknown as MockDatabase;
@@ -72,6 +76,12 @@ const roleIds: Record<string, number> = {
 let users: Map<number, StoredUser>;
 let sessions: { userId: number; revokedAt: Date | null }[];
 let permissions: string[];
+let claimedOrders: {
+  id: number;
+  assignedEmployeeId: number;
+  stationId: number;
+  status: string;
+}[];
 let shiftRecords: {
   id: number;
   employeeId: number;
@@ -95,6 +105,183 @@ const staffInput = {
   role: 'EMPLOYEE',
   stationId: 10,
 };
+
+describe('active claimed order eligibility', () => {
+  const changes = [
+    { method: 'post' as const, path: '/3/transfer', body: { stationId: 20 } },
+    { method: 'patch' as const, path: '/3', body: { stationId: 20 } },
+    { method: 'patch' as const, path: '/3', body: { role: 'SECURITY' } },
+    {
+      method: 'patch' as const,
+      path: '/3',
+      body: { role: 'HR', stationId: null },
+    },
+    { method: 'patch' as const, path: '/3/status', body: { isActive: false } },
+  ];
+
+  it.each(changes)(
+    'rejects $method $path $body without changing account or sessions',
+    async ({ method, path, body }) => {
+      claimedOrders.push({
+        id: 90,
+        assignedEmployeeId: 3,
+        stationId: 10,
+        status: 'IN_PROGRESS',
+      });
+      const beforeUser = structuredClone(users.get(3));
+      const beforeSessions = structuredClone(sessions);
+      const response = await authenticated(method, path).send(body);
+      expect(response.status).toBe(409);
+      expect(response.body.message).toMatch(/active claimed orders/);
+      expect(users.get(3)).toEqual(beforeUser);
+      expect(sessions).toEqual(beforeSessions);
+      expect(claimedOrders).toEqual([
+        { id: 90, assignedEmployeeId: 3, stationId: 10, status: 'IN_PROGRESS' },
+      ]);
+    },
+  );
+
+  it('checks claims at any station, including legacy mismatched assignments', async () => {
+    claimedOrders.push({
+      id: 90,
+      assignedEmployeeId: 3,
+      stationId: 20,
+      status: 'IN_PROGRESS',
+    });
+    expect(
+      (await authenticated('post', '/3/transfer').send({ stationId: 20 }))
+        .status,
+    ).toBe(409);
+  });
+
+  it.each(['COMPLETED', 'CANCELLED', 'PENDING'])(
+    'allows transfer when only %s orders are assigned',
+    async (status) => {
+      claimedOrders.push({
+        id: 90,
+        assignedEmployeeId: 3,
+        stationId: 10,
+        status,
+      });
+      expect(
+        (await authenticated('post', '/3/transfer').send({ stationId: 20 }))
+          .status,
+      ).toBe(200);
+    },
+  );
+
+  it('ignores claims belonging to another employee', async () => {
+    claimedOrders.push({
+      id: 90,
+      assignedEmployeeId: 4,
+      stationId: 10,
+      status: 'IN_PROGRESS',
+    });
+    expect(
+      (await authenticated('patch', '/3').send({ role: 'SECURITY' })).status,
+    ).toBe(200);
+  });
+
+  it.each(changes)(
+    'allows $method $path once the assigned order is completed',
+    async ({ method, path, body }) => {
+      claimedOrders.push({
+        id: 90,
+        assignedEmployeeId: 3,
+        stationId: 10,
+        status: 'COMPLETED',
+      });
+      expect((await authenticated(method, path).send(body)).status).toBe(200);
+      expect(claimedOrders[0].status).toBe('COMPLETED');
+    },
+  );
+
+  it('allows name edits, same-station transfer, unchanged role and active status with a claim', async () => {
+    claimedOrders.push({
+      id: 90,
+      assignedEmployeeId: 3,
+      stationId: 10,
+      status: 'IN_PROGRESS',
+    });
+    expect(
+      (await authenticated('patch', '/3').send({ name: 'New name' })).status,
+    ).toBe(200);
+    expect(
+      (await authenticated('post', '/3/transfer').send({ stationId: 10 }))
+        .status,
+    ).toBe(200);
+    expect(
+      (
+        await authenticated('patch', '/3').send({
+          role: 'EMPLOYEE',
+          stationId: 10,
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await authenticated('patch', '/3/status').send({ isActive: true }))
+        .status,
+    ).toBe(200);
+  });
+
+  it('allows recovery by reactivation or restoring the employee role without altering orders', async () => {
+    claimedOrders.push({
+      id: 90,
+      assignedEmployeeId: 3,
+      stationId: 10,
+      status: 'IN_PROGRESS',
+    });
+    users.get(3)!.isActive = false;
+    expect(
+      (await authenticated('patch', '/3/status').send({ isActive: true }))
+        .status,
+    ).toBe(200);
+    users.get(3)!.role.name = 'SECURITY';
+    expect(
+      (await authenticated('patch', '/3').send({ role: 'EMPLOYEE' })).status,
+    ).toBe(200);
+    expect(claimedOrders[0].status).toBe('IN_PROGRESS');
+  });
+
+  it.each(changes)(
+    'observes a claim committed before the $method $path eligibility check',
+    async ({ method, path, body }) => {
+      // Models the lock boundary, not PostgreSQL scheduling/isolation.
+      db.$queryRaw.mockImplementationOnce(async () => {
+        claimedOrders.push({
+          id: 90,
+          assignedEmployeeId: 3,
+          stationId: 10,
+          status: 'IN_PROGRESS',
+        });
+        return [];
+      });
+      expect((await authenticated(method, path).send(body)).status).toBe(409);
+      expect(users.get(3)).toMatchObject({
+        stationId: 10,
+        isActive: true,
+        role: { name: 'EMPLOYEE' },
+      });
+    },
+  );
+
+  it('rechecks claimed work after a serialization retry', async () => {
+    db.$transaction.mockImplementationOnce(async () => {
+      claimedOrders.push({
+        id: 90,
+        assignedEmployeeId: 3,
+        stationId: 10,
+        status: 'IN_PROGRESS',
+      });
+      throw { code: 'P2034' };
+    });
+    expect(
+      (await authenticated('post', '/3/transfer').send({ stationId: 20 }))
+        .status,
+    ).toBe(409);
+    expect(users.get(3)!.stationId).toBe(10);
+  });
+});
 
 function user(
   id: number,
@@ -178,6 +365,16 @@ beforeEach(() => {
   ];
   shiftRecords = [];
   attendanceRecords = [];
+  claimedOrders = [];
+  db.$queryRaw.mockResolvedValue([]);
+  db.fuelOrder.findFirst.mockImplementation(
+    async ({ where }) =>
+      claimedOrders.find(
+        (order) =>
+          order.assignedEmployeeId === where.assignedEmployeeId &&
+          order.status === where.status,
+      ) ?? null,
+  );
   db.shift.findFirst.mockImplementation(
     async ({
       where,
