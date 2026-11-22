@@ -125,6 +125,7 @@ const rolePermissions: Record<string, string[]> = {
   CUSTOMER: [
     'orders.read',
     'orders.create',
+    'orders.cancel',
   ],
 };
 
