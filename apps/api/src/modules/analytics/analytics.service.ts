@@ -1,10 +1,6 @@
 import type { UserProfile } from '../auth/auth.types.js';
 import { requireManagedStation } from '../../utils/accessScope.js';
-import {
-  demoOrdersForStation,
-  selectDemoOrders,
-} from '../orders/orders.demo.js';
-import type { DemoOrderStatus } from '../orders/orders.types.js';
+import { orderStatuses } from '../orders/orders.types.js';
 import { analyticsRepository } from './analytics.repository.js';
 import type { StationAnalyticsInput } from './analytics.validation.js';
 
@@ -15,38 +11,30 @@ export const analyticsService = {
     input: StationAnalyticsInput,
   ) {
     return analyticsRepository.transaction(async (tx) => {
-      // Authorize before both sections, including empty selections and demo data.
+      // Ownership, attendance and order counts use the same database snapshot.
       await requireManagedStation(actor, stationId, tx);
       const attendance = await analyticsRepository.attendance(
         stationId,
         input,
         tx,
       );
-      const selected = selectDemoOrders(
-        demoOrdersForStation(stationId),
-        stationId,
-        input,
-      );
-      const countsByStatus: Record<DemoOrderStatus, number> = {
-        PENDING: 0,
-        COMPLETED: 0,
-        CANCELLED: 0,
-      };
-      let completedOrderedAmountMinor = 0;
-      for (const order of selected) {
-        countsByStatus[order.status]++;
-        if (order.status === 'COMPLETED')
-          completedOrderedAmountMinor += order.orderedAmountMinor;
-      }
+      const groups = await analyticsRepository.orders(stationId, input, tx);
+      // Preserve any legacy string statuses in the counts rather than dropping
+      // those orders. Known statuses always appear, including on empty stations.
+      const countsByStatus: Record<string, number> = Object.fromEntries([
+        ...orderStatuses.map((status) => [status, 0] as const),
+        ...groups.map((group) => [group.status, group._count._all] as const),
+      ]);
       return {
         stationId,
         attendance,
         orders: {
-          dataSource: 'demo' as const,
-          currency: 'USD' as const,
-          totalOrders: selected.length,
+          dataSource: 'database' as const,
+          totalOrders: groups.reduce(
+            (total, group) => total + group._count._all,
+            0,
+          ),
           countsByStatus,
-          completedOrderedAmountMinor,
         },
       };
     });

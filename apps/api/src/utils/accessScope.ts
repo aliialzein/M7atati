@@ -2,7 +2,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import type { UserProfile } from '../modules/auth/auth.types.js';
 import { HttpError } from '../types/http-error.js';
 
-// Shared by manager attendance/reports and demo orders. The lookup includes
+// Shared by manager attendance/reports and persisted orders. The lookup includes
 // ownership, so unknown and unmanaged stations have the same response.
 export async function requireManagedStation(
   actor: Pick<UserProfile, 'id' | 'role' | 'stationId'>,

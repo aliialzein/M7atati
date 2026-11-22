@@ -3,27 +3,56 @@ import { app } from '../../src/app.js';
 import { prisma } from '../../src/database/prisma.js';
 import { ACCESS_COOKIE } from '../../src/modules/auth/auth.types.js';
 import { tokenService } from '../../src/modules/auth/token.service.js';
-import * as demoData from '../../src/modules/orders/orders.demo.js';
+import {
+  orderFixtures,
+  matchesOrder,
+  selectFields,
+  type OrderFixture,
+  type OrderWhere,
+} from '../fixtures/orders.js';
 
+// HTTP/application integration with mocked Prisma; no PostgreSQL claims.
 jest.mock('../../src/database/prisma.js', () => ({
   prisma: {
     user: { findUnique: jest.fn() },
     station: { findFirst: jest.fn() },
+    fuelOrder: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+      findFirst: jest.fn(),
+      updateMany: jest.fn(),
+      groupBy: jest.fn(),
+    },
+    orderEvent: { create: jest.fn() },
+    attendanceRecord: { count: jest.fn() },
+    $queryRaw: jest.fn(),
+    $transaction: jest.fn(),
   },
 }));
 jest.mock('../../src/utils/logger.js', () => ({
   logger: { error: jest.fn() },
 }));
-
 const db = prisma as unknown as {
   user: { findUnique: jest.Mock };
   station: { findFirst: jest.Mock };
+  fuelOrder: {
+    findMany: jest.Mock;
+    count: jest.Mock;
+    findFirst: jest.Mock;
+    updateMany: jest.Mock;
+    groupBy: jest.Mock;
+  };
+  orderEvent: { create: jest.Mock };
+  attendanceRecord: { count: jest.Mock };
+  $queryRaw: jest.Mock;
+  $transaction: jest.Mock;
 };
 let role: string;
 let permissions: string[];
 let actorId: number;
 let stationId: number | null;
 let active: boolean;
+let orders: OrderFixture[];
 let stations: {
   id: number;
   managerId: number;
@@ -31,7 +60,6 @@ let stations: {
   isActive: boolean;
 }[];
 const base = '/api/manager/stations/10/orders';
-
 function get(
   query: Record<string, string | number | undefined> = {},
   path = base,
@@ -45,213 +73,256 @@ function get(
     );
   return pending;
 }
-
 beforeEach(() => {
-  jest.restoreAllMocks();
   jest.resetAllMocks();
   role = 'MANAGER';
-  permissions = ['orders.read']; // No attendance.read: route permissions are independent.
+  permissions = ['orders.read'];
   actorId = 1;
-  stationId = 20; // Affiliation deliberately points at somebody else's station.
+  stationId = 20;
   active = true;
   stations = [
     { id: 10, managerId: 1, name: 'Historical station', isActive: false },
-    { id: 11, managerId: 1, name: 'Second managed station', isActive: true },
-    { id: 20, managerId: 2, name: 'Other manager station', isActive: true },
+    { id: 11, managerId: 1, name: 'Second station', isActive: true },
+    { id: 20, managerId: 2, name: 'Other manager', isActive: true },
   ];
+  orders = [...orderFixtures(10), ...orderFixtures(11), ...orderFixtures(20)];
   db.user.findUnique.mockImplementation(async () => ({
     id: actorId,
-    name: 'Manager',
-    email: 'manager@example.invalid',
+    name: 'Actor',
+    email: 'actor@example.invalid',
     isActive: active,
     tokenVersion: 0,
     stationId,
+    station: stations.find((station) => station.id === stationId) ?? null,
     role: {
       name: role,
       permissions: permissions.map((key) => ({ permission: { key } })),
     },
   }));
   db.station.findFirst.mockImplementation(
-    async ({
-      where,
-    }: {
-      where: { AND: [{ id: number }, { managerId: number }] };
-    }) =>
+    async ({ where }) =>
       stations.find(
-        (station) =>
-          station.id === where.AND[0].id &&
-          station.managerId === where.AND[1].managerId,
+        (s) =>
+          s.id === where.AND[0].id && s.managerId === where.AND[1].managerId,
       ) ?? null,
+  );
+  db.$transaction.mockImplementation(
+    async (work: (tx: typeof db) => Promise<unknown>) => work(db),
+  );
+  db.$queryRaw.mockImplementation(async (query: TemplateStringsArray) =>
+    query.join('').includes('FROM stations')
+      ? [
+          {
+            id: stationId,
+            isActive: stations.find((s) => s.id === stationId)?.isActive,
+          },
+        ]
+      : [{ id: actorId }],
+  );
+  db.fuelOrder.findMany.mockImplementation(
+    async ({ where, select, skip, take, orderBy }) =>
+      orders
+        .filter((row) => matchesOrder(row, where))
+        .sort(
+          (a, b) =>
+            (Number(a.createdAt) - Number(b.createdAt) || a.id - b.id) *
+            (orderBy[0].createdAt === 'desc' ? -1 : 1),
+        )
+        .slice(skip, skip + take)
+        .map((row) => selectFields(row, select)),
+  );
+  db.fuelOrder.count.mockImplementation(
+    async ({ where }) =>
+      orders.filter((row) => matchesOrder(row, where)).length,
+  );
+  db.fuelOrder.findFirst.mockImplementation(async ({ where, select }) => {
+    const row = orders.find((row) => matchesOrder(row, where));
+    return row ? selectFields(row, select) : null;
+  });
+  db.fuelOrder.updateMany.mockImplementation(async ({ where, data }) => {
+    const rows = orders.filter((row) => matchesOrder(row, where));
+    for (const row of rows)
+      Object.assign(row, data, {
+        updatedAt: new Date(),
+        assignee: { id: actorId, name: 'Employee', isActive: true },
+      });
+    return { count: rows.length };
+  });
+  db.orderEvent.create.mockImplementation(async ({ data }) => {
+    const row = orders.find((row) => row.id === data.orderId)!;
+    const event = {
+      ...data,
+      id: row.events.length + 1,
+      createdAt: new Date(),
+      note: null,
+    };
+    row.events.push(event);
+    return event;
+  });
+  db.attendanceRecord.count.mockResolvedValue(0);
+  db.fuelOrder.groupBy.mockImplementation(
+    async ({ where }: { where: OrderWhere }) => {
+      const counts = new Map<string, number>();
+      for (const row of orders.filter((row) => matchesOrder(row, where)))
+        counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
+      return [...counts].map(([status, count]) => ({
+        status,
+        _count: { _all: count },
+      }));
+    },
   );
 });
 
-describe('manager orders authentication and station ownership', () => {
-  it('requires authentication and does not consult demo data', async () => {
-    const factory = jest.spyOn(demoData, 'demoOrdersForStation');
-    const response = await get({}, base, false);
-    expect(response.status).toBe(401);
-    expect(response.headers['cache-control']).toBe('no-store');
-    expect(db.station.findFirst).not.toHaveBeenCalled();
-    expect(factory).not.toHaveBeenCalled();
-  });
-  it('rejects a malformed access cookie', async () => {
+describe('manager persisted order access', () => {
+  it.each(['', '/1002'])(
+    'requires authentication for %s before resource reads',
+    async (suffix) => {
+      const response = await get({}, base + suffix, false);
+      expect(response.status).toBe(401);
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(db.$transaction).not.toHaveBeenCalled();
+    },
+  );
+  it('rejects a malformed cookie and disabled manager', async () => {
     expect(
       (await request(app).get(base).set('Cookie', `${ACCESS_COOKIE}=invalid`))
         .status,
     ).toBe(401);
-    expect(db.station.findFirst).not.toHaveBeenCalled();
-  });
-  it('rejects a disabled manager', async () => {
     active = false;
     expect((await get()).status).toBe(401);
-    expect(db.station.findFirst).not.toHaveBeenCalled();
   });
   it.each(['ADMIN', 'HR', 'EMPLOYEE', 'SECURITY', 'CUSTOMER'])(
-    'rejects %s even with orders.read',
+    'denies %s on list and detail',
     async (value) => {
       role = value;
       expect((await get()).status).toBe(403);
-      expect(db.station.findFirst).not.toHaveBeenCalled();
+      expect((await get({}, `${base}/1002`)).status).toBe(403);
+      expect(db.$transaction).not.toHaveBeenCalled();
     },
   );
-  it('requires orders.read, not attendance.read or reports.read', async () => {
+  it('requires orders.read independently on list and detail', async () => {
     permissions = ['attendance.read', 'reports.read'];
-    const response = await get();
-    expect(response.status).toBe(403);
-    expect(response.headers['cache-control']).toBe('no-store');
-    expect(db.station.findFirst).not.toHaveBeenCalled();
+    expect((await get()).status).toBe(403);
+    expect((await get({}, `${base}/1002`)).status).toBe(403);
   });
   it.each([{}, { status: 'COMPLETED', minAmountMinor: 2000000000 }])(
-    'returns the same 404 for unknown/unmanaged stations even for empty filters %j',
+    'does not leak unmanaged stations for %j',
     async (query) => {
-      const factory = jest.spyOn(demoData, 'demoOrdersForStation');
       for (const id of [20, 999]) {
-        const response = await get(query, base.replace('/10/', `/${id}/`));
-        expect(response.status).toBe(404);
-        expect(response.body).toEqual({ message: 'Station not found' });
-        expect(response.headers['cache-control']).toBe('no-store');
+        for (const suffix of ['', '/1002']) {
+          const response = await get(
+            suffix ? {} : query,
+            base.replace('/10/', `/${id}/`) + suffix,
+          );
+          expect(response.status).toBe(404);
+          expect(response.body).toEqual({ message: 'Station not found' });
+        }
       }
-      expect(factory).not.toHaveBeenCalled();
+      expect(db.fuelOrder.findMany).not.toHaveBeenCalled();
+      expect(db.fuelOrder.findFirst).not.toHaveBeenCalled();
     },
   );
-  it('uses managerId rather than affiliation and includes inactive managed stations', async () => {
-    const response = await get();
-    expect(response.status).toBe(200);
+  it('uses ownership rather than affiliation and permits inactive station history', async () => {
+    expect((await get()).status).toBe(200);
     expect(db.station.findFirst).toHaveBeenCalledWith({
       where: { AND: [{ id: 10 }, { managerId: 1 }] },
       select: { id: true, name: true, isActive: true },
     });
-    expect(
-      response.body.orders.every(
-        (order: { stationId: number }) => order.stationId === 10,
-      ),
-    ).toBe(true);
-  });
-  it('rechecks ownership on every request rather than caching authorized station IDs', async () => {
-    expect((await get()).status).toBe(200);
     stations[0].managerId = 2;
     expect((await get()).status).toBe(404);
+    expect((await get({}, `${base}/1002`)).status).toBe(404);
   });
-  it('gives distinct managed stations distinct deterministic orders', async () => {
-    const a = await get();
-    const b = await get({}, base.replace('/10/', '/11/'));
-    expect(b.status).toBe(200);
+  it('isolates both owned stations and other managers', async () => {
     expect(
-      b.body.orders.map((order: { stationId: number }) => order.stationId),
+      (await get({}, base.replace('/10/', '/11/'))).body.orders.map(
+        (o: { stationId: number }) => o.stationId,
+      ),
     ).toEqual(Array(8).fill(11));
-    const idsA = a.body.orders.map((order: { id: number }) => order.id);
-    const idsB = b.body.orders.map((order: { id: number }) => order.id);
-    expect(idsB.some((id: number) => idsA.includes(id))).toBe(false);
-    expect(
-      a.body.orders.find((order: { id: number }) => order.id === 1003)
-        .orderedAmountMinor,
-    ).toBe(6000);
-    expect(
-      b.body.orders.find((order: { id: number }) => order.id === 1103)
-        .orderedAmountMinor,
-    ).toBe(6100);
-    expect((await get()).body).toEqual(a.body);
-  });
-  it('cannot expose another manager fixture by switching requested station or filters', async () => {
-    const station10 = demoData.demoOrdersForStation(10);
-    const station20 = demoData.demoOrdersForStation(20);
-    // Deliberately return a mixed dataset to ensure selection itself also scopes.
-    jest
-      .spyOn(demoData, 'demoOrdersForStation')
-      .mockReturnValue([...station20, ...station10]);
-    const own = await get();
-    expect(own.body.pagination.total).toBe(8);
-    expect(own.body.orders.map((order: { id: number }) => order.id)).toEqual([
-      1008, 1007, 1006, 1005, 1004, 1003, 1002, 1001,
-    ]);
-    expect(
-      (await get({ minAmountMinor: 7000, maxAmountMinor: 7000 })).body.orders,
-    ).toEqual([]);
-    expect((await get({}, base.replace('/10/', '/20/'))).status).toBe(404);
     actorId = 2;
-    const other = await get({}, base.replace('/10/', '/20/'));
-    expect(other.status).toBe(200);
-    expect(other.body.orders.map((order: { id: number }) => order.id)).toEqual([
-      2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001,
-    ]);
+    expect(
+      (await get({}, base.replace('/10/', '/20/'))).body.orders.map(
+        (o: { stationId: number }) => o.stationId,
+      ),
+    ).toEqual(Array(8).fill(20));
     expect((await get()).status).toBe(404);
   });
 });
 
-describe('manager demo order contract and selection', () => {
-  it('returns only the demo contract in USD cents with default pagination', async () => {
-    const response = await get();
-    expect(response.status).toBe(200);
-    expect(response.headers['cache-control']).toBe('no-store');
-    expect(response.body.dataSource).toBe('demo');
-    expect(response.body.pagination).toEqual({
-      page: 1,
-      limit: 20,
-      total: 8,
-      totalPages: 1,
-    });
-    for (const order of response.body.orders) {
-      expect(Object.keys(order).sort()).toEqual([
-        'createdAt',
-        'currency',
-        'id',
-        'orderedAmountMinor',
-        'stationId',
-        'status',
-      ]);
-      expect(order.currency).toBe('USD');
-      expect(Number.isSafeInteger(order.orderedAmountMinor)).toBe(true);
-      expect(order.orderedAmountMinor).toBeGreaterThanOrEqual(0);
-      expect(['PENDING', 'COMPLETED', 'CANCELLED']).toContain(order.status);
-    }
-    expect(
-      response.body.orders.map((order: { id: number }) => order.id),
-    ).toEqual([1008, 1007, 1006, 1005, 1004, 1003, 1002, 1001]);
-  });
-  it('combines station, dates, inclusive amounts and status before counting/pagination', async () => {
-    const response = await get({
-      from: '2026-11-19T14:00:00+02:00',
-      to: '2026-11-20T02:00:00+02:00',
-      minAmountMinor: 6000,
-      maxAmountMinor: 6000,
-      status: 'COMPLETED',
-      page: 1,
-      limit: 1,
-    });
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      dataSource: 'demo',
-      orders: [
+describe('persisted Manager listing and detail', () => {
+  it('reads unpaid deferred-pump orders and their creation history without exposing checkout credentials', async () => {
+    const row = orders.find((order) => order.id === 1002)!;
+    Object.assign(row, {
+      status: 'AWAITING_PAYMENT',
+      source: 'GUEST',
+      currency: 'USD',
+      fulfillmentType: 'IN_STATION',
+      pumpId: null,
+      pump: null,
+      orderedAmountMinor: 2513,
+      guestTokenHash: 'private-guest-hash',
+      creationRequestHash: 'private-request-hash',
+      events: [
         {
-          id: 1003,
-          stationId: 10,
-          status: 'COMPLETED',
-          createdAt: '2026-11-19T12:00:00.000Z',
-          orderedAmountMinor: 6000,
-          currency: 'USD',
+          id: 1,
+          actorUserId: null,
+          actorType: 'GUEST',
+          fromStatus: null,
+          toStatus: 'AWAITING_PAYMENT',
+          createdAt: row.createdAt,
+          note: null,
         },
       ],
-      pagination: { page: 1, limit: 1, total: 1, totalPages: 1 },
+    });
+    const list = await get({ status: 'AWAITING_PAYMENT' });
+    expect(list.status).toBe(200);
+    expect(list.body.pagination.total).toBe(1);
+    expect(list.body.orders[0]).toMatchObject({
+      id: 1002,
+      currency: 'USD',
+      fulfillmentType: 'IN_STATION',
+      pump: null,
+      assignedEmployeeId: null,
+      orderedAmountMinor: 2513,
+    });
+    const detail = await get({}, `${base}/1002`);
+    expect(detail.status).toBe(200);
+    expect(detail.body.order.events).toEqual([
+      expect.objectContaining({
+        actorType: 'GUEST',
+        toStatus: 'AWAITING_PAYMENT',
+      }),
+    ]);
+    expect(detail.text + list.text).not.toMatch(
+      /guestToken|creationRequestHash|private-/,
+    );
+    permissions = ['orders.read', 'attendance.read', 'reports.read'];
+    const analytics = await get({}, base.replace('/orders', '/analytics'));
+    expect(analytics.body.orders.countsByStatus.AWAITING_PAYMENT).toBe(1);
+    expect(analytics.body.orders.totalOrders).toBe(8);
+  });
+  it('returns stored fields and assignee without inventing currency or exposing private relations', async () => {
+    const response = await get();
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      dataSource: 'database',
+      stationId: 10,
+      pagination: { page: 1, limit: 20, total: 8, totalPages: 1 },
+    });
+    expect(response.body.orders.map((o: { id: number }) => o.id)).toEqual([
+      1008, 1007, 1006, 1005, 1004, 1003, 1002, 1001,
+    ]);
+    expect(response.body.orders[1]).toMatchObject({
+      status: 'IN_PROGRESS',
+      assignedEmployeeId: 3,
+      assignee: { id: 3, name: 'Historical employee', isActive: false },
+      source: 'PERSISTED_TEST',
+      orderedVolume: '25.125',
+    });
+    expect(response.text).not.toMatch(
+      /private-|password|customerPhone|payments|email/,
+    );
+    expect(db.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+      isolationLevel: 'RepeatableRead',
     });
   });
   it.each([
@@ -275,66 +346,199 @@ describe('manager demo order contract and selection', () => {
     [{ minAmountMinor: 6000 }, [1006, 1005, 1004, 1003]],
     [{ maxAmountMinor: 2250 }, [1008, 1007, 1001]],
     [{ minAmountMinor: 0, maxAmountMinor: 0 }, [1008, 1001]],
-    [{ status: 'PENDING' }, [1007, 1004, 1002]],
+    [{ status: 'PENDING' }, [1004, 1002]],
+    [{ status: 'IN_PROGRESS' }, [1007]],
     [{ status: 'COMPLETED' }, [1008, 1005, 1003]],
     [{ status: 'CANCELLED' }, [1006, 1001]],
   ] as const)(
-    'applies half-open dates/inclusive amount/status boundaries %j',
-    async (query, expected) => {
+    'applies half-open dates and inclusive amounts/status %j',
+    async (query, ids) => {
       const response = await get(query);
       expect(response.status).toBe(200);
-      expect(
-        response.body.orders.map((order: { id: number }) => order.id),
-      ).toEqual(expected);
-      expect(response.body.pagination.total).toBe(expected.length);
+      expect(response.body.orders.map((o: { id: number }) => o.id)).toEqual(
+        ids,
+      );
+      expect(response.body.pagination.total).toBe(ids.length);
     },
   );
-  it('paginates after all filters with consistent totals and stable tie ordering', async () => {
-    const first = await get({ minAmountMinor: 3500, limit: 2 });
-    const second = await get({ minAmountMinor: 3500, limit: 2, page: 2 });
-    const third = await get({ minAmountMinor: 3500, limit: 2, page: 3 });
-    expect(first.body.orders.map((order: { id: number }) => order.id)).toEqual([
-      1006, 1005,
+  it('combines all filters before paging and counting', async () => {
+    const response = await get({
+      from: '2026-11-19T14:00:00+02:00',
+      to: '2026-11-20T02:00:00+02:00',
+      minAmountMinor: 6000,
+      maxAmountMinor: 6000,
+      status: 'COMPLETED',
+      limit: 1,
+    });
+    expect(response.body.orders.map((o: { id: number }) => o.id)).toEqual([
+      1003,
     ]);
-    expect(second.body.orders.map((order: { id: number }) => order.id)).toEqual(
-      [1004, 1003],
-    );
-    expect(third.body.orders.map((order: { id: number }) => order.id)).toEqual([
-      1002,
-    ]);
-    for (const [index, response] of [first, second, third].entries())
+    expect(response.body.pagination.total).toBe(1);
+  });
+  it('paginates deterministically and retains totals on empty pages', async () => {
+    const ids: number[] = [];
+    for (let page = 1; page <= 3; page++) {
+      const response = await get({ minAmountMinor: 3500, limit: 2, page });
+      ids.push(...response.body.orders.map((o: { id: number }) => o.id));
       expect(response.body.pagination).toEqual({
-        page: index + 1,
+        page,
         limit: 2,
         total: 5,
         totalPages: 3,
       });
-  });
-  it('returns an empty page without losing the filtered total', async () => {
-    const response = await get({ page: 1000000, limit: 100 });
-    expect(response.status).toBe(200);
-    expect(response.body.orders).toEqual([]);
-    expect(response.body.pagination).toEqual({
-      page: 1000000,
-      limit: 100,
-      total: 8,
-      totalPages: 1,
+    }
+    expect(ids).toEqual([1006, 1005, 1004, 1003, 1002]);
+    expect((await get({ page: 1000000, limit: 100 })).body).toMatchObject({
+      orders: [],
+      pagination: { total: 8 },
     });
   });
-  it('returns zero totals for an unmatched selection', async () => {
-    const response = await get({ from: '2030-01-01T00:00:00Z' });
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      dataSource: 'demo',
+  it('handles empty persisted stations and allows full integer amount bounds', async () => {
+    expect(
+      (await get({ minAmountMinor: 0, maxAmountMinor: 2147483647 })).body
+        .pagination.total,
+    ).toBe(8);
+    orders = orders.filter((o) => o.stationId !== 10);
+    expect((await get()).body).toEqual({
+      dataSource: 'database',
+      stationId: 10,
       orders: [],
       pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
     });
   });
-  it('allows zero and the maximum supported amount bounds', async () => {
+  it('scopes order IDs to the requested owned station, including a second owned station', async () => {
+    for (const id of [1102, 2002, 9999])
+      expect((await get({}, `${base}/${id}`)).status).toBe(404);
+    expect((await get({}, base.replace('/10/', '/11/') + '/1102')).status).toBe(
+      200,
+    );
+  });
+  it('returns chronological persisted history with ID tie-breaking and a nullable actor', async () => {
+    const row = orders.find((o) => o.id === 1003)!;
+    const createdAt = new Date('2026-11-19T12:00:00Z');
+    row.events = [
+      {
+        id: 3,
+        createdAt,
+        actorUserId: 3,
+        actorType: 'EMPLOYEE',
+        fromStatus: 'IN_PROGRESS',
+        toStatus: 'COMPLETED',
+        note: null,
+      },
+      {
+        id: 1,
+        createdAt: new Date('2026-11-19T11:00:00Z'),
+        actorUserId: null,
+        actorType: 'SYSTEM',
+        fromStatus: null,
+        toStatus: 'PENDING',
+        note: 'Created',
+      },
+      {
+        id: 2,
+        createdAt,
+        actorUserId: 3,
+        actorType: 'EMPLOYEE',
+        fromStatus: 'PENDING',
+        toStatus: 'IN_PROGRESS',
+        note: null,
+      },
+    ];
+    const response = await get({}, `${base}/1003`);
+    expect(response.status).toBe(200);
+    expect(response.body.order.events.map((e: { id: number }) => e.id)).toEqual(
+      [1, 2, 3],
+    );
+    expect(response.body.order.events[0]).toMatchObject({
+      actorUserId: null,
+      note: 'Created',
+    });
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.text).not.toMatch(
+      /private-|password|customerPhone|payments|email/,
+    );
+  });
+  it('exposes no Manager mutation endpoint', async () => {
+    // The later attendance router authenticates unmatched Manager paths too.
+    permissions = ['orders.read', 'attendance.read'];
     expect(
-      (await get({ minAmountMinor: 0, maxAmountMinor: 2147483647, limit: 100 }))
-        .body.pagination.total,
-    ).toBe(8);
+      (
+        await request(app)
+          .post(`${base}/1002/claim`)
+          .set(
+            'Cookie',
+            `${ACCESS_COOKIE}=${tokenService.issue(actorId).accessToken}`,
+          )
+          .set('Origin', 'http://localhost:3000')
+          .set('X-CSRF-Protection', '1')
+      ).status,
+    ).toBe(404);
+    expect(db.fuelOrder.updateMany).not.toHaveBeenCalled();
+    expect(db.orderEvent.create).not.toHaveBeenCalled();
+  });
+  it('shows Employee claim and completion in subsequent Manager list/detail/analytics reads', async () => {
+    stations[0].isActive = true;
+    const employeeAction = async (action: string) => {
+      actorId = 3;
+      role = 'EMPLOYEE';
+      stationId = 10;
+      permissions = ['orders.read', 'orders.update'];
+      const response = await request(app)
+        .post(`/api/employee/orders/1002/${action}`)
+        .set('Cookie', `${ACCESS_COOKIE}=${tokenService.issue(3).accessToken}`)
+        .set('Origin', 'http://localhost:3000')
+        .set('X-CSRF-Protection', '1');
+      expect(response.status).toBe(200);
+      actorId = 1;
+      role = 'MANAGER';
+      permissions = ['orders.read', 'attendance.read', 'reports.read'];
+    };
+    await employeeAction('claim');
+    expect(
+      (await get({ status: 'IN_PROGRESS' })).body.orders.map(
+        (o: { id: number }) => o.id,
+      ),
+    ).toContain(1002);
+    expect((await get({}, `${base}/1002`)).body.order).toMatchObject({
+      assignedEmployeeId: 3,
+      status: 'IN_PROGRESS',
+      events: [expect.objectContaining({ toStatus: 'IN_PROGRESS' })],
+    });
+    expect(
+      (await get({}, base.replace('/orders', '/analytics'))).body.orders
+        .countsByStatus.IN_PROGRESS,
+    ).toBe(2);
+    await employeeAction('complete');
+    expect(
+      (await get({ status: 'COMPLETED' })).body.orders.map(
+        (o: { id: number }) => o.id,
+      ),
+    ).toContain(1002);
+    expect(
+      (await get({}, `${base}/1002`)).body.order.events.map(
+        (e: { toStatus: string }) => e.toStatus,
+      ),
+    ).toEqual(['IN_PROGRESS', 'COMPLETED']);
+    expect(
+      (await get({}, base.replace('/orders', '/analytics'))).body.orders
+        .countsByStatus,
+    ).toEqual({
+      AWAITING_PAYMENT: 0,
+      PENDING: 1,
+      IN_PROGRESS: 1,
+      COMPLETED: 4,
+      CANCELLED: 2,
+    });
+  });
+  it.each([
+    '/0',
+    '/abc',
+    '/2147483648',
+    '/1002?stationId=20',
+    '/1002?status=PENDING',
+  ])('rejects invalid detail parameters %s', async (suffix) => {
+    expect((await get({}, base + suffix)).status).toBe(400);
   });
 });
 
