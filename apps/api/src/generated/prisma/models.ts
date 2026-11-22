@@ -11,6 +11,8 @@
 export type * from './models/FuelType.js'
 export type * from './models/FuelPrice.js'
 export type * from './models/FuelPriceRefresh.js'
+export type * from './models/SellingPrice.js'
+export type * from './models/OrderQuote.js'
 export type * from './models/Station.js'
 export type * from './models/User.js'
 export type * from './models/Role.js'

@@ -144,7 +144,11 @@ beforeEach(() => {
       }
     },
   );
-  db.$queryRaw.mockResolvedValue([{ id: actor }]);
+  db.$queryRaw.mockImplementation(async (query: TemplateStringsArray) =>
+    query.join('').includes('FROM stations')
+      ? [{ id: station, isActive: stationActive }]
+      : [{ id: actor }],
+  );
   db.fuelOrder.findFirst.mockImplementation(async ({ where, select }) => {
     const row = rows.find((row) => matches(row, where));
     return row ? selected(row, select) : null;
@@ -398,3 +402,52 @@ it('retries serialization conflicts with a fresh transaction', async () => {
   expect((await call('/1/claim', 'post')).status).toBe(200);
   expect(events).toHaveLength(1);
 });
+
+it.each(['CANCELLED', 'REJECTED', 'UNKNOWN', 'pending'])(
+  'rejects both actions on unsupported state %s without events or mutation',
+  async (status) => {
+    rows[0].status = status;
+    rows[0].assignedEmployeeId = actor;
+    const before = { ...rows[0] };
+    expect((await call('/1/claim', 'post')).status).toBe(409);
+    expect((await call('/1/complete', 'post')).status).toBe(409);
+    expect(rows[0]).toEqual(before);
+    expect(events).toEqual([]);
+  },
+);
+
+it('rolls back a failed claim, then permits a clean retry with exactly one event', async () => {
+  db.orderEvent.create.mockRejectedValueOnce(new Error('event unavailable'));
+  expect((await call('/1/claim', 'post')).status).toBe(500);
+  expect((await call('/1/claim', 'post')).status).toBe(200);
+  expect((await call('/1/claim', 'post')).status).toBe(200);
+  expect(events).toHaveLength(1);
+  expect(events[0]).toMatchObject({
+    fromStatus: 'PENDING',
+    toStatus: 'IN_PROGRESS',
+  });
+});
+
+it('returns a bounded conflict after repeated serialization failures without a phantom event', async () => {
+  db.$transaction.mockRejectedValue({ code: 'P2034' });
+  expect((await call('/1/claim', 'post')).status).toBe(409);
+  expect(rows[0].status).toBe('PENDING');
+  expect(events).toEqual([]);
+});
+
+it.each(['claim', 'complete'] as const)(
+  'checks the locked station state before %s, even if the earlier employee read was active',
+  async (action) => {
+    if (action === 'complete') await call('/1/claim', 'post');
+    const before = { ...rows[0] };
+    const beforeEvents = [...events];
+    db.$queryRaw.mockImplementation(async (query: TemplateStringsArray) =>
+      query.join('').includes('FROM stations')
+        ? [{ id: station, isActive: false }]
+        : [{ id: actor }],
+    );
+    expect((await call(`/1/${action}`, 'post')).status).toBe(409);
+    expect(rows[0]).toEqual(before);
+    expect(events).toEqual(beforeEvents);
+  },
+);

@@ -400,6 +400,8 @@ export const ModelName = {
   FuelType: 'FuelType',
   FuelPrice: 'FuelPrice',
   FuelPriceRefresh: 'FuelPriceRefresh',
+  SellingPrice: 'SellingPrice',
+  OrderQuote: 'OrderQuote',
   Station: 'Station',
   User: 'User',
   Role: 'Role',
@@ -430,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "fuelType" | "fuelPrice" | "fuelPriceRefresh" | "station" | "user" | "role" | "shift" | "attendanceRecord" | "permission" | "rolePermission" | "refreshSession" | "tank" | "sensorReading" | "pump" | "fuelOrder" | "orderEvent" | "payment" | "callSession"
+    modelProps: "fuelType" | "fuelPrice" | "fuelPriceRefresh" | "sellingPrice" | "orderQuote" | "station" | "user" | "role" | "shift" | "attendanceRecord" | "permission" | "rolePermission" | "refreshSession" | "tank" | "sensorReading" | "pump" | "fuelOrder" | "orderEvent" | "payment" | "callSession"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -653,6 +655,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FuelPriceRefreshCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FuelPriceRefreshCountAggregateOutputType> | number
+        }
+      }
+    }
+    SellingPrice: {
+      payload: Prisma.$SellingPricePayload<ExtArgs>
+      fields: Prisma.SellingPriceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SellingPriceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SellingPriceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>
+        }
+        findFirst: {
+          args: Prisma.SellingPriceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SellingPriceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>
+        }
+        findMany: {
+          args: Prisma.SellingPriceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>[]
+        }
+        create: {
+          args: Prisma.SellingPriceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>
+        }
+        createMany: {
+          args: Prisma.SellingPriceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SellingPriceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>[]
+        }
+        delete: {
+          args: Prisma.SellingPriceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>
+        }
+        update: {
+          args: Prisma.SellingPriceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>
+        }
+        deleteMany: {
+          args: Prisma.SellingPriceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SellingPriceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SellingPriceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>[]
+        }
+        upsert: {
+          args: Prisma.SellingPriceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellingPricePayload>
+        }
+        aggregate: {
+          args: Prisma.SellingPriceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSellingPrice>
+        }
+        groupBy: {
+          args: Prisma.SellingPriceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SellingPriceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SellingPriceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SellingPriceCountAggregateOutputType> | number
+        }
+      }
+    }
+    OrderQuote: {
+      payload: Prisma.$OrderQuotePayload<ExtArgs>
+      fields: Prisma.OrderQuoteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderQuoteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderQuoteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>
+        }
+        findFirst: {
+          args: Prisma.OrderQuoteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderQuoteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>
+        }
+        findMany: {
+          args: Prisma.OrderQuoteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>[]
+        }
+        create: {
+          args: Prisma.OrderQuoteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>
+        }
+        createMany: {
+          args: Prisma.OrderQuoteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderQuoteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>[]
+        }
+        delete: {
+          args: Prisma.OrderQuoteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>
+        }
+        update: {
+          args: Prisma.OrderQuoteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderQuoteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderQuoteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderQuoteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderQuoteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderQuotePayload>
+        }
+        aggregate: {
+          args: Prisma.OrderQuoteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderQuote>
+        }
+        groupBy: {
+          args: Prisma.OrderQuoteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderQuoteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderQuoteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderQuoteCountAggregateOutputType> | number
         }
       }
     }
@@ -1851,6 +2001,40 @@ export const FuelPriceRefreshScalarFieldEnum = {
 export type FuelPriceRefreshScalarFieldEnum = (typeof FuelPriceRefreshScalarFieldEnum)[keyof typeof FuelPriceRefreshScalarFieldEnum]
 
 
+export const SellingPriceScalarFieldEnum = {
+  id: 'id',
+  fuelTypeId: 'fuelTypeId',
+  currency: 'currency',
+  unitPriceMinor: 'unitPriceMinor',
+  effectiveAt: 'effectiveAt',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt'
+} as const
+
+export type SellingPriceScalarFieldEnum = (typeof SellingPriceScalarFieldEnum)[keyof typeof SellingPriceScalarFieldEnum]
+
+
+export const OrderQuoteScalarFieldEnum = {
+  id: 'id',
+  stationId: 'stationId',
+  fuelTypeId: 'fuelTypeId',
+  sellingPriceId: 'sellingPriceId',
+  customerId: 'customerId',
+  guestTokenHash: 'guestTokenHash',
+  fulfillmentType: 'fulfillmentType',
+  currency: 'currency',
+  unitPriceMinor: 'unitPriceMinor',
+  quantity: 'quantity',
+  totalMinor: 'totalMinor',
+  inputMode: 'inputMode',
+  requestedValue: 'requestedValue',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderQuoteScalarFieldEnum = (typeof OrderQuoteScalarFieldEnum)[keyof typeof OrderQuoteScalarFieldEnum]
+
+
 export const StationScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1981,6 +2165,11 @@ export const FuelOrderScalarFieldEnum = {
   id: 'id',
   stationId: 'stationId',
   pumpId: 'pumpId',
+  currency: 'currency',
+  fulfillmentType: 'fulfillmentType',
+  quoteId: 'quoteId',
+  creationKey: 'creationKey',
+  creationRequestHash: 'creationRequestHash',
   userId: 'userId',
   createdBy: 'createdBy',
   assignedEmployeeId: 'assignedEmployeeId',
@@ -2029,7 +2218,9 @@ export const PaymentScalarFieldEnum = {
   capturedMinor: 'capturedMinor',
   status: 'status',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  confirmedById: 'confirmedById',
+  confirmedAt: 'confirmedAt'
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
@@ -2343,6 +2534,8 @@ export type GlobalOmitConfig = {
   fuelType?: Prisma.FuelTypeOmit
   fuelPrice?: Prisma.FuelPriceOmit
   fuelPriceRefresh?: Prisma.FuelPriceRefreshOmit
+  sellingPrice?: Prisma.SellingPriceOmit
+  orderQuote?: Prisma.OrderQuoteOmit
   station?: Prisma.StationOmit
   user?: Prisma.UserOmit
   role?: Prisma.RoleOmit

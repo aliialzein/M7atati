@@ -203,6 +203,8 @@ export type FuelTypeWhereInput = {
   prices?: Prisma.FuelPriceListRelationFilter
   tanks?: Prisma.TankListRelationFilter
   orders?: Prisma.FuelOrderListRelationFilter
+  sellingPrices?: Prisma.SellingPriceListRelationFilter
+  orderQuotes?: Prisma.OrderQuoteListRelationFilter
 }
 
 export type FuelTypeOrderByWithRelationInput = {
@@ -212,6 +214,8 @@ export type FuelTypeOrderByWithRelationInput = {
   prices?: Prisma.FuelPriceOrderByRelationAggregateInput
   tanks?: Prisma.TankOrderByRelationAggregateInput
   orders?: Prisma.FuelOrderOrderByRelationAggregateInput
+  sellingPrices?: Prisma.SellingPriceOrderByRelationAggregateInput
+  orderQuotes?: Prisma.OrderQuoteOrderByRelationAggregateInput
 }
 
 export type FuelTypeWhereUniqueInput = Prisma.AtLeast<{
@@ -224,6 +228,8 @@ export type FuelTypeWhereUniqueInput = Prisma.AtLeast<{
   prices?: Prisma.FuelPriceListRelationFilter
   tanks?: Prisma.TankListRelationFilter
   orders?: Prisma.FuelOrderListRelationFilter
+  sellingPrices?: Prisma.SellingPriceListRelationFilter
+  orderQuotes?: Prisma.OrderQuoteListRelationFilter
 }, "id" | "code">
 
 export type FuelTypeOrderByWithAggregationInput = {
@@ -252,6 +258,8 @@ export type FuelTypeCreateInput = {
   prices?: Prisma.FuelPriceCreateNestedManyWithoutFuelTypeInput
   tanks?: Prisma.TankCreateNestedManyWithoutFuelTypeInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeUncheckedCreateInput = {
@@ -261,6 +269,8 @@ export type FuelTypeUncheckedCreateInput = {
   prices?: Prisma.FuelPriceUncheckedCreateNestedManyWithoutFuelTypeInput
   tanks?: Prisma.TankUncheckedCreateNestedManyWithoutFuelTypeInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeUpdateInput = {
@@ -269,6 +279,8 @@ export type FuelTypeUpdateInput = {
   prices?: Prisma.FuelPriceUpdateManyWithoutFuelTypeNestedInput
   tanks?: Prisma.TankUpdateManyWithoutFuelTypeNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeUncheckedUpdateInput = {
@@ -278,6 +290,8 @@ export type FuelTypeUncheckedUpdateInput = {
   prices?: Prisma.FuelPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
   tanks?: Prisma.TankUncheckedUpdateManyWithoutFuelTypeNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeCreateManyInput = {
@@ -354,6 +368,34 @@ export type FuelTypeUpdateOneRequiredWithoutPricesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FuelTypeUpdateToOneWithWhereWithoutPricesInput, Prisma.FuelTypeUpdateWithoutPricesInput>, Prisma.FuelTypeUncheckedUpdateWithoutPricesInput>
 }
 
+export type FuelTypeCreateNestedOneWithoutSellingPricesInput = {
+  create?: Prisma.XOR<Prisma.FuelTypeCreateWithoutSellingPricesInput, Prisma.FuelTypeUncheckedCreateWithoutSellingPricesInput>
+  connectOrCreate?: Prisma.FuelTypeCreateOrConnectWithoutSellingPricesInput
+  connect?: Prisma.FuelTypeWhereUniqueInput
+}
+
+export type FuelTypeUpdateOneRequiredWithoutSellingPricesNestedInput = {
+  create?: Prisma.XOR<Prisma.FuelTypeCreateWithoutSellingPricesInput, Prisma.FuelTypeUncheckedCreateWithoutSellingPricesInput>
+  connectOrCreate?: Prisma.FuelTypeCreateOrConnectWithoutSellingPricesInput
+  upsert?: Prisma.FuelTypeUpsertWithoutSellingPricesInput
+  connect?: Prisma.FuelTypeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FuelTypeUpdateToOneWithWhereWithoutSellingPricesInput, Prisma.FuelTypeUpdateWithoutSellingPricesInput>, Prisma.FuelTypeUncheckedUpdateWithoutSellingPricesInput>
+}
+
+export type FuelTypeCreateNestedOneWithoutOrderQuotesInput = {
+  create?: Prisma.XOR<Prisma.FuelTypeCreateWithoutOrderQuotesInput, Prisma.FuelTypeUncheckedCreateWithoutOrderQuotesInput>
+  connectOrCreate?: Prisma.FuelTypeCreateOrConnectWithoutOrderQuotesInput
+  connect?: Prisma.FuelTypeWhereUniqueInput
+}
+
+export type FuelTypeUpdateOneRequiredWithoutOrderQuotesNestedInput = {
+  create?: Prisma.XOR<Prisma.FuelTypeCreateWithoutOrderQuotesInput, Prisma.FuelTypeUncheckedCreateWithoutOrderQuotesInput>
+  connectOrCreate?: Prisma.FuelTypeCreateOrConnectWithoutOrderQuotesInput
+  upsert?: Prisma.FuelTypeUpsertWithoutOrderQuotesInput
+  connect?: Prisma.FuelTypeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FuelTypeUpdateToOneWithWhereWithoutOrderQuotesInput, Prisma.FuelTypeUpdateWithoutOrderQuotesInput>, Prisma.FuelTypeUncheckedUpdateWithoutOrderQuotesInput>
+}
+
 export type FuelTypeCreateNestedOneWithoutTanksInput = {
   create?: Prisma.XOR<Prisma.FuelTypeCreateWithoutTanksInput, Prisma.FuelTypeUncheckedCreateWithoutTanksInput>
   connectOrCreate?: Prisma.FuelTypeCreateOrConnectWithoutTanksInput
@@ -387,6 +429,8 @@ export type FuelTypeCreateWithoutPricesInput = {
   code: string
   tanks?: Prisma.TankCreateNestedManyWithoutFuelTypeInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeUncheckedCreateWithoutPricesInput = {
@@ -395,6 +439,8 @@ export type FuelTypeUncheckedCreateWithoutPricesInput = {
   code: string
   tanks?: Prisma.TankUncheckedCreateNestedManyWithoutFuelTypeInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeCreateOrConnectWithoutPricesInput = {
@@ -418,6 +464,8 @@ export type FuelTypeUpdateWithoutPricesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   tanks?: Prisma.TankUpdateManyWithoutFuelTypeNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeUncheckedUpdateWithoutPricesInput = {
@@ -426,6 +474,116 @@ export type FuelTypeUncheckedUpdateWithoutPricesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   tanks?: Prisma.TankUncheckedUpdateManyWithoutFuelTypeNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutFuelTypeNestedInput
+}
+
+export type FuelTypeCreateWithoutSellingPricesInput = {
+  name: string
+  code: string
+  prices?: Prisma.FuelPriceCreateNestedManyWithoutFuelTypeInput
+  tanks?: Prisma.TankCreateNestedManyWithoutFuelTypeInput
+  orders?: Prisma.FuelOrderCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutFuelTypeInput
+}
+
+export type FuelTypeUncheckedCreateWithoutSellingPricesInput = {
+  id?: number
+  name: string
+  code: string
+  prices?: Prisma.FuelPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+  tanks?: Prisma.TankUncheckedCreateNestedManyWithoutFuelTypeInput
+  orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutFuelTypeInput
+}
+
+export type FuelTypeCreateOrConnectWithoutSellingPricesInput = {
+  where: Prisma.FuelTypeWhereUniqueInput
+  create: Prisma.XOR<Prisma.FuelTypeCreateWithoutSellingPricesInput, Prisma.FuelTypeUncheckedCreateWithoutSellingPricesInput>
+}
+
+export type FuelTypeUpsertWithoutSellingPricesInput = {
+  update: Prisma.XOR<Prisma.FuelTypeUpdateWithoutSellingPricesInput, Prisma.FuelTypeUncheckedUpdateWithoutSellingPricesInput>
+  create: Prisma.XOR<Prisma.FuelTypeCreateWithoutSellingPricesInput, Prisma.FuelTypeUncheckedCreateWithoutSellingPricesInput>
+  where?: Prisma.FuelTypeWhereInput
+}
+
+export type FuelTypeUpdateToOneWithWhereWithoutSellingPricesInput = {
+  where?: Prisma.FuelTypeWhereInput
+  data: Prisma.XOR<Prisma.FuelTypeUpdateWithoutSellingPricesInput, Prisma.FuelTypeUncheckedUpdateWithoutSellingPricesInput>
+}
+
+export type FuelTypeUpdateWithoutSellingPricesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  prices?: Prisma.FuelPriceUpdateManyWithoutFuelTypeNestedInput
+  tanks?: Prisma.TankUpdateManyWithoutFuelTypeNestedInput
+  orders?: Prisma.FuelOrderUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutFuelTypeNestedInput
+}
+
+export type FuelTypeUncheckedUpdateWithoutSellingPricesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  prices?: Prisma.FuelPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
+  tanks?: Prisma.TankUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutFuelTypeNestedInput
+}
+
+export type FuelTypeCreateWithoutOrderQuotesInput = {
+  name: string
+  code: string
+  prices?: Prisma.FuelPriceCreateNestedManyWithoutFuelTypeInput
+  tanks?: Prisma.TankCreateNestedManyWithoutFuelTypeInput
+  orders?: Prisma.FuelOrderCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutFuelTypeInput
+}
+
+export type FuelTypeUncheckedCreateWithoutOrderQuotesInput = {
+  id?: number
+  name: string
+  code: string
+  prices?: Prisma.FuelPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+  tanks?: Prisma.TankUncheckedCreateNestedManyWithoutFuelTypeInput
+  orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+}
+
+export type FuelTypeCreateOrConnectWithoutOrderQuotesInput = {
+  where: Prisma.FuelTypeWhereUniqueInput
+  create: Prisma.XOR<Prisma.FuelTypeCreateWithoutOrderQuotesInput, Prisma.FuelTypeUncheckedCreateWithoutOrderQuotesInput>
+}
+
+export type FuelTypeUpsertWithoutOrderQuotesInput = {
+  update: Prisma.XOR<Prisma.FuelTypeUpdateWithoutOrderQuotesInput, Prisma.FuelTypeUncheckedUpdateWithoutOrderQuotesInput>
+  create: Prisma.XOR<Prisma.FuelTypeCreateWithoutOrderQuotesInput, Prisma.FuelTypeUncheckedCreateWithoutOrderQuotesInput>
+  where?: Prisma.FuelTypeWhereInput
+}
+
+export type FuelTypeUpdateToOneWithWhereWithoutOrderQuotesInput = {
+  where?: Prisma.FuelTypeWhereInput
+  data: Prisma.XOR<Prisma.FuelTypeUpdateWithoutOrderQuotesInput, Prisma.FuelTypeUncheckedUpdateWithoutOrderQuotesInput>
+}
+
+export type FuelTypeUpdateWithoutOrderQuotesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  prices?: Prisma.FuelPriceUpdateManyWithoutFuelTypeNestedInput
+  tanks?: Prisma.TankUpdateManyWithoutFuelTypeNestedInput
+  orders?: Prisma.FuelOrderUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutFuelTypeNestedInput
+}
+
+export type FuelTypeUncheckedUpdateWithoutOrderQuotesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  prices?: Prisma.FuelPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
+  tanks?: Prisma.TankUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeCreateWithoutTanksInput = {
@@ -433,6 +591,8 @@ export type FuelTypeCreateWithoutTanksInput = {
   code: string
   prices?: Prisma.FuelPriceCreateNestedManyWithoutFuelTypeInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeUncheckedCreateWithoutTanksInput = {
@@ -441,6 +601,8 @@ export type FuelTypeUncheckedCreateWithoutTanksInput = {
   code: string
   prices?: Prisma.FuelPriceUncheckedCreateNestedManyWithoutFuelTypeInput
   orders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeCreateOrConnectWithoutTanksInput = {
@@ -464,6 +626,8 @@ export type FuelTypeUpdateWithoutTanksInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   prices?: Prisma.FuelPriceUpdateManyWithoutFuelTypeNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeUncheckedUpdateWithoutTanksInput = {
@@ -472,6 +636,8 @@ export type FuelTypeUncheckedUpdateWithoutTanksInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   prices?: Prisma.FuelPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
   orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeCreateWithoutOrdersInput = {
@@ -479,6 +645,8 @@ export type FuelTypeCreateWithoutOrdersInput = {
   code: string
   prices?: Prisma.FuelPriceCreateNestedManyWithoutFuelTypeInput
   tanks?: Prisma.TankCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeUncheckedCreateWithoutOrdersInput = {
@@ -487,6 +655,8 @@ export type FuelTypeUncheckedCreateWithoutOrdersInput = {
   code: string
   prices?: Prisma.FuelPriceUncheckedCreateNestedManyWithoutFuelTypeInput
   tanks?: Prisma.TankUncheckedCreateNestedManyWithoutFuelTypeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutFuelTypeInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutFuelTypeInput
 }
 
 export type FuelTypeCreateOrConnectWithoutOrdersInput = {
@@ -510,6 +680,8 @@ export type FuelTypeUpdateWithoutOrdersInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   prices?: Prisma.FuelPriceUpdateManyWithoutFuelTypeNestedInput
   tanks?: Prisma.TankUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutFuelTypeNestedInput
 }
 
 export type FuelTypeUncheckedUpdateWithoutOrdersInput = {
@@ -518,6 +690,8 @@ export type FuelTypeUncheckedUpdateWithoutOrdersInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   prices?: Prisma.FuelPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
   tanks?: Prisma.TankUncheckedUpdateManyWithoutFuelTypeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutFuelTypeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutFuelTypeNestedInput
 }
 
 
@@ -529,12 +703,16 @@ export type FuelTypeCountOutputType = {
   prices: number
   tanks: number
   orders: number
+  sellingPrices: number
+  orderQuotes: number
 }
 
 export type FuelTypeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   prices?: boolean | FuelTypeCountOutputTypeCountPricesArgs
   tanks?: boolean | FuelTypeCountOutputTypeCountTanksArgs
   orders?: boolean | FuelTypeCountOutputTypeCountOrdersArgs
+  sellingPrices?: boolean | FuelTypeCountOutputTypeCountSellingPricesArgs
+  orderQuotes?: boolean | FuelTypeCountOutputTypeCountOrderQuotesArgs
 }
 
 /**
@@ -568,6 +746,20 @@ export type FuelTypeCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types
   where?: Prisma.FuelOrderWhereInput
 }
 
+/**
+ * FuelTypeCountOutputType without action
+ */
+export type FuelTypeCountOutputTypeCountSellingPricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SellingPriceWhereInput
+}
+
+/**
+ * FuelTypeCountOutputType without action
+ */
+export type FuelTypeCountOutputTypeCountOrderQuotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderQuoteWhereInput
+}
+
 
 export type FuelTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -576,6 +768,8 @@ export type FuelTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   prices?: boolean | Prisma.FuelType$pricesArgs<ExtArgs>
   tanks?: boolean | Prisma.FuelType$tanksArgs<ExtArgs>
   orders?: boolean | Prisma.FuelType$ordersArgs<ExtArgs>
+  sellingPrices?: boolean | Prisma.FuelType$sellingPricesArgs<ExtArgs>
+  orderQuotes?: boolean | Prisma.FuelType$orderQuotesArgs<ExtArgs>
   _count?: boolean | Prisma.FuelTypeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fuelType"]>
 
@@ -602,6 +796,8 @@ export type FuelTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   prices?: boolean | Prisma.FuelType$pricesArgs<ExtArgs>
   tanks?: boolean | Prisma.FuelType$tanksArgs<ExtArgs>
   orders?: boolean | Prisma.FuelType$ordersArgs<ExtArgs>
+  sellingPrices?: boolean | Prisma.FuelType$sellingPricesArgs<ExtArgs>
+  orderQuotes?: boolean | Prisma.FuelType$orderQuotesArgs<ExtArgs>
   _count?: boolean | Prisma.FuelTypeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FuelTypeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -613,6 +809,8 @@ export type $FuelTypePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     prices: Prisma.$FuelPricePayload<ExtArgs>[]
     tanks: Prisma.$TankPayload<ExtArgs>[]
     orders: Prisma.$FuelOrderPayload<ExtArgs>[]
+    sellingPrices: Prisma.$SellingPricePayload<ExtArgs>[]
+    orderQuotes: Prisma.$OrderQuotePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1015,6 +1213,8 @@ export interface Prisma__FuelTypeClient<T, Null = never, ExtArgs extends runtime
   prices<T extends Prisma.FuelType$pricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelType$pricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuelPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tanks<T extends Prisma.FuelType$tanksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelType$tanksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TankPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.FuelType$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelType$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuelOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sellingPrices<T extends Prisma.FuelType$sellingPricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelType$sellingPricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SellingPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderQuotes<T extends Prisma.FuelType$orderQuotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FuelType$orderQuotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderQuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1509,6 +1709,54 @@ export type FuelType$ordersArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.FuelOrderScalarFieldEnum | Prisma.FuelOrderScalarFieldEnum[]
+}
+
+/**
+ * FuelType.sellingPrices
+ */
+export type FuelType$sellingPricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SellingPrice
+   */
+  select?: Prisma.SellingPriceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SellingPrice
+   */
+  omit?: Prisma.SellingPriceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SellingPriceInclude<ExtArgs> | null
+  where?: Prisma.SellingPriceWhereInput
+  orderBy?: Prisma.SellingPriceOrderByWithRelationInput | Prisma.SellingPriceOrderByWithRelationInput[]
+  cursor?: Prisma.SellingPriceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SellingPriceScalarFieldEnum | Prisma.SellingPriceScalarFieldEnum[]
+}
+
+/**
+ * FuelType.orderQuotes
+ */
+export type FuelType$orderQuotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderQuote
+   */
+  select?: Prisma.OrderQuoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderQuote
+   */
+  omit?: Prisma.OrderQuoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderQuoteInclude<ExtArgs> | null
+  where?: Prisma.OrderQuoteWhereInput
+  orderBy?: Prisma.OrderQuoteOrderByWithRelationInput | Prisma.OrderQuoteOrderByWithRelationInput[]
+  cursor?: Prisma.OrderQuoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderQuoteScalarFieldEnum | Prisma.OrderQuoteScalarFieldEnum[]
 }
 
 /**

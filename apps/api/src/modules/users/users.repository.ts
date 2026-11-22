@@ -4,6 +4,7 @@ import { prisma } from '../../database/prisma.js';
 import { HttpError } from '../../types/http-error.js';
 import type { ListUsersInput } from './users.validation.js';
 import type { UserRecord } from './users.types.js';
+import { orderStatus } from '../orders/orders.types.js';
 
 const userSelect = {
   id: true,
@@ -26,6 +27,25 @@ function hasCode(error: unknown, code: string): boolean {
 }
 
 export const usersRepository = {
+  async lockUser(id: number, tx: Prisma.TransactionClient) {
+    // Employee claims/completions lock this same row before checking eligibility.
+    await tx.$queryRaw`SELECT id FROM users WHERE id = ${id} FOR UPDATE`;
+  },
+  async hasActiveClaimedOrder(
+    employeeId: number,
+    tx: Prisma.TransactionClient,
+  ) {
+    return (
+      (await tx.fuelOrder.findFirst({
+        // Do not limit this check to the current station: legacy mismatches need review.
+        where: {
+          assignedEmployeeId: employeeId,
+          status: orderStatus.IN_PROGRESS,
+        },
+        select: { id: true },
+      })) !== null
+    );
+  },
   async transaction<T>(
     work: (tx: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {

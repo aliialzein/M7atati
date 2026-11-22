@@ -12,6 +12,7 @@ import { fuelPricesRouter } from './modules/fuel-prices/fuel-prices.routes.js';
 import {
   managerOrdersRouter,
   employeeOrdersRouter,
+  customerOrdersRouter,
 } from './modules/orders/orders.routes.js';
 import { managerAnalyticsRouter } from './modules/analytics/analytics.routes.js';
 import {
@@ -33,7 +34,11 @@ app.use(
     origin: env.allowedOrigins,
     credentials: true,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'X-CSRF-Protection'],
+    allowedHeaders: [
+      'Content-Type',
+      'X-CSRF-Protection',
+      'X-Order-Access-Token',
+    ],
   }),
 );
 app.use(helmet());
@@ -54,6 +59,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/employee/attendance', employeeAttendanceRouter);
 app.use('/api/employee/shifts', employeeShiftsRouter);
 app.use('/api/employee/orders', employeeOrdersRouter);
+app.use('/api/orders', customerOrdersRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/stations', stationsRouter);
 app.use('/api/fuel-prices', fuelPricesRouter);

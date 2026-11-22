@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- * 
+ *
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -19,91 +19,101 @@ export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
  * Model FuelType
- * 
+ *
  */
 export type FuelType = Prisma.FuelTypeModel
 /**
  * Model FuelPrice
- * 
+ *
  */
 export type FuelPrice = Prisma.FuelPriceModel
 /**
  * Model FuelPriceRefresh
- * 
+ *
  */
 export type FuelPriceRefresh = Prisma.FuelPriceRefreshModel
 /**
+ * Model SellingPrice
+ *
+ */
+export type SellingPrice = Prisma.SellingPriceModel
+/**
+ * Model OrderQuote
+ *
+ */
+export type OrderQuote = Prisma.OrderQuoteModel
+/**
  * Model Station
- * 
+ *
  */
 export type Station = Prisma.StationModel
 /**
  * Model User
- * 
+ *
  */
 export type User = Prisma.UserModel
 /**
  * Model Role
- * 
+ *
  */
 export type Role = Prisma.RoleModel
 /**
  * Model Shift
- * 
+ *
  */
 export type Shift = Prisma.ShiftModel
 /**
  * Model AttendanceRecord
- * 
+ *
  */
 export type AttendanceRecord = Prisma.AttendanceRecordModel
 /**
  * Model Permission
- * 
+ *
  */
 export type Permission = Prisma.PermissionModel
 /**
  * Model RolePermission
- * 
+ *
  */
 export type RolePermission = Prisma.RolePermissionModel
 /**
  * Model RefreshSession
- * 
+ *
  */
 export type RefreshSession = Prisma.RefreshSessionModel
 /**
  * Model Tank
- * 
+ *
  */
 export type Tank = Prisma.TankModel
 /**
  * Model SensorReading
- * 
+ *
  */
 export type SensorReading = Prisma.SensorReadingModel
 /**
  * Model Pump
- * 
+ *
  */
 export type Pump = Prisma.PumpModel
 /**
  * Model FuelOrder
- * 
+ *
  */
 export type FuelOrder = Prisma.FuelOrderModel
 /**
  * Model OrderEvent
- * 
+ *
  */
 export type OrderEvent = Prisma.OrderEventModel
 /**
  * Model Payment
- * 
+ *
  */
 export type Payment = Prisma.PaymentModel
 /**
  * Model CallSession
- * 
+ *
  */
 export type CallSession = Prisma.CallSessionModel

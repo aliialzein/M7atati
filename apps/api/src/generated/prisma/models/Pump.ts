@@ -361,9 +361,9 @@ export type PumpSumOrderByAggregateInput = {
   number?: Prisma.SortOrder
 }
 
-export type PumpScalarRelationFilter = {
-  is?: Prisma.PumpWhereInput
-  isNot?: Prisma.PumpWhereInput
+export type PumpNullableScalarRelationFilter = {
+  is?: Prisma.PumpWhereInput | null
+  isNot?: Prisma.PumpWhereInput | null
 }
 
 export type PumpCreateNestedManyWithoutStationInput = {
@@ -414,10 +414,12 @@ export type PumpCreateNestedOneWithoutOrdersInput = {
   connect?: Prisma.PumpWhereUniqueInput
 }
 
-export type PumpUpdateOneRequiredWithoutOrdersNestedInput = {
+export type PumpUpdateOneWithoutOrdersNestedInput = {
   create?: Prisma.XOR<Prisma.PumpCreateWithoutOrdersInput, Prisma.PumpUncheckedCreateWithoutOrdersInput>
   connectOrCreate?: Prisma.PumpCreateOrConnectWithoutOrdersInput
   upsert?: Prisma.PumpUpsertWithoutOrdersInput
+  disconnect?: Prisma.PumpWhereInput | boolean
+  delete?: Prisma.PumpWhereInput | boolean
   connect?: Prisma.PumpWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.PumpUpdateToOneWithWhereWithoutOrdersInput, Prisma.PumpUpdateWithoutOrdersInput>, Prisma.PumpUncheckedUpdateWithoutOrdersInput>
 }

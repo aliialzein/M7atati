@@ -12,12 +12,14 @@ datasource db {
 // --------------------------------------------------
 
 model FuelType {
-  id     Int         @id @default(autoincrement())
-  name   String
-  code   String      @unique
-  prices FuelPrice[]
-  tanks  Tank[]
-  orders FuelOrder[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  code          String         @unique
+  prices        FuelPrice[]
+  tanks         Tank[]
+  orders        FuelOrder[]
+  sellingPrices SellingPrice[]
+  orderQuotes   OrderQuote[]
 
   @@map("fuel_types")
 }
@@ -64,6 +66,49 @@ model FuelPriceRefresh {
   @@map("fuel_price_refreshes")
 }
 
+// Admin-authored global selling tariffs. Rows are appended, never overwritten.
+model SellingPrice {
+  id             Int          @id @default(autoincrement())
+  fuelTypeId     Int          @map("fuel_type_id")
+  currency       String       @db.VarChar(3)
+  unitPriceMinor Int          @map("unit_price_minor")
+  effectiveAt    DateTime     @map("effective_at") @db.Timestamptz(3)
+  createdBy      Int          @map("created_by")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  fuelType       FuelType     @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
+  creator        User         @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  quotes         OrderQuote[]
+
+  @@unique([fuelTypeId, currency, effectiveAt])
+  @@map("selling_prices")
+}
+
+model OrderQuote {
+  id              String       @id @default(uuid()) @db.Uuid
+  stationId       Int          @map("station_id")
+  fuelTypeId      Int          @map("fuel_type_id")
+  sellingPriceId  Int          @map("selling_price_id")
+  customerId      Int?         @map("customer_id")
+  guestTokenHash  String?      @map("guest_token_hash") @db.Char(64)
+  fulfillmentType String       @map("fulfillment_type")
+  currency        String       @db.VarChar(3)
+  unitPriceMinor  Int          @map("unit_price_minor")
+  quantity        Decimal      @db.Decimal(12, 3)
+  totalMinor      Int          @map("total_minor")
+  inputMode       String       @map("input_mode")
+  requestedValue  String       @map("requested_value") @db.VarChar(32)
+  expiresAt       DateTime     @map("expires_at") @db.Timestamptz(3)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  station         Station      @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  fuelType        FuelType     @relation(fields: [fuelTypeId], references: [id], onDelete: Restrict)
+  sellingPrice    SellingPrice @relation(fields: [sellingPriceId], references: [id], onDelete: Restrict)
+  customer        User?        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  order           FuelOrder?
+
+  @@index([expiresAt])
+  @@map("order_quotes")
+}
+
 // --------------------------------------------------
 // STATIONS & USERS
 // --------------------------------------------------
@@ -79,11 +124,12 @@ model Station {
   deviceKeyHash String?  @unique @map("device_key_hash")
   createdAt     DateTime @default(now()) @map("created_at")
 
-  manager      User?         @relation("StationManager", fields: [managerId], references: [id], onDelete: SetNull)
-  users        User[]        @relation("UserStation")
+  manager      User?              @relation("StationManager", fields: [managerId], references: [id], onDelete: SetNull)
+  users        User[]             @relation("UserStation")
   tanks        Tank[]
   pumps        Pump[]
   orders       FuelOrder[]
+  orderQuotes  OrderQuote[]
   callSessions CallSession[]
   shifts       Shift[]
   attendance   AttendanceRecord[]
@@ -104,17 +150,20 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  role                Role             @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  station             Station?         @relation("UserStation", fields: [stationId], references: [id], onDelete: SetNull)
-  managedStations     Station[]        @relation("StationManager")
-  customerOrders      FuelOrder[]      @relation("OrderCustomer")
-  createdOrders       FuelOrder[]      @relation("OrderCreator")
-  assignedOrders      FuelOrder[]      @relation("OrderAssignee")
-  orderEvents         OrderEvent[]     @relation("OrderEventActor")
-  handledCallSessions CallSession[]    @relation("CallSessionHandoff")
+  role                Role               @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  station             Station?           @relation("UserStation", fields: [stationId], references: [id], onDelete: SetNull)
+  managedStations     Station[]          @relation("StationManager")
+  customerOrders      FuelOrder[]        @relation("OrderCustomer")
+  createdOrders       FuelOrder[]        @relation("OrderCreator")
+  assignedOrders      FuelOrder[]        @relation("OrderAssignee")
+  orderEvents         OrderEvent[]       @relation("OrderEventActor")
+  handledCallSessions CallSession[]      @relation("CallSessionHandoff")
   refreshSessions     RefreshSession[]
   shifts              Shift[]
   attendance          AttendanceRecord[]
+  sellingPrices       SellingPrice[]
+  orderQuotes         OrderQuote[]
+  confirmedPayments   Payment[]          @relation("PaymentConfirmer")
 
   @@index([roleId])
   @@index([stationId])
@@ -153,21 +202,21 @@ model Shift {
 
 model AttendanceRecord {
   // One open record per employee is enforced by the partial index in SQL.
-  checkInRequestId String? @map("check_in_request_id") @db.Uuid
-  id         Int       @id @default(autoincrement())
-  employeeId Int       @map("employee_id")
-  stationId  Int       @map("station_id")
-  clockInAt  DateTime  @map("clock_in_at") @db.Timestamptz(3)
-  clockOutAt DateTime? @map("clock_out_at") @db.Timestamptz(3)
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  checkInRequestId String?   @map("check_in_request_id") @db.Uuid
+  id               Int       @id @default(autoincrement())
+  employeeId       Int       @map("employee_id")
+  stationId        Int       @map("station_id")
+  clockInAt        DateTime  @map("clock_in_at") @db.Timestamptz(3)
+  clockOutAt       DateTime? @map("clock_out_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
   employee User    @relation(fields: [employeeId], references: [id], onDelete: Restrict)
   station  Station @relation(fields: [stationId], references: [id], onDelete: Restrict)
 
+  @@unique([employeeId, checkInRequestId], map: "attendance_employee_request_key")
   @@index([clockInAt, id])
   @@index([stationId, clockInAt])
   @@index([employeeId, clockInAt])
-  @@unique([employeeId, checkInRequestId], map: "attendance_employee_request_key")
   @@map("attendance_records")
 }
 
@@ -262,31 +311,38 @@ model Pump {
 // --------------------------------------------------
 
 model FuelOrder {
-  id                 Int       @id @default(autoincrement())
-  stationId          Int       @map("station_id")
-  pumpId             Int       @map("pump_id")
-  userId             Int?      @map("user_id")
-  createdBy          Int?      @map("created_by")
-  assignedEmployeeId Int?      @map("assigned_employee_id")
-  claimedAt          DateTime? @map("claimed_at") @db.Timestamptz(3)
-  fuelTypeId         Int       @map("fuel_type_id")
-  source             String
-  status             String
-  unitPriceMinor     Int       @map("unit_price_minor")
-  orderedVolume      Decimal   @map("ordered_volume") @db.Decimal(12, 3)
-  orderedAmountMinor Int       @map("ordered_amount_minor")
-  dispensedVolume    Decimal?  @map("dispensed_volume") @db.Decimal(12, 3)
-  finalMinor         Int?      @map("final_minor")
-  customerName       String?   @map("customer_name")
-  customerPhone      String?   @map("customer_phone")
-  scheduledFor       DateTime? @map("scheduled_for")
-  notes              String?
-  expiresAt          DateTime? @map("expires_at")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
+  id                  Int       @id @default(autoincrement())
+  stationId           Int       @map("station_id")
+  pumpId              Int?      @map("pump_id")
+  // Nullable additions preserve the unknown meaning of legacy monetary values.
+  currency            String?   @db.VarChar(3)
+  fulfillmentType     String?   @map("fulfillment_type")
+  quoteId             String?   @unique @map("quote_id") @db.Uuid
+  creationKey         String?   @unique @map("creation_key") @db.Uuid
+  creationRequestHash String?   @map("creation_request_hash") @db.Char(64)
+  userId              Int?      @map("user_id")
+  createdBy           Int?      @map("created_by")
+  assignedEmployeeId  Int?      @map("assigned_employee_id")
+  claimedAt           DateTime? @map("claimed_at") @db.Timestamptz(3)
+  fuelTypeId          Int       @map("fuel_type_id")
+  source              String
+  status              String
+  unitPriceMinor      Int       @map("unit_price_minor")
+  orderedVolume       Decimal   @map("ordered_volume") @db.Decimal(12, 3)
+  orderedAmountMinor  Int       @map("ordered_amount_minor")
+  dispensedVolume     Decimal?  @map("dispensed_volume") @db.Decimal(12, 3)
+  finalMinor          Int?      @map("final_minor")
+  customerName        String?   @map("customer_name")
+  customerPhone       String?   @map("customer_phone")
+  scheduledFor        DateTime? @map("scheduled_for")
+  notes               String?
+  expiresAt           DateTime? @map("expires_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   station      Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
-  pump         Pump          @relation(fields: [pumpId], references: [id], onDelete: Restrict)
+  pump         Pump?         @relation(fields: [pumpId], references: [id], onDelete: Restrict)
+  quote        OrderQuote?   @relation(fields: [quoteId], references: [id], onDelete: Restrict)
   user         User?         @relation("OrderCustomer", fields: [userId], references: [id], onDelete: SetNull)
   creator      User?         @relation("OrderCreator", fields: [createdBy], references: [id], onDelete: SetNull)
   assignee     User?         @relation("OrderAssignee", fields: [assignedEmployeeId], references: [id], onDelete: Restrict)
@@ -297,6 +353,7 @@ model FuelOrder {
 
   @@index([stationId, status])
   @@index([assignedEmployeeId, stationId, status])
+  // One PENDING/IN_PROGRESS order per pump is enforced by a partial SQL index.
   @@index([pumpId])
   @@index([userId])
   @@index([fuelTypeId])
@@ -338,8 +395,13 @@ model Payment {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  order FuelOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  confirmedById Int?      @map("confirmed_by_id")
+  confirmedAt   DateTime? @map("confirmed_at") @db.Timestamptz(3)
+  confirmer     User?     @relation("PaymentConfirmer", fields: [confirmedById], references: [id], onDelete: Restrict)
+  order         FuelOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
 
+  // Partial unique index for confirmed cash payments is defined in the SQL migration.
+  @@index([confirmedById])
   @@index([orderId])
   @@map("payments")
 }

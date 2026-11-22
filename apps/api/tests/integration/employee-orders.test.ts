@@ -25,6 +25,7 @@ type Row = {
   createdAt: Date;
   customerPhone: string;
   orderedAmountMinor: number;
+  assignedEmployeeId: number | null;
 };
 let rows: Row[];
 let role: string;
@@ -104,7 +105,7 @@ beforeEach(() => {
       customerPhone: 'private-contact',
       orderedAmountMinor: 100,
     },
-  ];
+  ].map((row) => ({ ...row, assignedEmployeeId: null }));
   db.user.findUnique.mockImplementation(async () => ({
     id: actorId,
     name: 'Employee',
@@ -122,9 +123,16 @@ beforeEach(() => {
   db.$transaction.mockImplementation(
     (work: (tx: typeof db) => Promise<unknown>) => work(db),
   );
-  const selected = (where: { stationId: number; status: string }) =>
+  const selected = (where: {
+    stationId: number;
+    status: string;
+    assignedEmployeeId: null;
+  }) =>
     rows.filter(
-      (row) => row.stationId === where.stationId && row.status === where.status,
+      (row) =>
+        row.stationId === where.stationId &&
+        row.status === where.status &&
+        row.assignedEmployeeId === where.assignedEmployeeId,
     );
   db.fuelOrder.count.mockImplementation(
     async ({ where }) => selected(where).length,
@@ -173,7 +181,11 @@ it('returns pending persisted rows oldest-first with safe fields and consistent 
   });
   expect(response.body.orders.map((row: Row) => row.id)).toEqual([1, 2, 3]);
   const options = db.fuelOrder.findMany.mock.calls[0][0];
-  expect(options.where).toEqual({ stationId: 10, status: 'PENDING' });
+  expect(options.where).toEqual({
+    stationId: 10,
+    status: 'PENDING',
+    assignedEmployeeId: null,
+  });
   expect(options.orderBy).toEqual([{ createdAt: 'asc' }, { id: 'asc' }]);
   expect(Object.keys(options.select).sort()).toEqual([
     'createdAt',
@@ -198,6 +210,15 @@ it('accepts explicit PENDING and makes non-pending updates disappear on the next
   const response = await get();
   expect(response.body.orders.map((row: Row) => row.id)).toEqual([2]);
   expect(response.body.pagination.total).toBe(1);
+});
+
+it('omits assigned pending legacy rows from both the queue and its total without changing them', async () => {
+  rows[0].assignedEmployeeId = 9;
+  const response = await get();
+  expect(response.status).toBe(200);
+  expect(response.body.orders.map((row: Row) => row.id)).toEqual([1, 2]);
+  expect(response.body.pagination.total).toBe(2);
+  expect(rows[0]).toMatchObject({ status: 'PENDING', assignedEmployeeId: 9 });
 });
 it('derives station from fresh transactional assignment rather than the authenticated profile', async () => {
   db.$transaction.mockImplementationOnce(

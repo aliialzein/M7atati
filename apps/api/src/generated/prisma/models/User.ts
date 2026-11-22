@@ -279,6 +279,9 @@ export type UserWhereInput = {
   refreshSessions?: Prisma.RefreshSessionListRelationFilter
   shifts?: Prisma.ShiftListRelationFilter
   attendance?: Prisma.AttendanceRecordListRelationFilter
+  sellingPrices?: Prisma.SellingPriceListRelationFilter
+  orderQuotes?: Prisma.OrderQuoteListRelationFilter
+  confirmedPayments?: Prisma.PaymentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -303,6 +306,9 @@ export type UserOrderByWithRelationInput = {
   refreshSessions?: Prisma.RefreshSessionOrderByRelationAggregateInput
   shifts?: Prisma.ShiftOrderByRelationAggregateInput
   attendance?: Prisma.AttendanceRecordOrderByRelationAggregateInput
+  sellingPrices?: Prisma.SellingPriceOrderByRelationAggregateInput
+  orderQuotes?: Prisma.OrderQuoteOrderByRelationAggregateInput
+  confirmedPayments?: Prisma.PaymentOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -330,6 +336,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   refreshSessions?: Prisma.RefreshSessionListRelationFilter
   shifts?: Prisma.ShiftListRelationFilter
   attendance?: Prisma.AttendanceRecordListRelationFilter
+  sellingPrices?: Prisma.SellingPriceListRelationFilter
+  orderQuotes?: Prisma.OrderQuoteListRelationFilter
+  confirmedPayments?: Prisma.PaymentListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -385,6 +394,9 @@ export type UserCreateInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -407,6 +419,9 @@ export type UserUncheckedCreateInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUpdateInput = {
@@ -428,6 +443,9 @@ export type UserUpdateInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -450,6 +468,9 @@ export type UserUncheckedUpdateInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -486,6 +507,11 @@ export type UserUncheckedUpdateManyInput = {
   stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -556,9 +582,34 @@ export type UserSumOrderByAggregateInput = {
   stationId?: Prisma.SortOrder
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
+export type UserCreateNestedOneWithoutSellingPricesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSellingPricesInput, Prisma.UserUncheckedCreateWithoutSellingPricesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSellingPricesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSellingPricesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSellingPricesInput, Prisma.UserUncheckedCreateWithoutSellingPricesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSellingPricesInput
+  upsert?: Prisma.UserUpsertWithoutSellingPricesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSellingPricesInput, Prisma.UserUpdateWithoutSellingPricesInput>, Prisma.UserUncheckedUpdateWithoutSellingPricesInput>
+}
+
+export type UserCreateNestedOneWithoutOrderQuotesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderQuotesInput, Prisma.UserUncheckedCreateWithoutOrderQuotesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderQuotesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutOrderQuotesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderQuotesInput, Prisma.UserUncheckedCreateWithoutOrderQuotesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderQuotesInput
+  upsert?: Prisma.UserUpsertWithoutOrderQuotesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrderQuotesInput, Prisma.UserUpdateWithoutOrderQuotesInput>, Prisma.UserUncheckedUpdateWithoutOrderQuotesInput>
 }
 
 export type UserCreateNestedOneWithoutManagedStationsInput = {
@@ -767,6 +818,22 @@ export type UserUpdateOneWithoutOrderEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrderEventsInput, Prisma.UserUpdateWithoutOrderEventsInput>, Prisma.UserUncheckedUpdateWithoutOrderEventsInput>
 }
 
+export type UserCreateNestedOneWithoutConfirmedPaymentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutConfirmedPaymentsInput, Prisma.UserUncheckedCreateWithoutConfirmedPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConfirmedPaymentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutConfirmedPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutConfirmedPaymentsInput, Prisma.UserUncheckedCreateWithoutConfirmedPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConfirmedPaymentsInput
+  upsert?: Prisma.UserUpsertWithoutConfirmedPaymentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutConfirmedPaymentsInput, Prisma.UserUpdateWithoutConfirmedPaymentsInput>, Prisma.UserUncheckedUpdateWithoutConfirmedPaymentsInput>
+}
+
 export type UserCreateNestedOneWithoutHandledCallSessionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutHandledCallSessionsInput, Prisma.UserUncheckedCreateWithoutHandledCallSessionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutHandledCallSessionsInput
@@ -781,6 +848,226 @@ export type UserUpdateOneWithoutHandledCallSessionsNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutHandledCallSessionsInput, Prisma.UserUpdateWithoutHandledCallSessionsInput>, Prisma.UserUncheckedUpdateWithoutHandledCallSessionsInput>
+}
+
+export type UserCreateWithoutSellingPricesInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  assignedOrders?: Prisma.FuelOrderCreateNestedManyWithoutAssigneeInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
+}
+
+export type UserUncheckedCreateWithoutSellingPricesInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  roleId: number
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  assignedOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutAssigneeInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
+}
+
+export type UserCreateOrConnectWithoutSellingPricesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSellingPricesInput, Prisma.UserUncheckedCreateWithoutSellingPricesInput>
+}
+
+export type UserUpsertWithoutSellingPricesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSellingPricesInput, Prisma.UserUncheckedUpdateWithoutSellingPricesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSellingPricesInput, Prisma.UserUncheckedCreateWithoutSellingPricesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSellingPricesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSellingPricesInput, Prisma.UserUncheckedUpdateWithoutSellingPricesInput>
+}
+
+export type UserUpdateWithoutSellingPricesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  assignedOrders?: Prisma.FuelOrderUpdateManyWithoutAssigneeNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSellingPricesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  assignedOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutAssigneeNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
+}
+
+export type UserCreateWithoutOrderQuotesInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  assignedOrders?: Prisma.FuelOrderCreateNestedManyWithoutAssigneeInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
+}
+
+export type UserUncheckedCreateWithoutOrderQuotesInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  roleId: number
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  assignedOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutAssigneeInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
+}
+
+export type UserCreateOrConnectWithoutOrderQuotesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrderQuotesInput, Prisma.UserUncheckedCreateWithoutOrderQuotesInput>
+}
+
+export type UserUpsertWithoutOrderQuotesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOrderQuotesInput, Prisma.UserUncheckedUpdateWithoutOrderQuotesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrderQuotesInput, Prisma.UserUncheckedCreateWithoutOrderQuotesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOrderQuotesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOrderQuotesInput, Prisma.UserUncheckedUpdateWithoutOrderQuotesInput>
+}
+
+export type UserUpdateWithoutOrderQuotesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  assignedOrders?: Prisma.FuelOrderUpdateManyWithoutAssigneeNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOrderQuotesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  assignedOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutAssigneeNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateWithoutManagedStationsInput = {
@@ -801,6 +1088,9 @@ export type UserCreateWithoutManagedStationsInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutManagedStationsInput = {
@@ -822,6 +1112,9 @@ export type UserUncheckedCreateWithoutManagedStationsInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutManagedStationsInput = {
@@ -847,6 +1140,9 @@ export type UserCreateWithoutStationInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutStationInput = {
@@ -868,6 +1164,9 @@ export type UserUncheckedCreateWithoutStationInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutStationInput = {
@@ -909,6 +1208,9 @@ export type UserUpdateWithoutManagedStationsInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutManagedStationsInput = {
@@ -930,6 +1232,9 @@ export type UserUncheckedUpdateWithoutManagedStationsInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutStationInput = {
@@ -982,6 +1287,9 @@ export type UserCreateWithoutRoleInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutRoleInput = {
@@ -1003,6 +1311,9 @@ export type UserUncheckedCreateWithoutRoleInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutRoleInput = {
@@ -1049,6 +1360,9 @@ export type UserCreateWithoutShiftsInput = {
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutShiftsInput = {
@@ -1070,6 +1384,9 @@ export type UserUncheckedCreateWithoutShiftsInput = {
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutShiftsInput = {
@@ -1106,6 +1423,9 @@ export type UserUpdateWithoutShiftsInput = {
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShiftsInput = {
@@ -1127,6 +1447,9 @@ export type UserUncheckedUpdateWithoutShiftsInput = {
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateWithoutAttendanceInput = {
@@ -1147,6 +1470,9 @@ export type UserCreateWithoutAttendanceInput = {
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceInput = {
@@ -1168,6 +1494,9 @@ export type UserUncheckedCreateWithoutAttendanceInput = {
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceInput = {
@@ -1204,6 +1533,9 @@ export type UserUpdateWithoutAttendanceInput = {
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceInput = {
@@ -1225,6 +1557,9 @@ export type UserUncheckedUpdateWithoutAttendanceInput = {
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateWithoutRefreshSessionsInput = {
@@ -1245,6 +1580,9 @@ export type UserCreateWithoutRefreshSessionsInput = {
   handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutRefreshSessionsInput = {
@@ -1266,6 +1604,9 @@ export type UserUncheckedCreateWithoutRefreshSessionsInput = {
   handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutRefreshSessionsInput = {
@@ -1302,6 +1643,9 @@ export type UserUpdateWithoutRefreshSessionsInput = {
   handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
@@ -1323,6 +1667,9 @@ export type UserUncheckedUpdateWithoutRefreshSessionsInput = {
   handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateWithoutCustomerOrdersInput = {
@@ -1343,6 +1690,9 @@ export type UserCreateWithoutCustomerOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutCustomerOrdersInput = {
@@ -1364,6 +1714,9 @@ export type UserUncheckedCreateWithoutCustomerOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutCustomerOrdersInput = {
@@ -1389,6 +1742,9 @@ export type UserCreateWithoutCreatedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutCreatedOrdersInput = {
@@ -1410,6 +1766,9 @@ export type UserUncheckedCreateWithoutCreatedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutCreatedOrdersInput = {
@@ -1435,6 +1794,9 @@ export type UserCreateWithoutAssignedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutAssignedOrdersInput = {
@@ -1456,6 +1818,9 @@ export type UserUncheckedCreateWithoutAssignedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutAssignedOrdersInput = {
@@ -1492,6 +1857,9 @@ export type UserUpdateWithoutCustomerOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
@@ -1513,6 +1881,9 @@ export type UserUncheckedUpdateWithoutCustomerOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUpsertWithoutCreatedOrdersInput = {
@@ -1544,6 +1915,9 @@ export type UserUpdateWithoutCreatedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
@@ -1565,6 +1939,9 @@ export type UserUncheckedUpdateWithoutCreatedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUpsertWithoutAssignedOrdersInput = {
@@ -1596,6 +1973,9 @@ export type UserUpdateWithoutAssignedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedOrdersInput = {
@@ -1617,6 +1997,9 @@ export type UserUncheckedUpdateWithoutAssignedOrdersInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateWithoutOrderEventsInput = {
@@ -1637,6 +2020,9 @@ export type UserCreateWithoutOrderEventsInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutOrderEventsInput = {
@@ -1658,6 +2044,9 @@ export type UserUncheckedCreateWithoutOrderEventsInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutOrderEventsInput = {
@@ -1694,6 +2083,9 @@ export type UserUpdateWithoutOrderEventsInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrderEventsInput = {
@@ -1715,6 +2107,119 @@ export type UserUncheckedUpdateWithoutOrderEventsInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
+}
+
+export type UserCreateWithoutConfirmedPaymentsInput = {
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  station?: Prisma.StationCreateNestedOneWithoutUsersInput
+  managedStations?: Prisma.StationCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderCreateNestedManyWithoutCreatorInput
+  assignedOrders?: Prisma.FuelOrderCreateNestedManyWithoutAssigneeInput
+  orderEvents?: Prisma.OrderEventCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+}
+
+export type UserUncheckedCreateWithoutConfirmedPaymentsInput = {
+  id?: number
+  name: string
+  email: string
+  passwordHash: string
+  isActive?: boolean
+  tokenVersion?: number
+  roleId: number
+  stationId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedStations?: Prisma.StationUncheckedCreateNestedManyWithoutManagerInput
+  customerOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutUserInput
+  createdOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutCreatorInput
+  assignedOrders?: Prisma.FuelOrderUncheckedCreateNestedManyWithoutAssigneeInput
+  orderEvents?: Prisma.OrderEventUncheckedCreateNestedManyWithoutActorInput
+  handledCallSessions?: Prisma.CallSessionUncheckedCreateNestedManyWithoutHandoffUserInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type UserCreateOrConnectWithoutConfirmedPaymentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutConfirmedPaymentsInput, Prisma.UserUncheckedCreateWithoutConfirmedPaymentsInput>
+}
+
+export type UserUpsertWithoutConfirmedPaymentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutConfirmedPaymentsInput, Prisma.UserUncheckedUpdateWithoutConfirmedPaymentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutConfirmedPaymentsInput, Prisma.UserUncheckedCreateWithoutConfirmedPaymentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutConfirmedPaymentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutConfirmedPaymentsInput, Prisma.UserUncheckedUpdateWithoutConfirmedPaymentsInput>
+}
+
+export type UserUpdateWithoutConfirmedPaymentsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  station?: Prisma.StationUpdateOneWithoutUsersNestedInput
+  managedStations?: Prisma.StationUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUpdateManyWithoutCreatorNestedInput
+  assignedOrders?: Prisma.FuelOrderUpdateManyWithoutAssigneeNestedInput
+  orderEvents?: Prisma.OrderEventUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutConfirmedPaymentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  stationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedStations?: Prisma.StationUncheckedUpdateManyWithoutManagerNestedInput
+  customerOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutUserNestedInput
+  createdOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutCreatorNestedInput
+  assignedOrders?: Prisma.FuelOrderUncheckedUpdateManyWithoutAssigneeNestedInput
+  orderEvents?: Prisma.OrderEventUncheckedUpdateManyWithoutActorNestedInput
+  handledCallSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutHandoffUserNestedInput
+  refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type UserCreateWithoutHandledCallSessionsInput = {
@@ -1735,6 +2240,9 @@ export type UserCreateWithoutHandledCallSessionsInput = {
   refreshSessions?: Prisma.RefreshSessionCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
@@ -1756,6 +2264,9 @@ export type UserUncheckedCreateWithoutHandledCallSessionsInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedCreateNestedManyWithoutUserInput
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
   attendance?: Prisma.AttendanceRecordUncheckedCreateNestedManyWithoutEmployeeInput
+  sellingPrices?: Prisma.SellingPriceUncheckedCreateNestedManyWithoutCreatorInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedCreateNestedManyWithoutCustomerInput
+  confirmedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutConfirmerInput
 }
 
 export type UserCreateOrConnectWithoutHandledCallSessionsInput = {
@@ -1792,6 +2303,9 @@ export type UserUpdateWithoutHandledCallSessionsInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
@@ -1813,6 +2327,9 @@ export type UserUncheckedUpdateWithoutHandledCallSessionsInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserCreateManyStationInput = {
@@ -1845,6 +2362,9 @@ export type UserUpdateWithoutStationInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStationInput = {
@@ -1866,6 +2386,9 @@ export type UserUncheckedUpdateWithoutStationInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutStationInput = {
@@ -1910,6 +2433,9 @@ export type UserUpdateWithoutRoleInput = {
   refreshSessions?: Prisma.RefreshSessionUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoleInput = {
@@ -1931,6 +2457,9 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   refreshSessions?: Prisma.RefreshSessionUncheckedUpdateManyWithoutUserNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutEmployeeNestedInput
+  sellingPrices?: Prisma.SellingPriceUncheckedUpdateManyWithoutCreatorNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutCustomerNestedInput
+  confirmedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutConfirmerNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutRoleInput = {
@@ -1960,6 +2489,9 @@ export type UserCountOutputType = {
   refreshSessions: number
   shifts: number
   attendance: number
+  sellingPrices: number
+  orderQuotes: number
+  confirmedPayments: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1972,6 +2504,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   refreshSessions?: boolean | UserCountOutputTypeCountRefreshSessionsArgs
   shifts?: boolean | UserCountOutputTypeCountShiftsArgs
   attendance?: boolean | UserCountOutputTypeCountAttendanceArgs
+  sellingPrices?: boolean | UserCountOutputTypeCountSellingPricesArgs
+  orderQuotes?: boolean | UserCountOutputTypeCountOrderQuotesArgs
+  confirmedPayments?: boolean | UserCountOutputTypeCountConfirmedPaymentsArgs
 }
 
 /**
@@ -2047,6 +2582,27 @@ export type UserCountOutputTypeCountAttendanceArgs<ExtArgs extends runtime.Types
   where?: Prisma.AttendanceRecordWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSellingPricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SellingPriceWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOrderQuotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderQuoteWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountConfirmedPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2070,6 +2626,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
   shifts?: boolean | Prisma.User$shiftsArgs<ExtArgs>
   attendance?: boolean | Prisma.User$attendanceArgs<ExtArgs>
+  sellingPrices?: boolean | Prisma.User$sellingPricesArgs<ExtArgs>
+  orderQuotes?: boolean | Prisma.User$orderQuotesArgs<ExtArgs>
+  confirmedPayments?: boolean | Prisma.User$confirmedPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2129,6 +2688,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   refreshSessions?: boolean | Prisma.User$refreshSessionsArgs<ExtArgs>
   shifts?: boolean | Prisma.User$shiftsArgs<ExtArgs>
   attendance?: boolean | Prisma.User$attendanceArgs<ExtArgs>
+  sellingPrices?: boolean | Prisma.User$sellingPricesArgs<ExtArgs>
+  orderQuotes?: boolean | Prisma.User$orderQuotesArgs<ExtArgs>
+  confirmedPayments?: boolean | Prisma.User$confirmedPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2154,6 +2716,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     refreshSessions: Prisma.$RefreshSessionPayload<ExtArgs>[]
     shifts: Prisma.$ShiftPayload<ExtArgs>[]
     attendance: Prisma.$AttendanceRecordPayload<ExtArgs>[]
+    sellingPrices: Prisma.$SellingPricePayload<ExtArgs>[]
+    orderQuotes: Prisma.$OrderQuotePayload<ExtArgs>[]
+    confirmedPayments: Prisma.$PaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -2571,6 +3136,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   refreshSessions<T extends Prisma.User$refreshSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shifts<T extends Prisma.User$shiftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attendance<T extends Prisma.User$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sellingPrices<T extends Prisma.User$sellingPricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sellingPricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SellingPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderQuotes<T extends Prisma.User$orderQuotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orderQuotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderQuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  confirmedPayments<T extends Prisma.User$confirmedPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$confirmedPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3243,6 +3811,78 @@ export type User$attendanceArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AttendanceRecordScalarFieldEnum | Prisma.AttendanceRecordScalarFieldEnum[]
+}
+
+/**
+ * User.sellingPrices
+ */
+export type User$sellingPricesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SellingPrice
+   */
+  select?: Prisma.SellingPriceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SellingPrice
+   */
+  omit?: Prisma.SellingPriceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SellingPriceInclude<ExtArgs> | null
+  where?: Prisma.SellingPriceWhereInput
+  orderBy?: Prisma.SellingPriceOrderByWithRelationInput | Prisma.SellingPriceOrderByWithRelationInput[]
+  cursor?: Prisma.SellingPriceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SellingPriceScalarFieldEnum | Prisma.SellingPriceScalarFieldEnum[]
+}
+
+/**
+ * User.orderQuotes
+ */
+export type User$orderQuotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderQuote
+   */
+  select?: Prisma.OrderQuoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderQuote
+   */
+  omit?: Prisma.OrderQuoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderQuoteInclude<ExtArgs> | null
+  where?: Prisma.OrderQuoteWhereInput
+  orderBy?: Prisma.OrderQuoteOrderByWithRelationInput | Prisma.OrderQuoteOrderByWithRelationInput[]
+  cursor?: Prisma.OrderQuoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderQuoteScalarFieldEnum | Prisma.OrderQuoteScalarFieldEnum[]
+}
+
+/**
+ * User.confirmedPayments
+ */
+export type User$confirmedPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
 }
 
 /**

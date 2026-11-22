@@ -4,13 +4,20 @@ import { prisma } from '../../src/database/prisma.js';
 import { ACCESS_COOKIE } from '../../src/modules/auth/auth.types.js';
 import { tokenService } from '../../src/modules/auth/token.service.js';
 import { workRecordFixtures } from '../fixtures/attendance.js';
-import * as demoData from '../../src/modules/orders/orders.demo.js';
+import {
+  orderFixtures,
+  matchesOrder,
+  selectFields,
+  type OrderFixture,
+  type OrderWhere,
+} from '../fixtures/orders.js';
 
 jest.mock('../../src/database/prisma.js', () => ({
   prisma: {
     user: { findUnique: jest.fn() },
     station: { findFirst: jest.fn() },
     attendanceRecord: { count: jest.fn(), findMany: jest.fn() },
+    fuelOrder: { groupBy: jest.fn(), findMany: jest.fn(), count: jest.fn() },
     $transaction: jest.fn(),
   },
 }));
@@ -22,6 +29,7 @@ const db = prisma as unknown as {
   user: { findUnique: jest.Mock };
   station: { findFirst: jest.Mock };
   attendanceRecord: { count: jest.Mock; findMany: jest.Mock };
+  fuelOrder: { groupBy: jest.Mock; findMany: jest.Mock; count: jest.Mock };
   $transaction: jest.Mock;
 };
 type Row = {
@@ -33,6 +41,7 @@ type Row = {
 };
 type Where = { AND?: Where[]; OR?: Where[]; [key: string]: unknown };
 let rows: Row[];
+let orders: OrderFixture[];
 let stations: {
   id: number;
   name: string;
@@ -107,6 +116,32 @@ beforeEach(() => {
     stationA: 10,
     stationB: 20,
   }).attendance.map((row, index) => ({ ...row, id: index + 1 }));
+  orders = [...orderFixtures(10), ...orderFixtures(20)];
+  db.fuelOrder.groupBy.mockImplementation(
+    async ({ where }: { where: OrderWhere }) => {
+      const counts = new Map<string, number>();
+      for (const row of orders.filter((row) => matchesOrder(row, where)))
+        counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
+      return [...counts].map(([status, count]) => ({
+        status,
+        _count: { _all: count },
+      }));
+    },
+  );
+  db.fuelOrder.count.mockImplementation(
+    async ({ where }) =>
+      orders.filter((row) => matchesOrder(row, where)).length,
+  );
+  db.fuelOrder.findMany.mockImplementation(
+    async ({ where, select, skip, take }) =>
+      orders
+        .filter((row) => matchesOrder(row, where))
+        .sort(
+          (a, b) => Number(b.createdAt) - Number(a.createdAt) || b.id - a.id,
+        )
+        .slice(skip, skip + take)
+        .map((row) => selectFields(row, select)),
+  );
   db.user.findUnique.mockImplementation(async () => ({
     id: actorId,
     name: 'Manager',
@@ -166,8 +201,8 @@ beforeEach(() => {
 });
 
 describe('manager analytics access controls', () => {
-  it('requires authentication before reading counts or demo data', async () => {
-    const factory = jest.spyOn(demoData, 'demoOrdersForStation');
+  it('requires authentication before reading counts or order data', async () => {
+    const factory = db.fuelOrder.groupBy;
     const response = await get({}, base, false);
     expect(response.status).toBe(401);
     expect(response.headers['cache-control']).toBe('no-store');
@@ -197,7 +232,7 @@ describe('manager analytics access controls', () => {
   it.each([{}, { from: '1900-01-01T00:00:00Z', to: '1900-01-02T00:00:00Z' }])(
     'returns identical unknown/unmanaged 404s even for empty ranges: %j',
     async (query) => {
-      const factory = jest.spyOn(demoData, 'demoOrdersForStation');
+      const factory = db.fuelOrder.groupBy;
       for (const id of [20, 999]) {
         const response = await get(query, base.replace('/10/', `/${id}/`));
         expect(response.status).toBe(404);
@@ -215,8 +250,15 @@ describe('manager analytics access controls', () => {
   });
 });
 
-describe('manager analytics metrics', () => {
-  it('counts stored-station history, including inactive transferred employees, without attendance pagination', async () => {
+describe('manager persisted analytics metrics', () => {
+  const zero = {
+    AWAITING_PAYMENT: 0,
+    PENDING: 0,
+    IN_PROGRESS: 0,
+    COMPLETED: 0,
+    CANCELLED: 0,
+  };
+  it('counts persisted statuses and retains attendance history without money aggregates', async () => {
     const response = await get();
     expect(response.status).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
@@ -224,90 +266,85 @@ describe('manager analytics metrics', () => {
       stationId: 10,
       attendance: { totalRecords: 4, openRecords: 1, closedRecords: 3 },
       orders: {
-        dataSource: 'demo',
-        currency: 'USD',
+        dataSource: 'database',
         totalOrders: 8,
-        countsByStatus: { PENDING: 3, COMPLETED: 3, CANCELLED: 2 },
-        completedOrderedAmountMinor: 17000,
+        countsByStatus: {
+          AWAITING_PAYMENT: 0,
+          PENDING: 2,
+          IN_PROGRESS: 1,
+          COMPLETED: 3,
+          CANCELLED: 2,
+        },
       },
     });
-    expect(db.station.findFirst).toHaveBeenCalledWith({
-      where: { AND: [{ id: 10 }, { managerId: 1 }] },
-      select: { id: true, name: true, isActive: true },
-    });
     expect(db.attendanceRecord.findMany).not.toHaveBeenCalled();
-    expect(db.attendanceRecord.count.mock.calls.map((call) => call[0])).toEqual(
-      [
-        { where: { stationId: 10 } },
-        { where: { AND: [{ stationId: 10 }, { clockOutAt: null }] } },
-      ],
-    );
+    expect(db.fuelOrder.findMany).not.toHaveBeenCalled();
+    expect(db.fuelOrder.groupBy).toHaveBeenCalledWith({
+      by: ['status'],
+      where: { stationId: 10 },
+      _count: { _all: true },
+    });
     expect(db.$transaction).toHaveBeenCalledWith(expect.any(Function), {
       isolationLevel: 'RepeatableRead',
     });
     expect(response.text).not.toMatch(
-      /payment|revenue|captured|password|email|token/,
+      /currency|Minor|payment|revenue|captured|password|email|token/,
     );
   });
-  it('returns another owned station separately, with zero attendance and its own demo totals', async () => {
+  it('returns zero status counts for an owned station without orders or attendance', async () => {
     const response = await get({}, base.replace('/10/', '/11/'));
     expect(response.status).toBe(200);
-    expect(response.body.stationId).toBe(11);
-    expect(response.body.attendance).toEqual({
-      totalRecords: 0,
-      openRecords: 0,
-      closedRecords: 0,
+    expect(response.body).toEqual({
+      stationId: 11,
+      attendance: { totalRecords: 0, openRecords: 0, closedRecords: 0 },
+      orders: { dataSource: 'database', totalOrders: 0, countsByStatus: zero },
     });
-    expect(response.body.orders.completedOrderedAmountMinor).toBe(17200);
   });
-  it('isolates counts and demo records across managers, even with a mixed demo source', async () => {
-    const mixed = [
-      ...demoData.demoOrdersForStation(10),
-      ...demoData.demoOrdersForStation(20),
-    ];
-    jest.spyOn(demoData, 'demoOrdersForStation').mockReturnValue(mixed);
-    const own = await get();
-    expect(own.body.attendance.totalRecords).toBe(4);
-    expect(own.body.orders.totalOrders).toBe(8);
-    expect(own.body.orders.completedOrderedAmountMinor).toBe(17000);
+  it('isolates persisted counts between managers', async () => {
+    orders = orders.filter((row) => row.stationId === 10 || row.id === 2007);
+    expect((await get()).body.orders.totalOrders).toBe(8);
     expect((await get({}, base.replace('/10/', '/20/'))).status).toBe(404);
     actorId = 2;
     const other = await get({}, base.replace('/10/', '/20/'));
-    expect(other.status).toBe(200);
     expect(other.body.attendance).toEqual({
       totalRecords: 2,
       openRecords: 1,
       closedRecords: 1,
     });
-    expect(other.body.orders.totalOrders).toBe(8);
-    expect(other.body.orders.completedOrderedAmountMinor).toBe(19000);
+    expect(other.body.orders).toEqual({
+      dataSource: 'database',
+      totalOrders: 1,
+      countsByStatus: { ...zero, IN_PROGRESS: 1 },
+    });
     expect((await get()).status).toBe(404);
   });
-  it('uses overlap for overnight attendance and creation time for orders with identical date bounds', async () => {
+  it('preserves unknown legacy statuses rather than silently dropping orders', async () => {
+    orders[0].status = 'LEGACY';
+    const summary = (await get()).body.orders;
+    expect(summary.totalOrders).toBe(8);
+    expect(summary.countsByStatus).toEqual({
+      AWAITING_PAYMENT: 0,
+      PENDING: 2,
+      IN_PROGRESS: 1,
+      COMPLETED: 3,
+      CANCELLED: 1,
+      LEGACY: 1,
+    });
+  });
+  it('uses overlap for overnight attendance and creation time for orders', async () => {
     const response = await get({
       from: '2026-11-19T02:00:00+02:00',
       to: '2026-11-19T03:00:00+02:00',
     });
-    expect(response.status).toBe(200);
     expect(response.body.attendance).toEqual({
       totalRecords: 2,
       openRecords: 1,
       closedRecords: 1,
     });
     expect(response.body.orders).toEqual({
-      dataSource: 'demo',
-      currency: 'USD',
+      dataSource: 'database',
       totalOrders: 1,
-      countsByStatus: { PENDING: 1, COMPLETED: 0, CANCELLED: 0 },
-      completedOrderedAmountMinor: 0,
-    });
-    expect(db.attendanceRecord.count.mock.calls[0][0].where).toEqual({
-      stationId: 10,
-      clockInAt: { lt: new Date('2026-11-19T01:00:00Z') },
-      OR: [
-        { clockOutAt: null },
-        { clockOutAt: { gt: new Date('2026-11-19T00:00:00Z') } },
-      ],
+      countsByStatus: { ...zero, PENDING: 1 },
     });
   });
   it('excludes attendance ending at from and orders created at to', async () => {
@@ -321,7 +358,6 @@ describe('manager analytics metrics', () => {
       closedRecords: 1,
     });
     expect(response.body.orders.totalOrders).toBe(0);
-    expect(response.body.orders.completedOrderedAmountMinor).toBe(0);
   });
   it('excludes attendance starting at to and includes orders created at from', async () => {
     rows.push({
@@ -340,14 +376,12 @@ describe('manager analytics metrics', () => {
       closedRecords: 0,
     });
     expect(response.body.orders).toEqual({
-      dataSource: 'demo',
-      currency: 'USD',
+      dataSource: 'database',
       totalOrders: 2,
-      countsByStatus: { PENDING: 1, COMPLETED: 1, CANCELLED: 0 },
-      completedOrderedAmountMinor: 6000,
+      countsByStatus: { ...zero, PENDING: 1, COMPLETED: 1 },
     });
   });
-  it('accepts from alone and never invents a clock-out for open records', async () => {
+  it('accepts from alone without inventing clock-out times', async () => {
     const response = await get({ from: '2026-11-20T00:00:00Z' });
     expect(response.body.attendance).toEqual({
       totalRecords: 1,
@@ -355,42 +389,33 @@ describe('manager analytics metrics', () => {
       closedRecords: 0,
     });
     expect(response.body.orders.totalOrders).toBe(4);
-    expect(response.body.orders.completedOrderedAmountMinor).toBe(11000);
     expect(rows.find((row) => row.id === 4)!.clockOutAt).toBeNull();
   });
-  it('accepts to alone and returns zeros with every supported status for empty selections', async () => {
-    const response = await get({ to: '2026-11-18T20:00:00Z' });
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      stationId: 10,
-      attendance: { totalRecords: 0, openRecords: 0, closedRecords: 0 },
-      orders: {
-        dataSource: 'demo',
-        currency: 'USD',
-        totalOrders: 0,
-        countsByStatus: { PENDING: 0, COMPLETED: 0, CANCELLED: 0 },
-        completedOrderedAmountMinor: 0,
-      },
-    });
-  });
-  it('returns zeros for a bounded empty range', async () => {
-    const response = await get({
-      from: '1900-01-01T00:00:00Z',
-      to: '1900-01-02T00:00:00Z',
-    });
+  it.each([
+    { to: '2026-11-18T20:00:00Z' },
+    { from: '1900-01-01T00:00:00Z', to: '1900-01-02T00:00:00Z' },
+  ])('returns explicit zero counts for empty range %j', async (query) => {
+    const response = await get(query);
     expect(response.body.attendance).toEqual({
       totalRecords: 0,
       openRecords: 0,
       closedRecords: 0,
     });
-    expect(response.body.orders.totalOrders).toBe(0);
-    expect(response.body.orders.countsByStatus).toEqual({
-      PENDING: 0,
-      COMPLETED: 0,
-      CANCELLED: 0,
+    expect(response.body.orders).toEqual({
+      dataSource: 'database',
+      totalOrders: 0,
+      countsByStatus: zero,
     });
   });
-  it('counts entirely closed and entirely open attendance accurately', async () => {
+  it('returns zero orders without affecting attendance', async () => {
+    orders = [];
+    expect((await get()).body).toEqual({
+      stationId: 10,
+      attendance: { totalRecords: 4, openRecords: 1, closedRecords: 3 },
+      orders: { dataSource: 'database', totalOrders: 0, countsByStatus: zero },
+    });
+  });
+  it('counts entirely open and entirely closed attendance accurately', async () => {
     rows = rows.filter((row) => row.clockOutAt !== null);
     expect((await get()).body.attendance).toEqual({
       totalRecords: 3,
@@ -406,7 +431,7 @@ describe('manager analytics metrics', () => {
       closedRecords: 0,
     });
   });
-  it('agrees with both lists across all pages, rather than aggregating their first page', async () => {
+  it('agrees with both complete paginated lists', async () => {
     rows.push(
       ...Array.from({ length: 26 }, (_, i) => ({
         id: 100 + i,
@@ -419,7 +444,7 @@ describe('manager analytics metrics', () => {
     const range = { from: '2026-11-18T00:00:00Z', to: '2026-11-22T00:00:00Z' };
     const summary = (await get(range)).body;
     const attendance: { clockOutAt: string | null }[] = [];
-    const orders: { status: string; orderedAmountMinor: number }[] = [];
+    const selectedOrders: { status: string }[] = [];
     for (const path of ['attendance', 'orders']) {
       let page = 1;
       let totalPages = 1;
@@ -429,9 +454,8 @@ describe('manager analytics metrics', () => {
           base.replace('/analytics', `/${path}`),
         );
         expect(response.status).toBe(200);
-        const entries = response.body[path];
-        if (path === 'attendance') attendance.push(...entries);
-        else orders.push(...entries);
+        if (path === 'attendance') attendance.push(...response.body.attendance);
+        else selectedOrders.push(...response.body.orders);
         totalPages = response.body.pagination.totalPages;
         expect(totalPages).toBeGreaterThan(1);
         page++;
@@ -443,17 +467,12 @@ describe('manager analytics metrics', () => {
       openRecords: attendance.filter((row) => row.clockOutAt === null).length,
       closedRecords: attendance.filter((row) => row.clockOutAt !== null).length,
     });
-    expect(orders).toHaveLength(8);
-    expect(summary.orders.totalOrders).toBe(orders.length);
-    for (const status of ['PENDING', 'COMPLETED', 'CANCELLED'])
+    expect(selectedOrders).toHaveLength(8);
+    expect(summary.orders.totalOrders).toBe(selectedOrders.length);
+    for (const status of ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
       expect(summary.orders.countsByStatus[status]).toBe(
-        orders.filter((order) => order.status === status).length,
+        selectedOrders.filter((row) => row.status === status).length,
       );
-    expect(summary.orders.completedOrderedAmountMinor).toBe(
-      orders
-        .filter((order) => order.status === 'COMPLETED')
-        .reduce((sum, order) => sum + order.orderedAmountMinor, 0),
-    );
   });
 });
 

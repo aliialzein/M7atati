@@ -19,7 +19,11 @@ export class StationsService {
       throw new HttpError('Insufficient permissions', 403);
     const stations = await this.repository.managed(stationScope(actor));
     return {
-      stations: stations.map(({ id, name, isActive }) => ({ id, name, isActive })),
+      stations: stations.map(({ id, name, isActive }) => ({
+        id,
+        name,
+        isActive,
+      })),
     };
   }
 
@@ -87,7 +91,15 @@ export class StationsService {
   }
   async setStatus(id: number, isActive: boolean) {
     return this.repository.transaction(async (tx) => {
+      await this.repository.lockStation(id, tx);
       const station = await this.requireStation(id, tx);
+      // Check even an already-inactive legacy station; reactivation must remain
+      // available to recover it, but deactivation cannot acknowledge active work.
+      if (!isActive && (await this.repository.hasInProgressOrder(id, tx)))
+        throw new HttpError(
+          'Station has active orders; complete them before deactivating the station',
+          409,
+        );
       if (station.isActive === isActive) return managedStation(station);
       return managedStation(await this.repository.update(id, { isActive }, tx));
     });

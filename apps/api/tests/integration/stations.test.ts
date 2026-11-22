@@ -16,6 +16,8 @@ jest.mock('../../src/database/prisma.js', () => ({
       create: jest.fn(),
       update: jest.fn(),
     },
+    fuelOrder: { findFirst: jest.fn() },
+    $queryRaw: jest.fn(),
     $transaction: jest.fn(),
   },
 }));
@@ -56,12 +58,15 @@ type Database = {
     create: jest.Mock;
     update: jest.Mock;
   };
+  fuelOrder: { findFirst: jest.Mock };
+  $queryRaw: jest.Mock;
   $transaction: jest.Mock;
 };
 const db = prisma as unknown as Database;
 let rows: Row[];
 let role: string;
 let permissions: string[];
+let orders: { id: number; stationId: number; status: string }[];
 const grants = ['stations.read', 'stations.create', 'stations.update'];
 function row(id: number, name: string, isActive = true): Row {
   return {
@@ -118,6 +123,15 @@ beforeEach(() => {
   role = 'ADMIN';
   permissions = [...grants];
   rows = [row(3, 'Beta'), row(2, 'Alpha', false), row(1, 'Alpha')];
+  orders = [];
+  db.$queryRaw.mockResolvedValue([]);
+  db.fuelOrder.findFirst.mockImplementation(
+    async ({ where }) =>
+      orders.find(
+        (order) =>
+          order.stationId === where.stationId && order.status === where.status,
+      ) ?? null,
+  );
   db.user.findUnique.mockImplementation(async () => ({
     id: 1,
     name: 'Actor',
@@ -451,6 +465,79 @@ describe('station management and picker contracts', () => {
     });
     expect((await call('patch', '/1', { latitude: 34 })).status).toBe(400);
     expect(db.station.findUnique).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('station deactivation with claimed orders', () => {
+  it('rejects deactivation with active station work and preserves every relationship', async () => {
+    orders.push({ id: 90, stationId: 1, status: 'IN_PROGRESS' });
+    const before = structuredClone(rows);
+    const response = await call('patch', '/1/status', { isActive: false });
+    expect(response.status).toBe(409);
+    expect(response.body.message).toMatch(/active orders/);
+    expect(rows).toEqual(before);
+    expect(orders).toEqual([{ id: 90, stationId: 1, status: 'IN_PROGRESS' }]);
+    expect(db.station.update).not.toHaveBeenCalled();
+  });
+
+  it.each(['PENDING', 'COMPLETED', 'CANCELLED'])(
+    'allows deactivation and an identical retry with only %s orders',
+    async (status) => {
+      orders.push({ id: 90, stationId: 1, status });
+      const first = await call('patch', '/1/status', { isActive: false });
+      const retry = await call('patch', '/1/status', { isActive: false });
+      expect(first.status).toBe(200);
+      expect(retry.status).toBe(200);
+      expect(retry.body).toEqual(first.body);
+      expect(db.station.update).toHaveBeenCalledTimes(1);
+      expect(orders[0].status).toBe(status);
+    },
+  );
+
+  it('ignores active work at another station', async () => {
+    orders.push({ id: 90, stationId: 3, status: 'IN_PROGRESS' });
+    expect((await call('patch', '/1/status', { isActive: false })).status).toBe(
+      200,
+    );
+  });
+
+  it('allows reactivation of an inactive legacy station with active work', async () => {
+    orders.push({ id: 90, stationId: 2, status: 'IN_PROGRESS' });
+    expect((await call('patch', '/2/status', { isActive: false })).status).toBe(
+      409,
+    );
+    expect((await call('patch', '/2/status', { isActive: true })).status).toBe(
+      200,
+    );
+    expect((await call('patch', '/2/status', { isActive: true })).status).toBe(
+      200,
+    );
+    expect(orders[0].status).toBe('IN_PROGRESS');
+    expect(db.station.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('permits deactivation after completion without changing the order', async () => {
+    orders.push({ id: 90, stationId: 1, status: 'IN_PROGRESS' });
+    expect((await call('patch', '/1/status', { isActive: false })).status).toBe(
+      409,
+    );
+    orders[0].status = 'COMPLETED';
+    expect((await call('patch', '/1/status', { isActive: false })).status).toBe(
+      200,
+    );
+    expect(orders[0].status).toBe('COMPLETED');
+  });
+
+  it('rechecks active work on a fresh transaction after a serialization conflict', async () => {
+    db.$transaction.mockImplementationOnce(async () => {
+      orders.push({ id: 90, stationId: 1, status: 'IN_PROGRESS' });
+      throw { code: 'P2034' };
+    });
+    expect((await call('patch', '/1/status', { isActive: false })).status).toBe(
+      409,
+    );
+    expect(db.station.update).not.toHaveBeenCalled();
+    expect(rows.find((station) => station.id === 1)!.isActive).toBe(true);
   });
 });
 
