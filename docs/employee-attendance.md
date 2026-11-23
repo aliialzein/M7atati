@@ -1,5 +1,9 @@
 # Employee Stage 1: attendance and home-page controls
 
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+Stage-specific exclusions and rollout notes below are historical, not statements
+that persistent orders or weekly shifts remain unimplemented.
+
 This stage adds self-service attendance only. Existing HR/Admin reads, employee
 transfer restrictions, Manager lists/CSV/PDF reports, analytics, and demo orders
 retain their contracts. Weekly shifts and persistent orders are later stages.

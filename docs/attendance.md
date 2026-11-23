@@ -1,5 +1,9 @@
 # HR Stage 2: shift and attendance reads
 
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+Stage exclusions/deployment notes below are historical; employee attendance writes
+now exist, while these ADMIN/HR global endpoints remain read-only.
+
 `GET /api/shifts` returns `{ shifts, pagination }`; `GET /api/attendance` returns
 `{ attendance, pagination }`. Both require cookie authentication, an ADMIN or HR
 role, and respectively `shifts.read` or `attendance.read`. An EMPLOYEE's existing

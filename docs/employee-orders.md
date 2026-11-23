@@ -1,9 +1,10 @@
 # Employee Stage 3: persistent pending-order queue
 
-This stage is a read-only employee queue. It does not add claiming/completion,
-production order creation, payments, currency assumptions, or schema changes.
-Manager order lists and analytics continue using their existing demo source.
-Claim/completion is documented separately in [Employee Stage 4](employee-order-work.md).
+This document describes the read-only pending queue. Current creation, payments,
+claiming/completion and persisted Manager APIs are consolidated in the authoritative
+[frontend API guide](frontend-api-guide.md). Claim/completion details also appear
+in [Employee Stage 4](employee-order-work.md); historical stage exclusions below
+do not mean those workflows remain unimplemented.
 
 ## Endpoint
 

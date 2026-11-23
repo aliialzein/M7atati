@@ -1,5 +1,9 @@
 # Employee Stage 4: claim and complete
 
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+References below to unchanged demo Manager APIs describe this stage's history;
+current Manager orders and analytics use persisted database records.
+
 Builds on Stages 1–3 without changing Manager demo orders/analytics, attendance,
 CSV/PDF reports or weekly shifts. No production creation, cancellation,
 reassignment, payments or actual dispensed-volume updates are introduced.

@@ -1,5 +1,9 @@
 # Manager Stage 1: station discovery and attendance reports
 
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+Stage exclusions below describe historical scope; Manager orders and analytics
+now exist with their own permissions and persisted data.
+
 Backend only; uses the existing schema. HR/Admin `/api/attendance` and
 `/api/shifts` contracts are unchanged. Managers still cannot use those global
 views or read shifts. No orders, analytics, or frontend work is included.
