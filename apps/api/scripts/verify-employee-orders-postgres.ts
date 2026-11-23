@@ -70,13 +70,28 @@ async function main() {
     assert(b.orders.some((order) => order.id === first[1].orderId));
     // A new marked order on each verification run preserves all earlier history.
     const raceOrder = await database.$transaction(async (tx) => {
+      // Share the fixture lock so concurrent verifier runs allocate distinct
+      // pump numbers without changing any retained fixture reservation.
+      await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(73190211)`;
       const original = await tx.fuelOrder.findUniqueOrThrow({
         where: { id: first[0].orderId },
+      });
+      const lastPump = await tx.pump.findFirst({
+        where: { stationId: original.stationId },
+        orderBy: { number: 'desc' },
+        select: { number: true },
+      });
+      const pump = await tx.pump.create({
+        data: {
+          stationId: original.stationId,
+          number: (lastPump?.number ?? 0) + 1,
+          status: 'IDLE',
+        },
       });
       const order = await tx.fuelOrder.create({
         data: {
           stationId: original.stationId,
-          pumpId: original.pumpId,
+          pumpId: pump.id,
           fuelTypeId: original.fuelTypeId,
           source: `EMPLOYEE_WORK_RACE_${randomUUID()}`,
           status: 'PENDING',

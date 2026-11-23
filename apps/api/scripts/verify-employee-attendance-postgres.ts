@@ -4,6 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import pg from 'pg';
 import type { AuthContext } from '../src/modules/auth/auth.types.js';
+import { assertReviewedMigrationHistory } from './postgres-verification-migrations.js';
 
 // Opt-in only. No fallback to DATABASE_URL, no database creation, no development
 // target, no general seed/provisioning. Requires an EMPTY dedicated database.
@@ -32,6 +33,13 @@ async function main() {
     !url.searchParams.has('schema') ||
       url.searchParams.get('schema') === 'public',
   );
+  const root = 'apps/api/prisma/migrations';
+  const migration = '20261121130000_employee_attendance';
+  const names = readdirSync(root)
+    .filter((entry) => /^\d/.test(entry))
+    .sort();
+  assertReviewedMigrationHistory(names);
+  const migrationIndex = names.indexOf(migration);
   const sql = new pg.Client({
     connectionString: target,
     connectionTimeoutMillis: 5000,
@@ -53,17 +61,7 @@ async function main() {
       0,
       'Disposable database must be empty',
     );
-    const root = 'apps/api/prisma/migrations';
-    const migration = '20261121130000_employee_attendance';
-    const names = readdirSync(root)
-      .filter((entry) => /^\d/.test(entry))
-      .sort();
-    assert.equal(
-      names.at(-1),
-      migration,
-      'Review verifier before using with later migrations',
-    );
-    for (const entry of names.filter((entry) => entry !== migration))
+    for (const entry of names.slice(0, migrationIndex))
       await sql.query(readFileSync(join(root, entry, 'migration.sql'), 'utf8'));
     const employeeRole = (
       await sql.query(
@@ -135,6 +133,10 @@ async function main() {
       ),
       (error: unknown) => (error as { code: string }).code === '23505',
     );
+    // Preserve the pre-migration rejection scenario above, then bring the
+    // disposable schema up to date before current services query newer tables.
+    for (const entry of names.slice(migrationIndex + 1))
+      await sql.query(readFileSync(join(root, entry, 'migration.sql'), 'utf8'));
     process.env.DATABASE_URL = target;
     process.env.NODE_ENV = 'test';
     process.env.JWT_ACCESS_SECRET = randomBytes(32).toString('hex');
@@ -262,7 +264,7 @@ async function main() {
         releaseWinner = resolve;
       });
       let attendanceRead = false;
-      let targetRead = false;
+      let targetLockAttempted = false;
       const attendance = new EmployeeAttendanceService({
         ...attendanceRepository,
         async employee(id, tx) {
@@ -280,17 +282,16 @@ async function main() {
       });
       const users = new UsersService({
         ...usersRepository,
-        async findUser(id, scope, tx) {
-          const result = await usersRepository.findUser(id, scope, tx);
-          if (id === person.id && !targetRead) {
-            targetRead = true;
+        async lockUser(id, tx) {
+          if (id === person.id && !targetLockAttempted) {
+            targetLockAttempted = true;
+            // Rendezvous before FOR UPDATE. Holding this lock while waiting
+            // for check-in would block its employee FK check and deadlock the
+            // verifier's barrier instead of exercising the intended winner.
             await rendezvous();
+            if (!transferWins) await winnerCommitted;
           }
-          return result;
-        },
-        async update(id, data, tx) {
-          if (!transferWins) await winnerCommitted;
-          return usersRepository.update(id, data, tx);
+          return usersRepository.lockUser(id, tx);
         },
       });
       const checkedIn = attendance.checkIn(context(person.id), randomUUID());
@@ -318,6 +319,163 @@ async function main() {
     }
     console.info(
       'PASS: both transfer/check-in commit orders preserve current assignment or reject transfer',
+    );
+
+    // Task 02: real Serializable attendance/role races. All users/roles below
+    // belong to the same initially empty, explicitly authorized disposable DB.
+    const adminRole = await prisma.role.create({ data: { name: 'ADMIN' } });
+    for (const name of ['MANAGER', 'SECURITY'])
+      await prisma.role.create({ data: { name } });
+    const admin = await employee(adminRole.id, null);
+    const administrator: AuthContext = {
+      user: { ...context(admin.id, 'ADMIN').user, stationId: null },
+      permissions: ['users.update'],
+    };
+    for (const role of ['MANAGER', 'SECURITY'] as const) {
+      for (const roleFirst of [true, false]) {
+        const person = await employee();
+        const rendezvous = gate();
+        let committed!: () => void;
+        const winnerCommitted = new Promise<void>((resolve) => {
+          committed = resolve;
+        });
+        let readEmployee = false;
+        let attemptedLock = false;
+        const attendance = new EmployeeAttendanceService({
+          ...attendanceRepository,
+          async employee(id, tx) {
+            const result = await attendanceRepository.employee(id, tx);
+            if (!readEmployee) {
+              readEmployee = true;
+              await rendezvous();
+            }
+            return result;
+          },
+          async create(id, stationId, requestId, tx) {
+            if (roleFirst) await winnerCommitted;
+            return attendanceRepository.create(id, stationId, requestId, tx);
+          },
+        });
+        const users = new UsersService({
+          ...usersRepository,
+          async lockUser(id, tx) {
+            if (id === person.id && !attemptedLock) {
+              attemptedLock = true;
+              await rendezvous();
+              if (!roleFirst) await winnerCommitted;
+            }
+            return usersRepository.lockUser(id, tx);
+          },
+        });
+        const checkedIn = attendance.checkIn(context(person.id), randomUUID());
+        const changed = users.update(administrator, person.id, { role });
+        void (roleFirst ? changed : checkedIn).then(committed, committed);
+        const outcomes = await Promise.allSettled([checkedIn, changed]);
+        assert.equal(outcomes[0].status, roleFirst ? 'rejected' : 'fulfilled');
+        assert.equal(outcomes[1].status, roleFirst ? 'fulfilled' : 'rejected');
+        const rejected = outcomes[roleFirst ? 0 : 1];
+        assert(rejected.status === 'rejected');
+        assert.equal(rejected.reason.statusCode, roleFirst ? 403 : 409);
+        const saved = await prisma.user.findUniqueOrThrow({
+          where: { id: person.id },
+          include: { role: true },
+        });
+        const open = await prisma.attendanceRecord.findMany({
+          where: { employeeId: person.id, clockOutAt: null },
+        });
+        assert.equal(saved.role.name, roleFirst ? role : 'EMPLOYEE');
+        assert.equal(open.length, roleFirst ? 0 : 1);
+        if (open.length) assert.equal(open[0].stationId, stationA);
+      }
+    }
+    console.info(
+      'PASS: check-in versus MANAGER/SECURITY role exit in both commit orders; no stranded attendance',
+    );
+
+    const checkingOut = await employee();
+    const original = await service.checkIn(
+      context(checkingOut.id),
+      randomUUID(),
+    );
+    const rendezvous = gate();
+    let readRecord = false;
+    let readOpen = false;
+    const checkout = new EmployeeAttendanceService({
+      ...attendanceRepository,
+      async record(id, recordId, tx) {
+        const result = await attendanceRepository.record(id, recordId, tx);
+        if (!readRecord) {
+          readRecord = true;
+          await rendezvous();
+        }
+        return result;
+      },
+    });
+    const changingRole = new UsersService({
+      ...usersRepository,
+      async hasOpenAttendance(id, tx) {
+        const result = await usersRepository.hasOpenAttendance(id, tx);
+        if (!readOpen) {
+          readOpen = true;
+          await rendezvous();
+        }
+        return result;
+      },
+    });
+    const closing = await Promise.allSettled([
+      checkout.checkOut(context(checkingOut.id), original.record.id),
+      changingRole.update(administrator, checkingOut.id, { role: 'SECURITY' }),
+    ]);
+    assert.equal(closing[0].status, 'fulfilled');
+    assert.equal(closing[1].status, 'rejected');
+    if (closing[1].status === 'rejected')
+      assert.equal(closing[1].reason.statusCode, 409);
+    const closedRecord = await prisma.attendanceRecord.findUniqueOrThrow({
+      where: { id: original.record.id },
+    });
+    assert.equal(
+      closedRecord.clockInAt.getTime(),
+      original.record.clockInAt.getTime(),
+    );
+    assert(closedRecord.clockOutAt !== null);
+    await new UsersService().update(administrator, checkingOut.id, {
+      role: 'SECURITY',
+    });
+    assert.deepEqual(
+      await prisma.attendanceRecord.findUniqueOrThrow({
+        where: { id: original.record.id },
+      }),
+      closedRecord,
+    );
+
+    const contested = await employee();
+    const attended = await service.checkIn(context(contested.id), randomUUID());
+    const roleBefore = await prisma.user.findUniqueOrThrow({
+      where: { id: contested.id },
+    });
+    const competing = await Promise.allSettled(
+      (['MANAGER', 'SECURITY'] as const).map((role) =>
+        new UsersService().update(administrator, contested.id, { role }),
+      ),
+    );
+    for (const outcome of competing) {
+      assert(outcome.status === 'rejected');
+      assert.equal(outcome.reason.statusCode, 409);
+    }
+    assert.deepEqual(
+      await prisma.user.findUniqueOrThrow({ where: { id: contested.id } }),
+      roleBefore,
+    );
+    const record = await prisma.attendanceRecord.findUniqueOrThrow({
+      where: { id: attended.record.id },
+    });
+    assert.equal(record.clockOutAt, null);
+    assert.equal(
+      record.clockInAt.getTime(),
+      attended.record.clockInAt.getTime(),
+    );
+    console.info(
+      'PASS: checkout/role overlap and competing role exits preserve role/attendance or allow a later closed-record retry',
     );
   } finally {
     await disconnect?.();

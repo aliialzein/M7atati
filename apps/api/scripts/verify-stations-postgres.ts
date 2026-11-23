@@ -14,6 +14,7 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import request from 'supertest';
 import type { PrismaClient } from '../src/generated/prisma/client.js';
+import { assertReviewedMigrationHistory } from './postgres-verification-migrations.js';
 
 // Explicit, opt-in real PostgreSQL verification. Never included in routine Jest.
 // Creates a uniquely named database on the existing local development cluster;
@@ -40,6 +41,10 @@ async function main() {
     'development',
     'Development configuration required',
   );
+  const names = readdirSync('apps/api/prisma/migrations')
+    .filter((name) => /^\d/.test(name))
+    .sort();
+  assertReviewedMigrationHistory(names);
   const databaseName = `m7atati_stage1_verify_${randomBytes(8).toString('hex')}`;
   assert(/^m7atati_stage1_verify_[a-f0-9]{16}$/.test(databaseName));
   const testUrl = new URL(sourceUrl);
@@ -98,19 +103,6 @@ async function main() {
       `COMMENT ON DATABASE "${databaseName}" IS 'Disposable isolated M7atati Stage 1 verification database'`,
     );
     console.info(`Isolated PostgreSQL database created: ${databaseName}`);
-    const names = readdirSync('apps/api/prisma/migrations')
-      .filter((name) => /^\d/.test(name))
-      .sort();
-    assert.deepEqual(names, [
-      '20261104110906_init',
-      '20261105085846_add_authentication',
-      '20261114150000_add_station_status',
-      '20261117090000_add_user_token_version',
-      '20261117100000_add_reference_fuel_prices',
-      '20261117110000_preserve_provider_price_units',
-      '20261119090000_add_shifts_and_attendance',
-      '20261121130000_employee_attendance',
-    ]);
     cpSync(
       'apps/api/prisma/migrations/migration_lock.toml',
       join(migrationsPath, 'migration_lock.toml'),

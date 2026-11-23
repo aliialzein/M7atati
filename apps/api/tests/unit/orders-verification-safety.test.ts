@@ -77,39 +77,83 @@ it('allows mutation only after the separate authorization guard', () => {
 });
 it('discovers the complete ordered migration history and hashes every SQL file', () => {
   const migrations = ordersMigrationInventory(resolve('prisma/migrations'));
-  expect(migrations).toHaveLength(12);
+  expect(migrations).toHaveLength(13);
   expect(migrations.slice(-3).map((row) => row.name)).toEqual([
-    '20261122190000_selling_prices_order_quotes',
     '20261122210000_cash_confirmation',
     '20261122220000_active_pump_reservations',
+    '20261123160000_unique_station_manager',
   ]);
   expect(migrations.every((row) => /^[a-f0-9]{64}$/.test(row.checksum))).toBe(
     true,
   );
 });
-it('fails closed before database imports when invoked without target confirmation', () => {
-  const childEnvironment: NodeJS.ProcessEnv = {
-    ...process.env,
-    DATABASE_URL: 'not-a-database-url',
-  };
-  delete childEnvironment.ORDERS_VERIFY_DATABASE_URL;
-  delete childEnvironment.ORDERS_VERIFY_CONFIRM_DATABASE;
-  delete childEnvironment.ALLOW_ORDERS_VERIFY_MUTATIONS;
-  const repo = resolve('../..');
-  const child = spawnSync(
-    process.execPath,
-    [
-      resolve(repo, 'node_modules/tsx/dist/cli.mjs'),
-      'apps/api/scripts/verify-orders-postgres.ts',
-      '--verify',
-    ],
-    { cwd: repo, env: childEnvironment, encoding: 'utf8', timeout: 10000 },
-  );
-  expect(child.status).toBe(1);
-  expect(child.stderr).toContain('Stage 9 stopped');
-  expect(child.stderr).not.toContain('not-a-database-url');
-  expect(child.stdout).not.toContain('Fixtures');
-});
+it.each([
+  ['verify-orders-postgres.ts', 'Stage 9 stopped'],
+  ['verify-station-pumps-postgres.ts', 'Pump lookup verification stopped'],
+  [
+    'verify-manager-ownership-postgres.ts',
+    'Manager ownership verification stopped',
+  ],
+])(
+  'fails closed before database imports without target confirmation: %s',
+  (script, diagnostic) => {
+    const childEnvironment: NodeJS.ProcessEnv = {
+      ...process.env,
+      DATABASE_URL: 'not-a-database-url',
+    };
+    delete childEnvironment.ORDERS_VERIFY_DATABASE_URL;
+    delete childEnvironment.ORDERS_VERIFY_CONFIRM_DATABASE;
+    delete childEnvironment.ALLOW_ORDERS_VERIFY_MUTATIONS;
+    const repo = resolve('../..');
+    const child = spawnSync(
+      process.execPath,
+      [
+        resolve(repo, 'node_modules/tsx/dist/cli.mjs'),
+        `apps/api/scripts/${script}`,
+        '--verify',
+      ],
+      { cwd: repo, env: childEnvironment, encoding: 'utf8', timeout: 10000 },
+    );
+    expect(child.status).toBe(1);
+    expect(child.stderr).toContain(diagnostic);
+    expect(child.stderr).not.toContain('not-a-database-url');
+    expect(child.stdout).not.toContain('Fixtures');
+  },
+);
+it.each([
+  ['m7atati_employee_orders_verify_manager_task03', 'yes'],
+  ['m7atati_employee_orders_verify_pumps_task05', 'no'],
+])(
+  'pump verifier rejects an earlier-task target or absent write opt-in: %s',
+  (name, mutation) => {
+    const repo = resolve('../..');
+    const child = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        'apps/api/scripts/verify-station-pumps-postgres.ts',
+        '--verify',
+      ],
+      {
+        cwd: repo,
+        encoding: 'utf8',
+        timeout: 10000,
+        env: {
+          ...process.env,
+          DATABASE_URL: 'not-a-database-url',
+          ORDERS_VERIFY_DATABASE_URL: `postgresql://127.0.0.1:1/${name}`,
+          ORDERS_VERIFY_CONFIRM_DATABASE: name,
+          ALLOW_ORDERS_VERIFY_MUTATIONS: mutation,
+        },
+      },
+    );
+    expect(child.status).toBe(1);
+    expect(child.stderr).toContain('stopped during target safety');
+    expect(child.stderr).not.toContain('not-a-database-url');
+    expect(child.stdout).toBe('');
+  },
+);
 it('provisions only Customer orders.cancel, preserving unrelated grants and replaying safely', async () => {
   const grants = new Set(['7:80']);
   const tx = {

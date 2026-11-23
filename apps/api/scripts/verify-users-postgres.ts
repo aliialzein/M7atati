@@ -1290,7 +1290,7 @@ export async function verifyUsersPostgres(
     },
   );
   await check(
-    'Observe deactivation of a manager with managed stations',
+    'Assigned manager deactivation is rejected without changing ownership or sessions',
     async () => {
       requireAdmin();
       const before = await prisma.station.findMany({
@@ -1298,49 +1298,45 @@ export async function verifyUsersPostgres(
         select: { id: true, managerId: true },
         orderBy: { id: 'asc' },
       });
+      const managerBefore = await prisma.user.findUniqueOrThrow({
+        where: { id: managerA },
+      });
+      const sessionsBefore = await prisma.refreshSession.findMany({
+        where: { userId: managerA },
+        orderBy: { id: 'asc' },
+      });
       const response = await send(
         'patch',
         `/api/users/${managerA}/status`,
-        undefined,
+        409,
         { isActive: false },
       );
       observations.managerDeactivation = response.status;
-      if (response.status === 200) {
-        observations.employeeRemainsActiveDuringManagerDeactivation = (
-          await prisma.user.findUniqueOrThrow({ where: { id: employeeA } })
-        ).isActive;
-        assert.equal(
-          (await prisma.user.findUniqueOrThrow({ where: { id: managerA } }))
-            .isActive,
-          false,
-        );
-        assert.deepEqual(
-          await prisma.station.findMany({
-            where: { managerId: managerA },
-            select: { id: true, managerId: true },
-            orderBy: { id: 'asc' },
-          }),
-          before,
-        );
-        await login('manager@stage1.invalid', 401);
-        await send('get', '/api/users', 401, undefined, {
-          cookie: actor('MANAGER').cookie,
-        });
-        await send('patch', `/api/users/${managerA}/status`, 200, {
-          isActive: true,
-        });
-        const fresh = await login('manager@stage1.invalid');
-        assert(fresh);
-        await send('get', '/api/users', 200, undefined, {
-          cookie: fresh.cookie,
-        });
-        assert.equal(
-          (await prisma.user.findUniqueOrThrow({ where: { id: employeeA } }))
-            .isActive,
-          true,
-        );
-        observations.managerLinksPreserved = true;
-      }
+      assert.deepEqual(
+        await prisma.user.findUniqueOrThrow({ where: { id: managerA } }),
+        managerBefore,
+      );
+      assert.deepEqual(
+        await prisma.refreshSession.findMany({
+          where: { userId: managerA },
+          orderBy: { id: 'asc' },
+        }),
+        sessionsBefore,
+      );
+      assert.deepEqual(
+        await prisma.station.findMany({
+          where: { managerId: managerA },
+          select: { id: true, managerId: true },
+          orderBy: { id: 'asc' },
+        }),
+        before,
+      );
+      assert.equal(
+        (await prisma.user.findUniqueOrThrow({ where: { id: employeeA } }))
+          .isActive,
+        true,
+      );
+      observations.managerLinksPreserved = true;
     },
   );
   await check(

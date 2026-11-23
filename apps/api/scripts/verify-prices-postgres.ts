@@ -295,6 +295,10 @@ export async function verifyPricesPostgres(
         const corrected = quotes.map((q) => ({
           ...q,
           price: q.fuelCode === 'diesel' ? '70001.000000000001' : q.price,
+          // This synthetic feed is per litre (divisor 1). A correction must
+          // preserve price * conversionDivisor = providerPrice in PostgreSQL.
+          providerPrice:
+            q.fuelCode === 'diesel' ? '70001.000000000001' : q.providerPrice,
         }));
         assert.equal(
           (await repository.ingest(corrected, new Date(Date.now() + 10)))

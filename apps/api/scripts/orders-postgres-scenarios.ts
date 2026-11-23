@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
+import type { ErrorRequestHandler } from 'express';
 import type { Prisma } from '../src/generated/prisma/client.js';
 import type { UserProfile } from '../src/modules/auth/auth.types.js';
 import { provisionCustomerOrderCancellation } from './customer-order-permissions.js';
@@ -10,11 +11,75 @@ import { provisionCustomerOrderCancellation } from './customer-order-permissions
 export async function runOrdersPostgresScenarios() {
   const { prisma } = await import('../src/database/prisma.js');
   const { app } = await import('../src/app.js');
+  const { errorHandler } = await import('../src/middleware/errorHandler.js');
+  const errorLayer = (
+    app as unknown as {
+      _router: { stack: { handle: ErrorRequestHandler }[] };
+    }
+  )._router.stack.find((layer) => layer.handle === errorHandler);
+  assert(errorLayer, 'Expected shared error handler for verifier diagnostics');
+  // Harness-only observation; delegate unchanged so the HTTP contract is preserved.
+  errorLayer.handle = (error: unknown, req, res, next) => {
+    const failure = error as {
+      name?: string;
+      code?: string;
+      message?: string;
+      meta?: {
+        code?: string;
+        driverAdapterError?: {
+          cause?: {
+            originalCode?: string;
+            kind?: string;
+          };
+        };
+      };
+    };
+    const message = failure.message ?? '';
+    console.error(
+      JSON.stringify({
+        method: req.method,
+        path: req.path,
+        errorType: failure.name,
+        prismaCode: failure.code,
+        sqlState:
+          failure.meta?.code ??
+          failure.meta?.driverAdapterError?.cause?.originalCode,
+        driverKind: failure.meta?.driverAdapterError?.cause?.kind,
+        unsupportedColumnType: message.match(
+          /Failed to deserialize column of type '([^']+)'/,
+        )?.[1],
+        unknownArgument: message.match(
+          /Unknown argument `([a-zA-Z0-9_]+)`/,
+        )?.[1],
+      }),
+    );
+    errorHandler(error, req, res, next);
+  };
   const { env } = await import('../src/config/env.js');
   const { tokenService } = await import('../src/modules/auth/token.service.js');
   const { ACCESS_COOKIE } = await import('../src/modules/auth/auth.types.js');
-  const { cashOrdersRepository, orderCancellationRepository } =
-    await import('../src/modules/orders/orders.repository.js');
+  const {
+    cashOrdersRepository,
+    orderCancellationRepository,
+    employeeOrdersRepository,
+  } = await import('../src/modules/orders/orders.repository.js');
+  const originalLockOrder = cashOrdersRepository.lockOrder;
+  cashOrdersRepository.lockOrder = async (id, stationId, tx) => {
+    try {
+      return await originalLockOrder(id, stationId, tx);
+    } catch (error) {
+      const failure = error as { code?: string };
+      console.error(
+        JSON.stringify({
+          transactionStep: 'cash lockOrder FOR UPDATE',
+          orderId: id,
+          stationId,
+          prismaCode: failure.code,
+        }),
+      );
+      throw error;
+    }
+  };
   const run = randomUUID();
   let phase = 'fixture setup';
   try {
@@ -181,6 +246,24 @@ export async function runOrdersPostgresScenarios() {
       if (actor) pending.set('Cookie', cookie(actor));
       if (credential) pending.set('X-Order-Access-Token', credential);
       const response = await pending;
+      if (response.status !== expected)
+        console.error(
+          JSON.stringify({
+            method: 'POST',
+            path: `/api${path}`,
+            expected,
+            actual: response.status,
+            response:
+              response.status === 500
+                ? {
+                    message:
+                      response.body.message === 'Internal Server Error'
+                        ? response.body.message
+                        : '[redacted unexpected message]',
+                  }
+                : undefined,
+          }),
+        );
       assert.equal(response.status, expected, `POST ${path}`);
       return response;
     };
@@ -194,6 +277,24 @@ export async function runOrdersPostgresScenarios() {
       if (actor) pending.set('Cookie', cookie(actor));
       if (credential) pending.set('X-Order-Access-Token', credential);
       const response = await pending;
+      if (response.status !== expected)
+        console.error(
+          JSON.stringify({
+            method: 'GET',
+            path: `/api${path}`,
+            expected,
+            actual: response.status,
+            response:
+              response.status === 500
+                ? {
+                    message:
+                      response.body.message === 'Internal Server Error'
+                        ? response.body.message
+                        : '[redacted unexpected message]',
+                  }
+                : undefined,
+          }),
+        );
       assert.equal(response.status, expected, `GET ${path}`);
       return response;
     };
@@ -472,6 +573,26 @@ export async function runOrdersPostgresScenarios() {
       confirmRequest(owned.created),
       confirmRequest(owned.created),
     ]);
+    console.info(
+      JSON.stringify({
+        operation: 'duplicate cash confirmation',
+        method: 'POST',
+        path: `/api${cashPath(owned.created.order.id)}`,
+        expectedStatuses: [200, 201],
+        actualStatuses: duplicateCash.map((response) => response.status),
+        errors: duplicateCash
+          .filter((response) => response.status === 500)
+          .map((response) => ({
+            status: response.status,
+            body: {
+              message:
+                response.body.message === 'Internal Server Error'
+                  ? response.body.message
+                  : '[redacted unexpected message]',
+            },
+          })),
+      }),
+    );
     assert.deepEqual(
       duplicateCash.map((response) => response.status).sort(),
       [200, 201],
@@ -851,10 +972,7 @@ export async function runOrdersPostgresScenarios() {
       await prisma.user.findUnique({ where: { id: -2147483648 } }),
       null,
     );
-    const delegate = prisma.orderEvent as unknown as {
-      create: (args: Prisma.OrderEventCreateArgs) => Promise<unknown>;
-    };
-    const insertEvent = delegate.create;
+    const originalWriteTransaction = employeeOrdersRepository.writeTransaction;
     for (const operation of ['cash', 'cancel', 'complete'] as const) {
       const target = await mint(customer);
       if (operation === 'complete') {
@@ -872,14 +990,56 @@ export async function runOrdersPostgresScenarios() {
         );
       }
       const snapshot = await state(target.created.order.id);
-      delegate.create = (args) =>
-        insertEvent({
-          ...args,
-          data: {
-            ...(args.data as Prisma.OrderEventUncheckedCreateInput),
-            actorUserId: -2147483648,
-          },
-        });
+      let injected = false;
+      // Root Prisma delegates are different from interactive-transaction delegates.
+      // Inject into the actual transaction without altering application behavior.
+      employeeOrdersRepository.writeTransaction = (work) =>
+        originalWriteTransaction(async (tx) =>
+          work(
+            new Proxy(tx, {
+              get(target, property) {
+                if (property !== 'orderEvent')
+                  return Reflect.get(target, property);
+                return new Proxy(target.orderEvent, {
+                  get(delegate, key) {
+                    if (key !== 'create') return Reflect.get(delegate, key);
+                    return async (args: Prisma.OrderEventCreateArgs) => {
+                      injected = true;
+                      try {
+                        return await tx.orderEvent.create({
+                          ...args,
+                          data: {
+                            ...(args.data as Prisma.OrderEventUncheckedCreateInput),
+                            actorUserId: -2147483648,
+                          },
+                        });
+                      } catch (error) {
+                        const failure = error as {
+                          code?: string;
+                          meta?: {
+                            driverAdapterError?: {
+                              cause?: { originalCode?: string };
+                            };
+                          };
+                        };
+                        console.info(
+                          JSON.stringify({
+                            operation,
+                            injectedEventFailure: failure.code,
+                            sqlState:
+                              failure.meta?.driverAdapterError?.cause
+                                ?.originalCode,
+                          }),
+                        );
+                        throw error;
+                      }
+                    };
+                  },
+                });
+              },
+            }),
+          ),
+        );
       try {
         if (operation === 'cash')
           await post(
@@ -898,8 +1058,9 @@ export async function runOrdersPostgresScenarios() {
             employee,
           );
       } finally {
-        delegate.create = insertEvent;
+        employeeOrdersRepository.writeTransaction = originalWriteTransaction;
       }
+      assert(injected, 'Event FK failure must execute inside the transaction');
       assert.deepEqual(await state(target.created.order.id), snapshot);
       if (operation === 'complete') {
         const waiting = await mint();
@@ -918,10 +1079,233 @@ export async function runOrdersPostgresScenarios() {
       } else await cancel(target.created, 200, customer);
     }
     console.info(`PASS: ${phase}`);
+    phase =
+      'Task 02 station deactivation versus creation, cash and paid claims in both lock orders';
+    const { orderCreationService, cashOrdersService, employeeOrdersService } =
+      await import('../src/modules/orders/orders.service.js');
+    const { stationsService } =
+      await import('../src/modules/stations/stations.service.js');
+    const { stationsRepository } =
+      await import('../src/modules/stations/stations.repository.js');
+    const conflict = (outcome: PromiseSettledResult<unknown>) => {
+      assert(outcome.status === 'rejected');
+      assert.equal(outcome.reason.statusCode, 409);
+    };
+    for (const operation of ['create', 'cash', 'claim'] as const) {
+      for (const workFirst of [true, false]) {
+        // Isolate these cases from all retained earlier work; never clean up
+        // existing paid orders just to make a station status test pass.
+        const isolatedManager = await person(managerRole.id, 'MANAGER');
+        const isolated = await prisma.station.create({
+          data: {
+            name: `Operational race ${run} ${operation} ${workFirst}`,
+            managerId: isolatedManager.id,
+          },
+        });
+        const reservedPump = await prisma.pump.create({
+          data: { stationId: isolated.id, number: 1, status: 'IDLE' },
+        });
+        const worker = await person(employeeRole.id, 'EMPLOYEE', isolated.id);
+        const quotation = await orderCreationService.quote(undefined, {
+          stationId: isolated.id,
+          fuelTypeId: fuel.id,
+          currency: 'USD',
+          fulfillmentType: 'IN_STATION',
+          inputMode: 'LITERS',
+          value: '1.250',
+        });
+        const input = {
+          quoteId: quotation.quote.id,
+          guestToken: quotation.guestToken,
+          idempotencyKey: randomUUID(),
+        };
+        const created =
+          operation === 'create'
+            ? null
+            : await orderCreationService.create(undefined, input);
+        const confirmation = {
+          amountMinor: quotation.quote.totalMinor,
+          currency: 'USD' as const,
+          pumpId: reservedPump.id,
+        };
+        if (operation === 'claim')
+          await cashOrdersService.confirm(
+            isolatedManager,
+            isolated.id,
+            created!.order.id,
+            confirmation,
+          );
+        const before = created ? await state(created.order.id) : null;
+
+        const originalStatusLock = stationsRepository.lockStation;
+        const originalCashLock = cashOrdersRepository.lockStation;
+        const originalWorkLock = employeeOrdersRepository.lockStation;
+        let firstLocked!: () => void;
+        let competitorArrived!: () => void;
+        const held = new Promise<void>((resolve) => {
+          firstLocked = resolve;
+        });
+        const arrived = new Promise<void>((resolve) => {
+          competitorArrived = resolve;
+        });
+        let waiting = true;
+        const gate = async <T>(first: boolean, acquire: () => Promise<T>) => {
+          if (first && waiting) {
+            waiting = false;
+            const result = await acquire();
+            firstLocked();
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            try {
+              await Promise.race([
+                arrived,
+                new Promise<never>((_, reject) => {
+                  timer = setTimeout(
+                    () => reject(new Error('Station race barrier timed out')),
+                    2000,
+                  );
+                }),
+              ]);
+            } finally {
+              clearTimeout(timer);
+            }
+            return result;
+          }
+          competitorArrived();
+          return acquire();
+        };
+        stationsRepository.lockStation = (id, tx) =>
+          id === isolated.id
+            ? gate(!workFirst, () => originalStatusLock(id, tx))
+            : originalStatusLock(id, tx);
+        cashOrdersRepository.lockStation = (id, tx) =>
+          id === isolated.id
+            ? gate(workFirst, () => originalCashLock(id, tx))
+            : originalCashLock(id, tx);
+        employeeOrdersRepository.lockStation = (id, tx) =>
+          id === isolated.id
+            ? gate(workFirst, () => originalWorkLock(id, tx))
+            : originalWorkLock(id, tx);
+        const work = () =>
+          operation === 'create'
+            ? orderCreationService.create(undefined, input)
+            : operation === 'cash'
+              ? cashOrdersService.confirm(
+                  isolatedManager,
+                  isolated.id,
+                  created!.order.id,
+                  confirmation,
+                )
+              : employeeOrdersService.transition(
+                  worker,
+                  created!.order.id,
+                  'claim',
+                );
+        const deactivate = () => stationsService.setStatus(isolated.id, false);
+        try {
+          const first = workFirst ? work() : deactivate();
+          const firstResult = Promise.allSettled([first]);
+          await Promise.race([
+            held,
+            first.then(() => {
+              throw new Error('Expected station lock barrier');
+            }),
+          ]);
+          const secondResult = Promise.allSettled([
+            workFirst ? deactivate() : work(),
+          ]);
+          const [one, two] = await Promise.all([firstResult, secondResult]);
+          const [workResult, statusResult] = workFirst
+            ? [one[0], two[0]]
+            : [two[0], one[0]];
+          if (operation === 'claim' || workFirst)
+            assert.equal(workResult.status, 'fulfilled');
+          else conflict(workResult);
+          if (operation === 'claim' || (operation === 'cash' && workFirst))
+            conflict(statusResult);
+          else assert.equal(statusResult.status, 'fulfilled');
+        } finally {
+          competitorArrived();
+          stationsRepository.lockStation = originalStatusLock;
+          cashOrdersRepository.lockStation = originalCashLock;
+          employeeOrdersRepository.lockStation = originalWorkLock;
+        }
+        const active = (
+          await prisma.station.findUniqueOrThrow({ where: { id: isolated.id } })
+        ).isActive;
+        assert.equal(
+          active,
+          operation === 'claim' || (operation === 'cash' && workFirst),
+        );
+        if (operation === 'create') {
+          const rows = await prisma.fuelOrder.findMany({
+            where: { quoteId: input.quoteId },
+            include: { payments: true },
+          });
+          assert.equal(rows.length, workFirst ? 1 : 0);
+          if (rows.length) {
+            assert.equal(rows[0].status, 'AWAITING_PAYMENT');
+            assert.equal(rows[0].payments.length, 0);
+          }
+        } else {
+          const saved = await state(created!.order.id);
+          assert.equal(
+            saved.status,
+            operation === 'claim'
+              ? 'IN_PROGRESS'
+              : workFirst
+                ? 'PENDING'
+                : 'AWAITING_PAYMENT',
+          );
+          assert.equal(saved.payments.length, active ? 1 : 0);
+          assert.equal(saved.pumpId, active ? reservedPump.id : null);
+          if (operation === 'claim')
+            assert.deepEqual(saved.payments, before!.payments);
+          if (active) {
+            // Rejected deactivation must not change timestamps, events, payment,
+            // reservation, worker assignments or station relationships.
+            const stationBefore = await prisma.station.findUniqueOrThrow({
+              where: { id: isolated.id },
+            });
+            await assert.rejects(
+              deactivate(),
+              (error: unknown) =>
+                (error as { statusCode: number }).statusCode === 409,
+            );
+            assert.deepEqual(await state(saved.id), saved);
+            assert.deepEqual(
+              await prisma.station.findUniqueOrThrow({
+                where: { id: isolated.id },
+              }),
+              stationBefore,
+            );
+            if (operation === 'cash')
+              await employeeOrdersService.transition(worker, saved.id, 'claim');
+            await employeeOrdersService.transition(
+              worker,
+              saved.id,
+              'complete',
+            );
+            const historical = await state(saved.id);
+            await deactivate();
+            assert.deepEqual(await state(saved.id), historical);
+          }
+        }
+        const version = () =>
+          prisma.$queryRaw<
+            { version: string }[]
+          >`SELECT xmin::text AS version FROM stations WHERE id = ${isolated.id}`;
+        const inactive = await version();
+        await deactivate();
+        assert.deepEqual(await version(), inactive);
+      }
+    }
+    console.info(`PASS: ${phase}`);
   } catch (error) {
     console.error(`FAIL scenario: ${phase}`);
     throw error;
   } finally {
+    cashOrdersRepository.lockOrder = originalLockOrder;
+    errorLayer.handle = errorHandler;
     await prisma.$disconnect();
   }
 }
