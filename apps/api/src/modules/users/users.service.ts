@@ -212,6 +212,20 @@ export class UsersService {
         await this.requireNoClaimedOrders(id, tx);
       if (
         roleChanged &&
+        target.role.name === 'EMPLOYEE' &&
+        (await this.repository.hasOpenAttendance(id, tx))
+      ) {
+        // The target user is locked, and both this operation and attendance
+        // writes are Serializable. A concurrent check-in reads this user's
+        // role and writes the attendance predicate read here: PostgreSQL must
+        // abort/retry one side rather than commit a stranded open record.
+        throw new HttpError(
+          'Employee has open attendance; check out before changing role',
+          409,
+        );
+      }
+      if (
+        roleChanged &&
         target.role.name === 'MANAGER' &&
         (await this.repository.countManagedStations(id, tx)) > 0
       ) {
@@ -300,6 +314,15 @@ export class UsersService {
     return this.repository.transaction(async (tx) => {
       const actor = await this.actor(context, tx, 'update');
       const target = await this.target(id, actor, tx, true);
+      if (
+        !isActive &&
+        target.role.name === 'MANAGER' &&
+        (await this.repository.countManagedStations(id, tx)) > 0
+      )
+        throw new HttpError(
+          'Unassign managed station before deactivating this manager',
+          409,
+        );
       if (!isActive && target.isActive)
         await this.requireNoClaimedOrders(id, tx);
       if (!isActive && target.isActive && target.role.name === 'ADMIN')

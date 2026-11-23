@@ -1,7 +1,10 @@
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../database/prisma.js';
 import { HttpError } from '../../types/http-error.js';
-import { orderStatus } from '../orders/orders.types.js';
+import {
+  orderStatus,
+  activePumpOrderStatuses,
+} from '../orders/orders.types.js';
 import { pickerSelect, stationSelect } from './stations.types.js';
 import type {
   CreateStationInput,
@@ -15,15 +18,70 @@ const orderBy = [
 ] satisfies Prisma.StationOrderByWithRelationInput[];
 
 export const stationsRepository = {
+  pumpLookup(where: Prisma.StationWhereInput, tx: Prisma.TransactionClient) {
+    return tx.station.findFirst({
+      where,
+      select: {
+        id: true,
+        isActive: true,
+        pumps: {
+          orderBy: [{ number: 'asc' }, { id: 'asc' }],
+          select: {
+            id: true,
+            number: true,
+            status: true,
+            _count: {
+              select: {
+                orders: { where: { status: { in: activePumpOrderStatuses } } },
+              },
+            },
+          },
+        },
+      },
+    });
+  },
+  async lockManager(id: number, tx: Prisma.TransactionClient) {
+    // Same user-row lock as role/status changes. Always acquire before station.
+    await tx.$queryRaw`SELECT id FROM users WHERE id = ${id} FOR UPDATE`;
+  },
+  assignmentUser(id: number, tx: Prisma.TransactionClient) {
+    return tx.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        isActive: true,
+        role: {
+          select: {
+            name: true,
+            permissions: { select: { permission: { select: { key: true } } } },
+          },
+        },
+      },
+    });
+  },
+  ownedStation(managerId: number, tx: Prisma.TransactionClient) {
+    return tx.station.findFirst({ where: { managerId }, select: { id: true } });
+  },
   async lockStation(id: number, tx: Prisma.TransactionClient) {
     // Status changes lock only the station, never employees or orders. This
     // avoids reversing the employee -> station lock order of fulfillment.
     await tx.$queryRaw`SELECT id FROM stations WHERE id = ${id} FOR UPDATE`;
   },
-  async hasInProgressOrder(stationId: number, tx: Prisma.TransactionClient) {
+  async hasBlockingOrder(stationId: number, tx: Prisma.TransactionClient) {
     return (
       (await tx.fuelOrder.findFirst({
-        where: { stationId, status: orderStatus.IN_PROGRESS },
+        where: {
+          stationId,
+          OR: [
+            { status: orderStatus.IN_PROGRESS },
+            {
+              status: orderStatus.PENDING,
+              payments: {
+                some: { status: 'CONFIRMED', capturedMinor: { gt: 0 } },
+              },
+            },
+          ],
+        },
         select: { id: true },
       })) !== null
     );
@@ -45,12 +103,27 @@ export const stationsRepository = {
         });
       } catch (error) {
         if (typeof error === 'object' && error !== null && 'code' in error) {
-          if (error.code === 'P2034') {
+          // The pg adapter wraps raw FOR UPDATE serialization failures in P2010.
+          const meta = (
+            error as {
+              meta?: {
+                code?: string;
+                driverAdapterError?: { cause?: { originalCode?: string } };
+              };
+            }
+          ).meta;
+          const rawSerializationFailure =
+            error.code === 'P2010' &&
+            (meta?.code === '40001' ||
+              meta?.driverAdapterError?.cause?.originalCode === '40001');
+          if (error.code === 'P2034' || rawSerializationFailure) {
             if (attempt < 2) continue;
             throw new HttpError('Concurrent update; retry request', 409);
           }
           if (error.code === 'P2025')
             throw new HttpError('Station not found', 404);
+          if (error.code === 'P2002')
+            throw new HttpError('Manager already owns another station', 409);
         }
         throw error;
       }
@@ -96,7 +169,8 @@ export const stationsRepository = {
   },
   update(
     id: number,
-    data: UpdateStationInput | { isActive: boolean },
+    data:
+      UpdateStationInput | { isActive: boolean } | { managerId: number | null },
     tx: Prisma.TransactionClient,
   ) {
     return tx.station.update({ where: { id }, data, select: stationSelect });

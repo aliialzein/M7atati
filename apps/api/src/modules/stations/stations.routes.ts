@@ -11,6 +11,16 @@ stationsRouter.use((_req, res, next) => {
 });
 stationsRouter.get('/picker', stationsController.picker);
 stationsRouter.use(authenticate);
+stationsRouter.get(
+  '/:id/pumps',
+  (req, res, next) => {
+    const role = req.auth!.user.role;
+    if (role === 'ADMIN') return authorize('stations.read')(req, res, next);
+    if (role === 'MANAGER') return authorize('payments.manage')(req, res, next);
+    return next(new HttpError('Insufficient permissions', 403));
+  },
+  stationsController.pumps,
+);
 stationsRouter.get('/managed', (req, res, next) => {
   if (req.auth!.user.role !== 'MANAGER')
     return next(new HttpError('Insufficient permissions', 403));
@@ -37,4 +47,9 @@ stationsRouter.patch(
   '/:id/status',
   authorize('stations.update'),
   stationsController.status,
+);
+stationsRouter.patch(
+  '/:id/manager',
+  authorize('stations.update'),
+  stationsController.manager,
 );
