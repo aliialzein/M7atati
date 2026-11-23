@@ -195,6 +195,18 @@ afterEach(() => {
 
 describe('registration', () => {
   it('creates CUSTOMER and its initial hashed refresh session atomically', async () => {
+    db.user.create.mockImplementationOnce(({ data }) =>
+      Promise.resolve({
+        ...fixture(),
+        ...data,
+        role: {
+          name: 'CUSTOMER',
+          permissions: ['orders.read', 'orders.create', 'orders.read'].map(
+            (key) => ({ permission: { key } }),
+          ),
+        },
+      }),
+    );
     const response = await post('register').send({
       name: ' Customer ',
       email: ' CUSTOMER@Example.com ',
@@ -208,6 +220,7 @@ describe('registration', () => {
         email: 'customer@example.com',
         role: 'CUSTOMER',
         stationId: null,
+        permissions: ['orders.create', 'orders.read'],
       },
     });
     expect(db.user.create).toHaveBeenCalledWith(
@@ -248,6 +261,12 @@ describe('registration', () => {
     },
     { name: 'Name', email: 'name@example.com', password, role: 'ADMIN' },
     { name: 'Name', email: 'name@example.com', password, stationId: 1 },
+    {
+      name: 'Name',
+      email: 'name@example.com',
+      password,
+      permissions: ['payments.manage'],
+    },
   ])('rejects invalid input or privilege fields: %j', async (body) => {
     const response = await post('register').send(body);
     expect(response.status).toBe(400);
@@ -497,6 +516,142 @@ describe('authentication and permission middleware', () => {
     return testApp;
   }
 
+  it.each([
+    ['ADMIN', ['stations.update', 'stations.read']],
+    ['MANAGER', ['payments.manage', 'orders.read']],
+    ['EMPLOYEE', ['orders.update', 'orders.read']],
+    ['HR', ['users.read', 'employees.transfer']],
+    ['SECURITY', ['safety.manage', 'safety.read']],
+    ['CUSTOMER', ['orders.read', 'orders.create']],
+  ])(
+    'returns consistent sorted unique grants for %s on login, me and refresh',
+    async (role, keys) => {
+      const grants = keys as string[];
+      currentUser!.role = {
+        name: role as string,
+        permissions: [...grants, grants[0]].map((key) => ({
+          permission: { key },
+        })),
+      };
+      const expected = {
+        id: 1,
+        name: 'Customer',
+        email: 'customer@example.com',
+        role,
+        stationId: null,
+        permissions: [...grants].sort(),
+      };
+      const login = await post('login').send({
+        email: currentUser!.email,
+        password,
+      });
+      expect(login.status).toBe(200);
+      expect(login.body).toEqual({ user: expected });
+      const me = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', cookie(login, ACCESS_COOKIE));
+      expect(me.status).toBe(200);
+      expect(me.body).toEqual(login.body);
+      const rotated = await post('refresh').set(
+        'Cookie',
+        cookie(login, REFRESH_COOKIE),
+      );
+      expect(rotated.status).toBe(200);
+      expect(rotated.body).toEqual(login.body);
+      expect(Object.keys(rotated.body.user).sort()).toEqual([
+        'email',
+        'id',
+        'name',
+        'permissions',
+        'role',
+        'stationId',
+      ]);
+      expect(rotated.text).not.toMatch(
+        /password|tokenHash|accessToken|refreshToken|roleId|permissionId/,
+      );
+    },
+  );
+
+  it.each(['ADMIN', 'MANAGER', 'EMPLOYEE', 'HR', 'SECURITY', 'CUSTOMER'])(
+    'returns an empty array for %s without grants',
+    async (role) => {
+      currentUser!.role = { name: role, permissions: [] };
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set('Cookie', `${ACCESS_COOKIE}=${tokenService.issue(1).accessToken}`);
+      expect(response.status).toBe(200);
+      expect(response.body.user.permissions).toEqual([]);
+    },
+  );
+
+  it('reflects grants and revocations on subsequent requests with the same access token', async () => {
+    const accessCookie = `${ACCESS_COOKIE}=${tokenService.issue(1).accessToken}`;
+    const me = () =>
+      request(app).get('/api/auth/me').set('Cookie', accessCookie);
+    expect((await me()).body.user.permissions).toEqual(['orders.create']);
+    currentUser!.role.permissions.push({ permission: { key: 'orders.read' } });
+    expect((await me()).body.user.permissions).toEqual([
+      'orders.create',
+      'orders.read',
+    ]);
+    currentUser!.role.permissions = [{ permission: { key: 'orders.read' } }];
+    expect((await me()).body.user.permissions).toEqual(['orders.read']);
+    const denied = await request(protectedApp())
+      .post('/orders')
+      .set('Cookie', accessCookie)
+      .set('Origin', origin)
+      .set('X-CSRF-Protection', '1');
+    expect(denied.status).toBe(403);
+    currentUser!.role.permissions.push({
+      permission: { key: 'orders.create' },
+    });
+    const allowed = await request(protectedApp())
+      .post('/orders')
+      .set('Cookie', accessCookie)
+      .set('Origin', origin)
+      .set('X-CSRF-Protection', '1');
+    expect(allowed.status).toBe(200);
+  });
+
+  it('refresh returns current grants rather than grants from the original session', async () => {
+    const tokens = persist();
+    currentUser!.role.permissions = [
+      'orders.read',
+      'orders.cancel',
+      'orders.read',
+    ].map((key) => ({ permission: { key } }));
+    const response = await refresh(tokens);
+    expect(response.status).toBe(200);
+    expect(response.body.user.permissions).toEqual([
+      'orders.cancel',
+      'orders.read',
+    ]);
+    expect((await refresh(tokens)).status).toBe(401);
+  });
+
+  it('editing frontend permissions and sending them back cannot bypass authorization', async () => {
+    const accessCookie = `${ACCESS_COOKIE}=${tokenService.issue(1).accessToken}`;
+    const visible = await request(app)
+      .get('/api/auth/me')
+      .set('Cookie', accessCookie);
+    visible.body.user.permissions.push('payments.manage');
+    const denied = await request(protectedApp('payments.manage'))
+      .post('/orders')
+      .set('Cookie', accessCookie)
+      .set('Origin', origin)
+      .set('X-CSRF-Protection', '1')
+      .send({
+        permissions: visible.body.user.permissions,
+        user: visible.body.user,
+      });
+    expect(denied.status).toBe(403);
+    expect(denied.body).toEqual({ message: 'Insufficient permissions' });
+    const again = await request(app)
+      .get('/api/auth/me')
+      .set('Cookie', accessCookie);
+    expect(again.body.user.permissions).toEqual(['orders.create']);
+  });
+
   it('rejects a state-changing request with a valid cookie but no CSRF proof', async () => {
     const response = await request(protectedApp())
       .post('/orders')
@@ -528,6 +683,7 @@ describe('authentication and permission middleware', () => {
         email: 'customer@example.com',
         role: 'CUSTOMER',
         stationId: null,
+        permissions: ['orders.create'],
       },
     });
   });
