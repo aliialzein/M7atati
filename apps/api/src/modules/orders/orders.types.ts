@@ -7,6 +7,11 @@ export const orderStatus = {
   CANCELLED: 'CANCELLED',
 } as const;
 export type OrderStatus = (typeof orderStatus)[keyof typeof orderStatus];
+// Must match orders_active_pump_key; payment/employee assignment do not release it.
+export const activePumpOrderStatuses = [
+  orderStatus.PENDING,
+  orderStatus.IN_PROGRESS,
+];
 export const orderStatuses = [
   orderStatus.AWAITING_PAYMENT,
   orderStatus.PENDING,
