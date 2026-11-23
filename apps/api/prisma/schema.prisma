@@ -120,7 +120,7 @@ model Station {
   address       String?
   latitude      Decimal? @db.Decimal(10, 7)
   longitude     Decimal? @db.Decimal(10, 7)
-  managerId     Int?     @map("manager_id")
+  managerId     Int?     @unique @map("manager_id")
   deviceKeyHash String?  @unique @map("device_key_hash")
   createdAt     DateTime @default(now()) @map("created_at")
 
@@ -134,7 +134,6 @@ model Station {
   shifts       Shift[]
   attendance   AttendanceRecord[]
 
-  @@index([managerId])
   @@map("stations")
 }
 
@@ -152,7 +151,7 @@ model User {
 
   role                Role               @relation(fields: [roleId], references: [id], onDelete: Restrict)
   station             Station?           @relation("UserStation", fields: [stationId], references: [id], onDelete: SetNull)
-  managedStations     Station[]          @relation("StationManager")
+  managedStation      Station?           @relation("StationManager")
   customerOrders      FuelOrder[]        @relation("OrderCustomer")
   createdOrders       FuelOrder[]        @relation("OrderCreator")
   assignedOrders      FuelOrder[]        @relation("OrderAssignee")

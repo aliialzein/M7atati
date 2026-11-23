@@ -45,7 +45,7 @@ let orders: OrderFixture[];
 let stations: {
   id: number;
   name: string;
-  managerId: number;
+  managerId: number | null;
   isActive: boolean;
 }[];
 let role: string;
@@ -102,7 +102,7 @@ beforeEach(() => {
       managerId: 1,
       isActive: false,
     },
-    { id: 11, name: 'Second managed station', managerId: 1, isActive: true },
+    { id: 11, name: 'Unassigned station', managerId: null, isActive: true },
     {
       id: 20,
       name: 'Affiliated station owned by another manager',
@@ -245,8 +245,12 @@ describe('manager analytics access controls', () => {
   );
   it('rechecks ownership after station management changes', async () => {
     expect((await get()).status).toBe(200);
-    stations[0].managerId = 2;
+    stations[0].managerId = null;
     expect((await get()).status).toBe(404);
+    stations[2].managerId = null;
+    stations[0].managerId = 2;
+    actorId = 2;
+    expect((await get()).status).toBe(200);
   });
 });
 
@@ -292,6 +296,8 @@ describe('manager persisted analytics metrics', () => {
     );
   });
   it('returns zero status counts for an owned station without orders or attendance', async () => {
+    stations[0].managerId = null;
+    stations[1].managerId = 1;
     const response = await get({}, base.replace('/10/', '/11/'));
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
