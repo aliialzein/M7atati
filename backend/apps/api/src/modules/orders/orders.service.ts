@@ -36,7 +36,7 @@ import {
 export const ordersService = {
   async list(actor: UserProfile, stationId: number, input: ListOrdersInput) {
     return managerOrdersRepository.transaction(async (tx) => {
-      await managerOrdersRepository.managedStation(actor, stationId, tx);
+      await managerOrdersRepository.reportingStation(actor, stationId, tx);
       const { orders, total } = await managerOrdersRepository.list(
         stationId,
         input,
@@ -52,7 +52,7 @@ export const ordersService = {
   },
   async detail(actor: UserProfile, stationId: number, orderId: number) {
     return managerOrdersRepository.transaction(async (tx) => {
-      await managerOrdersRepository.managedStation(actor, stationId, tx);
+      await managerOrdersRepository.reportingStation(actor, stationId, tx);
       const order = await managerOrdersRepository.detail(
         orderId,
         stationId,

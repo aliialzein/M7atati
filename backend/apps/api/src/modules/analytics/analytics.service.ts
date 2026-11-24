@@ -1,5 +1,5 @@
 import type { UserProfile } from '../auth/auth.types.js';
-import { requireManagedStation } from '../../utils/accessScope.js';
+import { requireReportingStation } from '../../utils/accessScope.js';
 import { orderStatuses } from '../orders/orders.types.js';
 import { analyticsRepository } from './analytics.repository.js';
 import type { StationAnalyticsInput } from './analytics.validation.js';
@@ -12,7 +12,7 @@ export const analyticsService = {
   ) {
     return analyticsRepository.transaction(async (tx) => {
       // Ownership, attendance and order counts use the same database snapshot.
-      await requireManagedStation(actor, stationId, tx);
+      await requireReportingStation(actor, stationId, tx);
       const attendance = await analyticsRepository.attendance(
         stationId,
         input,

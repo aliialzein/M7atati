@@ -1,7 +1,6 @@
 const base = (import.meta.env?.VITE_API_ORIGIN || "").replace(/\/+$/, "");
 const safeMethods = new Set(["GET", "HEAD"]);
 let refreshing;
-let verifying;
 
 export class ApiError extends Error {
   constructor(status, message) {
@@ -10,14 +9,10 @@ export class ApiError extends Error {
   }
 }
 
-async function request(
-  path,
-  { method = "GET", body, signal, guestToken, binary } = {},
-) {
+async function request(path, { method = "GET", body, signal, binary } = {}) {
   const headers = { Accept: binary ? "*/*" : "application/json" };
   if (!safeMethods.has(method)) headers["X-CSRF-Protection"] = "1";
   if (body !== undefined) headers["Content-Type"] = "application/json";
-  if (guestToken) headers["X-Order-Access-Token"] = guestToken;
   let response;
   try {
     response = await fetch(`${base}/api${path}`, {
@@ -66,7 +61,6 @@ function refresh() {
 }
 
 export async function api(path, options = {}) {
-  if (options.ensureSession) await verifySession();
   try {
     return await request(path, options);
   } catch (error) {
@@ -86,17 +80,6 @@ export async function api(path, options = {}) {
     }
     return request(path, options);
   }
-}
-
-function verifySession() {
-  if (!verifying) {
-    // Checkout and order detail also accept guests. Resolve staff/customer
-    // session expiry before sending a request that could otherwise become guest work.
-    verifying = api("/auth/me").finally(() => {
-      verifying = undefined;
-    });
-  }
-  return verifying;
 }
 
 export async function restoreSession() {

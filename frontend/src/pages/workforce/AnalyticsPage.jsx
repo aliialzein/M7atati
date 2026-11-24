@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { branchPath } from "../../app/access.js";
 import { query } from "../../api/client.js";
 import { useResource } from "../../api/hooks.js";
 import {
@@ -9,15 +10,16 @@ import {
   Title,
 } from "../../components/ui.jsx";
 import { humanize, iso } from "../../lib/format.js";
-import { ManagedStation } from "../../features/stations/ManagedStation.jsx";
+import { useAuth } from "../../features/auth/AuthProvider.jsx";
+import { BranchWorkspace } from "../../features/stations/BranchWorkspace.jsx";
 
-function StationAnalytics({ station }) {
+function StationAnalytics({ station, user }) {
   const [filters, setFilters] = useState({ from: "", to: "" });
   const invalid = filters.from && filters.to && filters.from >= filters.to;
   const result = useResource(
     invalid
       ? null
-      : query(`/manager/stations/${station.id}/analytics`, {
+      : query(`${branchPath(user, station.id)}/analytics`, {
           from: iso(filters.from),
           to: iso(filters.to),
         }),
@@ -73,9 +75,12 @@ function StationAnalytics({ station }) {
   );
 }
 export default function AnalyticsPage() {
+  const { user } = useAuth();
   return (
-    <ManagedStation>
-      {(station) => <StationAnalytics station={station} />}
-    </ManagedStation>
+    <BranchWorkspace title="Analytics" returnTo="/reports">
+      {(station) => (
+        <StationAnalytics key={station.id} station={station} user={user} />
+      )}
+    </BranchWorkspace>
   );
 }

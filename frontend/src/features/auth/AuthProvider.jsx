@@ -1,7 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api, restoreSession, signOut } from "../../api/client.js";
+import { isDashboardUser } from "../../app/access.js";
 
 const Auth = createContext(null);
+const dashboardUser = (user) => (isDashboardUser(user) ? user : null);
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState({ loading: true });
@@ -9,12 +11,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let active = true;
     function update(event) {
-      setSession({ user: event.detail });
+      setSession({ user: dashboardUser(event.detail) });
     }
     window.addEventListener("smartstation-session", update);
     restoreSession().then(
       (user) => {
-        if (active) setSession({ user });
+        if (active) setSession({ user: dashboardUser(user) });
       },
       (error) => {
         if (active) setSession({ error });
@@ -26,12 +28,18 @@ export function AuthProvider({ children }) {
     };
   }, [attempt]);
 
-  async function authenticate(kind, credentials) {
-    const { user } = await api(`/auth/${kind}`, {
+  async function authenticate(credentials) {
+    const { user } = await api("/auth/login", {
       method: "POST",
       body: credentials,
       public: true,
     });
+    if (!isDashboardUser(user)) {
+      await signOut();
+      throw new Error(
+        "This dashboard is available to the General CEO and Station Managers.",
+      );
+    }
     setSession({ user });
   }
 

@@ -117,7 +117,9 @@ beforeEach(() => {
     async ({ where }) =>
       stations.find(
         (s) =>
-          s.id === where.AND[0].id && s.managerId === where.AND[1].managerId,
+          s.id === where.AND[0].id &&
+          (!('managerId' in where.AND[1]) ||
+            s.managerId === where.AND[1].managerId),
       ) ?? null,
   );
   db.$transaction.mockImplementation(
@@ -188,6 +190,31 @@ beforeEach(() => {
 });
 
 describe('manager persisted order access', () => {
+  it('allows executive reads at both branches and rejects a manager on the executive route', async () => {
+    const other = '/api/admin/stations/20/orders';
+    permissions = ['orders.read', 'stations.read'];
+    expect((await get({}, other)).status).toBe(403);
+    expect(db.$transaction).not.toHaveBeenCalled();
+
+    role = 'ADMIN';
+    expect((await get({}, '/api/admin/stations/10/orders')).status).toBe(200);
+    const response = await get({}, other);
+    expect(response.status).toBe(200);
+    expect(response.body.stationId).toBe(20);
+    expect(response.body.orders.length).toBeGreaterThan(0);
+    expect(
+      (await get({}, `${other}/${response.body.orders[0].id}`)).status,
+    ).toBe(200);
+    expect(
+      (
+        await get(
+          {},
+          `/api/admin/stations/10/orders/${response.body.orders[0].id}`,
+        )
+      ).status,
+    ).toBe(404);
+  });
+
   it.each(['', '/1002'])(
     'requires authentication for %s before resource reads',
     async (suffix) => {

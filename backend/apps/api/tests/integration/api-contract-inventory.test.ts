@@ -10,6 +10,7 @@ import { stationsRouter } from '../../src/modules/stations/stations.routes.js';
 import { fuelTypesRouter } from '../../src/modules/fuel-types/fuel-types.routes.js';
 import { fuelPricesRouter } from '../../src/modules/fuel-prices/fuel-prices.routes.js';
 import { healthRouter } from '../../src/routes/health.js';
+import { adminBranchReadsRouter } from '../../src/routes/admin-branch-reads.js';
 import {
   employeeOrdersRouter,
   customerOrdersRouter,
@@ -59,6 +60,7 @@ const mounts: [string, unknown][] = [
   ['/api/manager', managerOrdersRouter],
   ['/api/manager', managerAnalyticsRouter],
   ['/api/manager', managerAttendanceRouter],
+  ['/api/admin', adminBranchReadsRouter],
 ];
 
 it('documents exactly every explicit route on every mounted router, including loop-generated routes', () => {
@@ -100,7 +102,7 @@ it('documents exactly every explicit route on every mounted router, including lo
   expect(new Set(actual).size).toBe(actual.length);
   expect(new Set(documented).size).toBe(documented.length);
   expect(documented.sort()).toEqual(actual.sort());
-  expect(actual).toHaveLength(52);
+  expect(actual).toHaveLength(55);
 });
 
 const db = prisma as unknown as {

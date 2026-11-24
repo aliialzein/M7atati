@@ -55,6 +55,19 @@ let active: boolean;
 const grants = ['reports.read', 'attendance.read', 'orders.read'];
 const base = '/api/manager/stations/10/analytics';
 
+it('allows the executive to read analytics for any branch with all required grants', async () => {
+  const executive = '/api/admin/stations/20/analytics';
+  permissions = [...grants, 'stations.read'];
+  expect((await get({}, executive)).status).toBe(403);
+  role = 'ADMIN';
+  expect((await get({}, executive)).body.stationId).toBe(20);
+  expect(
+    (await get({}, executive.replace('/20/', '/10/'))).body.stationId,
+  ).toBe(10);
+  permissions = [...grants];
+  expect((await get({}, executive)).status).toBe(403);
+});
+
 function matches(row: Row, where: Where): boolean {
   return Object.entries(where).every(([key, value]) => {
     if (key === 'AND')
@@ -158,11 +171,13 @@ beforeEach(() => {
     async ({
       where,
     }: {
-      where: { AND: [{ id: number }, { managerId: number }] };
+      where: { AND: [{ id: number }, { managerId?: number }] };
     }) =>
       stations.find(
         (s) =>
-          s.id === where.AND[0].id && s.managerId === where.AND[1].managerId,
+          s.id === where.AND[0].id &&
+          (!('managerId' in where.AND[1]) ||
+            s.managerId === where.AND[1].managerId),
       ) ?? null,
   );
   db.$transaction.mockImplementation(

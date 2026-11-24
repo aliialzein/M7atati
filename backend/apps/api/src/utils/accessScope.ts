@@ -4,6 +4,19 @@ import { HttpError } from '../types/http-error.js';
 
 // Shared by manager attendance/reports and persisted orders. The lookup includes
 // ownership, so unknown and unmanaged stations have the same response.
+async function requireStation(
+  actor: Pick<UserProfile, 'id' | 'role' | 'stationId'>,
+  stationId: number,
+  database: Pick<Prisma.TransactionClient, 'station'>,
+) {
+  const station = await database.station.findFirst({
+    where: { AND: [{ id: stationId }, stationScope(actor)] },
+    select: { id: true, name: true, isActive: true },
+  });
+  if (!station) throw new HttpError('Station not found', 404);
+  return station;
+}
+
 export async function requireManagedStation(
   actor: Pick<UserProfile, 'id' | 'role' | 'stationId'>,
   stationId: number,
@@ -11,12 +24,16 @@ export async function requireManagedStation(
 ) {
   if (actor.role !== 'MANAGER')
     throw new HttpError('Insufficient permissions', 403);
-  const station = await database.station.findFirst({
-    where: { AND: [{ id: stationId }, stationScope(actor)] },
-    select: { id: true, name: true, isActive: true },
-  });
-  if (!station) throw new HttpError('Station not found', 404);
-  return station;
+  return requireStation(actor, stationId, database);
+}
+
+export async function requireReportingStation(
+  actor: Pick<UserProfile, 'id' | 'role' | 'stationId'>,
+  stationId: number,
+  database: Pick<Prisma.TransactionClient, 'station'>,
+) {
+  if (actor.role === 'ADMIN') return requireStation(actor, stationId, database);
+  return requireManagedStation(actor, stationId, database);
 }
 
 // Resource services must combine this predicate with their own capability rules.

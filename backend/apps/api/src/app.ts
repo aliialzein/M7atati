@@ -27,6 +27,7 @@ import {
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { healthRouter } from './routes/health.js';
+import { adminBranchReadsRouter } from './routes/admin-branch-reads.js';
 
 export const app = express();
 
@@ -70,6 +71,7 @@ app.use('/api/attendance', attendanceRouter);
 app.use('/api/manager', managerOrdersRouter);
 app.use('/api/manager', managerAnalyticsRouter);
 app.use('/api/manager', managerAttendanceRouter);
+app.use('/api/admin', adminBranchReadsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

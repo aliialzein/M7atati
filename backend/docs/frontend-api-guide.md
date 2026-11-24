@@ -118,7 +118,7 @@ earlier snapshot. Restore the session with `/auth/me`, not browser-stored claims
 
 ## Complete mounted endpoint inventory
 
-52 explicit method/path pairs, excluding automatic HEAD, CORS OPTIONS, middleware,
+55 explicit method/path pairs, excluding automatic HEAD, CORS OPTIONS, middleware,
 and unmatched routes. All paths below include the actual `/api` mount.
 
 Access abbreviations: `P` public; `A` ADMIN; `M` MANAGER; `E` EMPLOYEE;
@@ -190,6 +190,9 @@ Query/body/DTO names are fully defined in the following sections.
 | GET | `/api/manager/stations/:stationId/attendance` | M, `attendance.read`, owned station | ManagerAttendance | — | 200 `{attendance:Attendance[],pagination}` | B,404 |
 | GET | `/api/manager/stations/:stationId/attendance/export` | M, `attendance.read`, owned station | Export | — | 200 CSV or PDF bytes | B,404,422 |
 | GET | `/api/manager/stations/:stationId/analytics` | M, all `reports.read`,`attendance.read`,`orders.read`; owned station | Analytics | — | 200 AnalyticsResult | B,404 |
+| GET | `/api/admin/stations/:stationId/orders` | A, `stations.read` and `orders.read`; any station | ManagerOrders | — | 200 `{dataSource:"database",stationId,orders:ManagerOrder[],pagination}` | B,404 |
+| GET | `/api/admin/stations/:stationId/orders/:orderId` | A, `stations.read` and `orders.read`; order must belong to the selected station | N | — | 200 `{dataSource:"database",stationId,order:ManagerDetail}` | B,404 |
+| GET | `/api/admin/stations/:stationId/analytics` | A, all `stations.read`, `reports.read`, `attendance.read` and `orders.read`; any station | Analytics | — | 200 AnalyticsResult | B,404 |
 <!-- endpoints:end -->
 
 ## Exact query and body definitions

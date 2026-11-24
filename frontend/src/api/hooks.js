@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./client.js";
 
-export function useResource(
-  path,
-  { publicRead = false, guestToken, ensureSession = false } = {},
-) {
+export function useResource(path, { publicRead = false } = {}) {
   const [result, setResult] = useState(null);
   const [revision, setRevision] = useState(0);
   const reload = useCallback(() => setRevision((value) => value + 1), []);
@@ -14,8 +11,6 @@ export function useResource(
     api(path, {
       signal: controller.signal,
       public: publicRead,
-      guestToken,
-      ensureSession,
     }).then(
       (data) => {
         if (!controller.signal.aborted) setResult({ path, revision, data });
@@ -25,7 +20,7 @@ export function useResource(
       },
     );
     return () => controller.abort();
-  }, [path, revision, publicRead, guestToken, ensureSession]);
+  }, [path, revision, publicRead]);
   return {
     ...(result?.path === path && result.revision === revision
       ? result

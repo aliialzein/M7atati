@@ -421,13 +421,8 @@ tr:last-child td {
   max-width: 580px;
   margin-inline: auto;
 }
-.account-link {
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-}
-.account-link a {
-  color: var(--green);
+.branch-toolbar {
+  margin-bottom: 16px;
 }
 @media (max-width: 900px) {
   .shell {

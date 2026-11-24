@@ -1,7 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAction } from "../../api/hooks.js";
-import { useAuth } from "../../features/auth/AuthProvider.jsx";
+import { useAuth } from "./AuthProvider.jsx";
 import { Status } from "../../components/ui.jsx";
 import Canopy from "./Canopy.jsx";
 import "./AuthForm.css";
@@ -10,7 +10,7 @@ import emblem from "../../assets/emblem-drop.svg";
 import eye from "../../assets/eye.svg";
 import arrow from "../../assets/arrow-right.svg";
 
-export default function AuthForm({ register = false }) {
+export default function AuthForm() {
   const { user, authenticate } = useAuth();
   const [visible, setVisible] = useState(false);
   const action = useAction();
@@ -27,9 +27,6 @@ export default function AuthForm({ register = false }) {
               SmartStation <small className="eyebrow">OS</small>
             </span>
           </Link>
-          <Link to="/orders/new" className="eyebrow">
-            Order fuel as guest →
-          </Link>
         </div>
       </header>
       <main className="main">
@@ -39,13 +36,9 @@ export default function AuthForm({ register = false }) {
               <img src={emblem} alt="" width="14" height="18" />
             </span>
             <p className="eyebrow intro__eyebrow">SmartStation OS</p>
-            <h1 className="intro__title">
-              {register ? "Create an account" : "Welcome back"}
-            </h1>
+            <h1 className="intro__title">Welcome back</h1>
             <p className="intro__sub">
-              {register
-                ? "Order fuel and track your orders."
-                : "Sign in to Ma7atati."}
+              Sign in as the General CEO or a Station Manager.
             </p>
           </div>
           <div className="card">
@@ -56,23 +49,9 @@ export default function AuthForm({ register = false }) {
                 const fields = Object.fromEntries(
                   new FormData(event.currentTarget),
                 );
-                action.run(() =>
-                  authenticate(register ? "register" : "login", fields),
-                );
+                action.run(() => authenticate(fields));
               }}
             >
-              {register && (
-                <label className="field">
-                  <span className="field__label">Full name</span>
-                  <input
-                    className="input"
-                    name="name"
-                    autoComplete="name"
-                    required
-                    maxLength={128}
-                  />
-                </label>
-              )}
               <label className="field">
                 <span className="field__label">Email address</span>
                 <input
@@ -94,12 +73,8 @@ export default function AuthForm({ register = false }) {
                     className="input input--has-action"
                     type={visible ? "text" : "password"}
                     name="password"
-                    autoComplete={
-                      register ? "new-password" : "current-password"
-                    }
-                    minLength={register ? 12 : undefined}
+                    autoComplete="current-password"
                     maxLength={72}
-                    aria-describedby={register ? "password-help" : undefined}
                     required
                   />
                   <button
@@ -112,12 +87,6 @@ export default function AuthForm({ register = false }) {
                     <img src={eye} alt="" width="17" height="12" />
                   </button>
                 </div>
-                {register && (
-                  <small id="password-help">
-                    Use at least 12 characters with upper and lower case
-                    letters, a number, and a symbol.
-                  </small>
-                )}
               </div>
               <Status action={action} />
               <button
@@ -125,20 +94,10 @@ export default function AuthForm({ register = false }) {
                 type="submit"
                 disabled={action.pending}
               >
-                {action.pending
-                  ? "Please wait…"
-                  : register
-                    ? "Create account"
-                    : "Sign in"}
+                {action.pending ? "Please wait…" : "Sign in"}
                 <img src={arrow} alt="" width="12" height="12" />
               </button>
             </form>
-            <p className="account-link">
-              {register ? "Already have an account?" : "New to SmartStation?"}{" "}
-              <Link to={register ? "/" : "/register"}>
-                {register ? "Sign in" : "Create a customer account"}
-              </Link>
-            </p>
           </div>
           <figure className="illustration">
             <Canopy />

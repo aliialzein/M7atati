@@ -21,14 +21,16 @@ npm run dev
 
 The seed sets up the default roles and permission assignments. Run it for a new development database. To create the initial administrator, set `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in the terminal environment and run `npm --prefix backend run create-admin`. Remove the password from the environment afterward.
 
+The web dashboard has two roles. The General CEO uses the backend administrator account to view every branch and its orders and analytics. A Station Manager sees the station assigned to the account. Customer and employee order operations remain available through the Ma7atati API.
+
 Open [SmartStation](http://127.0.0.1:5173). The Vite proxy forwards `/api` to `http://127.0.0.1:4000`. Run `npm run dev:frontend` and `npm run dev:backend` in separate terminals if needed.
 
 ## Set up a station
 
 1. Sign in as an administrator, create a station, create a manager and employee, then assign the manager on the station page.
 2. For a local development database, run `npm --prefix backend run provision-local-catalog -- 1` with the new station ID to provision gasoline, diesel, and pumps 1 and 2. Existing pump state is preserved.
-3. Publish an effective selling tariff under **Fuel prices**, then place a customer or guest order. The manager confirms cash and assigns an available pump. An employee at the station claims and completes the order.
-4. Employees can clock in and out. Managers can view and export attendance and check station analytics. Shift screens display existing schedules from the database.
+3. Publish an effective selling tariff under **Fuel prices**. Customer and guest clients place orders through the API. The station manager confirms cash and assigns an available pump. Employee clients claim and complete orders through the API.
+4. Managers can view and export attendance and check branch analytics. The CEO can open orders and analytics for any branch from the dashboard.
 
 The optional reference pricing provider uses a server-side `OILAPI_API_KEY`. Checkout uses the selling tariffs stored in PostgreSQL.
 

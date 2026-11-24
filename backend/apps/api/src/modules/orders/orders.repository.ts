@@ -1,5 +1,5 @@
 import type { UserProfile } from '../auth/auth.types.js';
-import { requireManagedStation } from '../../utils/accessScope.js';
+import { requireReportingStation } from '../../utils/accessScope.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../database/prisma.js';
 import { HttpError } from '../../types/http-error.js';
@@ -276,12 +276,12 @@ export const managerOrdersRepository = {
   ): Promise<T> {
     return prisma.$transaction(work, { isolationLevel: 'RepeatableRead' });
   },
-  managedStation(
+  reportingStation(
     actor: UserProfile,
     stationId: number,
     tx: Prisma.TransactionClient,
   ) {
-    return requireManagedStation(actor, stationId, tx);
+    return requireReportingStation(actor, stationId, tx);
   },
   async list(
     stationId: number,

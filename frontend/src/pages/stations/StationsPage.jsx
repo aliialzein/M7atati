@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { query } from "../../api/client.js";
 import { useResource } from "../../api/hooks.js";
 import { useAuth } from "../../features/auth/AuthProvider.jsx";
@@ -24,20 +25,23 @@ function AdminStations({ user }) {
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState(null);
+  const [params, setParams] = useSearchParams();
+  const selected = params.get("branch");
+  const valid =
+    /^[1-9][0-9]{0,9}$/.test(selected || "") && Number(selected) <= 2147483647;
   const result = useResource(query("/stations", { search, page }));
-  const detail = useResource(selected ? `/stations/${selected}` : null);
+  const detail = useResource(valid ? `/stations/${selected}` : null);
   function refresh() {
     result.reload();
-    if (selected) detail.reload();
+    if (valid) detail.reload();
   }
   return (
     <>
       <Title
-        title="Stations"
-        description="Station details, assignments, and pump availability."
+        title="Branches"
+        description="Branch details, manager assignments, and pump availability."
       />
-      <Card title="Station directory">
+      <Card title="Branch directory">
         <form
           className="filters"
           onSubmit={(event) => {
@@ -67,7 +71,7 @@ function AdminStations({ user }) {
                     <button
                       type="button"
                       className="text-button"
-                      onClick={() => setSelected(station.id)}
+                      onClick={() => setParams({ branch: station.id })}
                     >
                       {station.name}
                     </button>,
@@ -84,16 +88,19 @@ function AdminStations({ user }) {
           )}
         </Resource>
       </Card>
-      {selected && (
+      {selected && !valid && (
+        <p className="notice error" role="alert">
+          Invalid branch number.
+        </p>
+      )}
+      {valid && (
         <Resource result={detail}>
           {({ station }) => (
             <>
               <Card
                 title={station.name}
                 action={
-                  <Button onClick={() => setSelected(null)}>
-                    Clear selection
-                  </Button>
+                  <Button onClick={() => setParams({})}>Clear selection</Button>
                 }
               >
                 <p>{station.address}</p>
@@ -126,7 +133,7 @@ export default function StationsPage() {
             title={station.name}
             description="Station and pump availability."
           />
-          <Pumps station={station} />
+          {has(user, "payments.manage") && <Pumps station={station} />}
         </>
       )}
     </ManagedStation>

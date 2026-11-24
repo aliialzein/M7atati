@@ -1,6 +1,6 @@
 import { useAuth } from "../../features/auth/AuthProvider.jsx";
 import { Card, Title } from "../../components/ui.jsx";
-import { humanize } from "../../lib/format.js";
+import { dashboardRole } from "../../app/access.js";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -22,12 +22,12 @@ export default function ProfilePage() {
           </div>
           <div>
             <dt>Role</dt>
-            <dd>{humanize(user.role)}</dd>
+            <dd>{dashboardRole(user)}</dd>
           </div>
           <div>
-            <dt>Station affiliation</dt>
+            <dt>Branch access</dt>
             <dd>
-              {user.stationId ? `Station #${user.stationId}` : "Unassigned"}
+              {user.role === "ADMIN" ? "All branches" : "Your assigned branch"}
             </dd>
           </div>
         </dl>

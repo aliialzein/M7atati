@@ -1,12 +1,9 @@
-import { test } from "node:test";
+﻿import { test } from "node:test";
 import assert from "node:assert/strict";
 import { api } from "../src/api/client.js";
+import { branchPath, features, isDashboardUser } from "../src/app/access.js";
 
-const customer = {
-  id: 1,
-  role: "CUSTOMER",
-  permissions: ["orders.read", "orders.create"],
-};
+const manager = { id: 1, role: "MANAGER", permissions: ["orders.read"] };
 
 function mockSession(t, canRefresh) {
   const calls = [];
@@ -18,67 +15,61 @@ function mockSession(t, canRefresh) {
   });
   t.mock.method(globalThis, "fetch", async (path, options) => {
     calls.push({ path, options });
-    if (path === "/api/auth/me") {
-      return active
-        ? Response.json({ user: customer })
-        : Response.json({ message: "Unauthenticated" }, { status: 401 });
-    }
     if (path === "/api/auth/refresh") {
       if (!canRefresh)
         return Response.json({ message: "Session expired" }, { status: 401 });
       active = true;
-      return Response.json({ user: customer });
+      return Response.json({ user: manager });
     }
-    return Response.json({ authenticated: active });
+    if (!active)
+      return Response.json({ message: "Unauthenticated" }, { status: 401 });
+    return Response.json(
+      path === "/api/auth/me" ? { user: manager } : { authenticated: true },
+    );
   });
   return { calls, events };
 }
 
-test("checks an authenticated customer session before using an order route that also accepts guests", async (t) => {
+test("refreshes a manager session once when parallel branch requests return 401", async (t) => {
   const { calls } = mockSession(t, true);
-  const [order, events] = await Promise.all([
-    api("/orders/42", { ensureSession: true }),
-    api("/orders/42/events", { ensureSession: true }),
-  ]);
-  assert.equal(order.authenticated, true);
-  assert.equal(events.authenticated, true);
-  const paths = calls.map(({ path }) => path);
-  assert.equal(paths.filter((path) => path === "/api/auth/refresh").length, 1);
-  assert.ok(
-    paths.indexOf("/api/auth/refresh") < paths.indexOf("/api/orders/42"),
+  const orders = "/manager/stations/12/orders";
+  const [list, detail] = await Promise.all([api(orders), api(`${orders}/42`)]);
+  assert.deepEqual(
+    [list, detail],
+    [{ authenticated: true }, { authenticated: true }],
   );
-  const refresh = calls.find(({ path }) => path === "/api/auth/refresh");
-  assert.equal(refresh.options.headers["X-CSRF-Protection"], "1");
-  assert.equal(refresh.options.credentials, "include");
+  const refreshes = calls.filter(({ path }) => path === "/api/auth/refresh");
+  assert.equal(refreshes.length, 1);
+  assert.equal(refreshes[0].options.headers["X-CSRF-Protection"], "1");
+  assert.equal(refreshes[0].options.credentials, "include");
 });
 
-test("does not fall back to guest checkout if the customer session cannot be recovered", async (t) => {
+test("ends a dashboard session when the API rejects refresh", async (t) => {
   const { calls, events } = mockSession(t, false);
   const updates = [];
   events.addEventListener("smartstation-session", (event) =>
     updates.push(event.detail),
   );
-  await assert.rejects(
-    api("/orders/quotes", { method: "POST", body: {}, ensureSession: true }),
-    { status: 401 },
-  );
-  assert.equal(
-    calls.some(({ path }) => path === "/api/orders/quotes"),
-    false,
-  );
+  const orders = "/manager/stations/12/orders";
+  await assert.rejects(api(orders), { status: 401 });
+  assert.equal(calls.filter(({ path }) => path === `/api${orders}`).length, 1);
   assert.deepEqual(updates, [null]);
 });
 
-test("reads an explicitly guest-owned order without refreshing or exposing its capability in the URL", async (t) => {
-  const { calls } = mockSession(t, false);
-  await api("/orders/42", {
-    public: true,
-    guestToken: "guest-tracking-capability",
+test("only the executive and station manager roles enter the dashboard", () => {
+  const principal = (role) => ({
+    role,
+    permissions: ["stations.read", "orders.read"],
   });
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].path, "/api/orders/42");
-  assert.equal(
-    calls[0].options.headers["X-Order-Access-Token"],
-    "guest-tracking-capability",
-  );
+  for (const role of ["HR", "EMPLOYEE", "CUSTOMER", "SECURITY"]) {
+    assert.equal(isDashboardUser(principal(role)), false);
+    assert.deepEqual(
+      features.filter((feature) => feature.show(principal(role))),
+      [],
+    );
+  }
+  assert.equal(isDashboardUser(principal("ADMIN")), true);
+  assert.equal(isDashboardUser(principal("MANAGER")), true);
+  assert.equal(branchPath(principal("ADMIN"), 2), "/admin/stations/2");
+  assert.equal(branchPath(principal("MANAGER"), 2), "/manager/stations/2");
 });
