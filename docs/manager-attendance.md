@@ -1,5 +1,16 @@
 # Manager Stage 1: station discovery and attendance reports
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+Stage exclusions below describe historical scope; Manager orders and analytics
+now exist with their own permissions and persisted data.
+
 Backend only; uses the existing schema. HR/Admin `/api/attendance` and
 `/api/shifts` contracts are unchanged. Managers still cannot use those global
 views or read shifts. No orders, analytics, or frontend work is included.
@@ -138,13 +149,6 @@ Jest/Supertest tests use mocked Prisma. Test-only PDF.js independently opens the
 generated PDFs and checks selected rows, Unicode text, empty reports, and headers
 on every page. PDF rendering was also visually checked with a separate renderer.
 
-The existing disposable runner includes manager discovery, historical list and
-CSV/PDF ownership checks:
-
-```sh
-node --import tsx apps/api/scripts/verify-stations-postgres.ts --attendance
-```
-
-It creates a disposable database and **runs migrations there**. Do not invoke it
-under a no-migrations constraint. It does not provision or modify application data
-in the development database.
+The removed disposable runner historically checked manager discovery, scoped
+attendance lists and CSV/PDF ownership against a real isolated database. This
+acceptance tooling is no longer available; the mocked regression tests remain.

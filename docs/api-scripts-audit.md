@@ -1,93 +1,156 @@
 # API scripts audit
 
-Audited the current `feat/Employee_Functionalities` checkout at HEAD
-`edb027ddaf4d34f9f7922e00016b177ad89b7f5d`, including uncommitted Employee Stages
-1–4. No script was deleted, moved or executed for this audit. The only script
-edit changes two imports in `verify-employee-attendance-postgres.ts` to the
-consolidated attendance directory.
+Current API contracts remain in the authoritative [frontend API guide](frontend-api-guide.md).
+This inventory reflects the post-cleanup repository on 2026-11-24, branch
+`Backend_Hardening`. PostgreSQL acceptance runners were intentionally removed.
+Historical successful acceptance remains evidence, but it cannot be rerun with
+this checkout's remaining tooling. No PostgreSQL connection or database-mutating
+command was used during this review.
 
-Evidence checked: root and API package scripts, `.github/workflows/ci.yml`,
-README/docs, all API tests, script-to-script imports/dynamic imports and subprocess
-arguments, and application imports. Standalone manual tools are not unused just
-because they have no npm entry. Helper modules are not standalone CLIs.
+## Remaining scripts: 18 files
 
-## Invocation conventions
+All paths below are relative to `apps/api/scripts/`. All are retained. CLI commands
+are maintenance/development entry points; helper modules do not execute simply
+because they are imported. The TypeScript checks cover every remaining TS script.
+No provisioning, fixture, seed or database operation was executed for this audit.
 
-All commands below start at the repository root:
+| File | Purpose and callers | Dependencies | Operational / development | Database writes |
+| --- | --- | --- | --- | --- |
+| `admin-provisioning.ts` | Bootstrap first administrator; `create-admin.ts` and unit test | Auth validator/password service, users repository/mapper | Operational helper | Creates first admin transactionally; rejects existing admin |
+| `create-admin.ts` | API package `create-admin` CLI | Prisma/config, admin helper, Zod/HttpError | Operational CLI | Calls bootstrap helper |
+| `attendance-permissions.ts` | Global attendance/shift read grants; provisioning CLI and unit tests | Generated Prisma types, HttpError | Operational helper | Additive permission/grant upserts |
+| `customer-order-permissions.ts` | Customer `orders.cancel` grant; dedicated unit tests, exported maintenance helper | Generated Prisma types, HttpError | Operational helper; no standalone CLI | Additive permission/grant upserts; never creates missing role |
+| `employee-attendance-permissions.ts` | Self-attendance grant; provisioning CLI and unit tests | Generated Prisma types, HttpError | Operational helper | Additive employee grant upserts |
+| `employee-orders-fixture.ts` | API package `fixture-employee-orders`; explicit fixture CLI and optional HTTP probe | Guarded fixture helper, Prisma adapter/client, auth/app for probe | Development only | Default writes fixtures; probe reads queue, probe race claims orders |
+| `employee-orders-fixtures.ts` | Fixture creation and target guard; fixture CLI and unit tests | Generated Prisma types, Node assert | Development helper | Transactional fixture/grant writes; advisory lock; no migration or database creation |
+| `employee-shift-permissions.ts` | Weekly-shift grant; provisioning CLI and unit tests | Generated Prisma types, HttpError | Operational helper | Additive employee grant upserts |
+| `preflight-employee-attendance.sql` | Manual duplicate-open-attendance inspection; employee attendance/order docs | PostgreSQL attendance table | Operational read-only SQL | None; explicit READ ONLY transaction |
+| `pricing-permissions.ts` | ADMIN pricing grants; provisioning CLI | Generated Prisma types, HttpError | Operational helper | Additive permission/grant upserts |
+| `provision-attendance-permissions.ts` | API package command, attendance docs | dotenv, adapter/client, attendance helper | Operational CLI | Calls grant helper |
+| `provision-employee-attendance-permissions.ts` | API package command, employee-attendance docs | dotenv, adapter/client, employee-attendance helper | Operational CLI | Calls grant helper |
+| `provision-employee-shift-permissions.ts` | API package command, employee-shifts docs | dotenv, adapter/client, employee-shift helper | Operational CLI | Calls grant helper |
+| `provision-pricing-permissions.ts` | API package command, fuel-prices docs | dotenv, adapter/client, pricing helper | Operational CLI | Calls grant helper |
+| `provision-station-permissions.ts` | API package command, station docs | dotenv, adapter/client, station helper | Operational CLI | Calls grant helper |
+| `provision-transfer-permissions.ts` | API package command, user docs | dotenv, adapter/client, transfer helper | Operational CLI | Calls grant helper |
+| `station-permissions.ts` | ADMIN station grants; CLI and unit tests | Generated Prisma types, HttpError | Operational helper | Additive permission/grant upserts |
+| `transfer-permissions.ts` | ADMIN/HR transfer grants; CLI and unit tests | Generated Prisma types, HttpError | Operational helper | Additive permission/grant upserts |
 
-- **N(name)**: `npm run <name> --workspace @smart-fuel-station/api`.
-- **T(file)**: `node --import tsx apps/api/scripts/<file>`.
-- **H(flag)**: `node --import tsx apps/api/scripts/verify-stations-postgres.ts <flag>`.
+All six permission-provisioning CLI commands remain available. No essential
+operational file was among the manual deletions. The customer-grant helper is
+retained with its two original tests; it is an exported function requiring an
+explicit Prisma client, not a package command. The seed independently defines
+customer cancellation grants.
 
-These document existing entry points, not permission to run them. Deployment
-tools write to the configured database. PostgreSQL verification and fixture tools
-also perform writes and require a separately authorized disposable target.
+The fixture CLI remains supported, but there is no automated queue/restart/race
+acceptance orchestrator. Its target guard requires explicit local disposable URL
+and write authorization; it never creates a database or falls back to `m7atati`.
+The developer reports that all five earlier targets were deleted. Do not use the
+primary or maintenance database for fixtures. No new target is authorized by this
+review.
 
-## Deployment tools (including imported helpers)
+## Removed files and classifications
 
-| File in `apps/api/scripts`                     | Purpose                                                                                                | Invocation and references                                                                                                          | Classification             |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `create-admin.ts`                              | Bootstrap the first ADMIN from explicit environment credentials; refuses when an ADMIN already exists. | N(create-admin); `docs/user-management.md`; imports admin-provisioning.                                                            | Deployment CLI; retain.    |
-| `admin-provisioning.ts`                        | Validate/hash initial admin credentials and create the initial account transactionally.                | Imported by create-admin; exercised by `tests/unit/admin-provisioning.test.ts`. No standalone invocation.                          | Deployment helper; retain. |
-| `provision-station-permissions.ts`             | Add missing ADMIN station grants using the configured database.                                        | N(provision-station-permissions); station-management docs; subprocess in verify-stations.                                          | Deployment CLI; retain.    |
-| `station-permissions.ts`                       | Definitions and additive ADMIN stations.read/create/update grants.                                     | Imported by provision-station-permissions; `tests/unit/station-permissions.test.ts`; user-management docs reference the helper.    | Deployment helper; retain. |
-| `provision-pricing-permissions.ts`             | Add missing ADMIN pricing grants.                                                                      | N(provision-pricing-permissions); fuel-prices docs; subprocess in verify-prices.                                                   | Deployment CLI; retain.    |
-| `pricing-permissions.ts`                       | Definitions and additive ADMIN pricing.read/update grants.                                             | Imported by provision-pricing-permissions. Pricing verification exercises the CLI/helper through the guarded harness.              | Deployment helper; retain. |
-| `provision-attendance-permissions.ts`          | Add attendance/shift read grants without replacing unrelated grants.                                   | N(provision-attendance-permissions); attendance and manager-attendance docs.                                                       | Deployment CLI; retain.    |
-| `attendance-permissions.ts`                    | Add ADMIN/HR attendance.read and shifts.read, and MANAGER attendance.read.                             | Imported by provision-attendance-permissions, verify-attendance and verify-transfers; `tests/unit/attendance-permissions.test.ts`. | Deployment helper; retain. |
-| `provision-transfer-permissions.ts`            | Add missing employee-transfer grants.                                                                  | N(provision-transfer-permissions); user-management docs.                                                                           | Deployment CLI; retain.    |
-| `transfer-permissions.ts`                      | Add employees.transfer to ADMIN/HR while preserving other grants.                                      | Imported by provision-transfer-permissions and verify-transfers; `tests/unit/transfer-permissions.test.ts`.                        | Deployment helper; retain. |
-| `provision-employee-attendance-permissions.ts` | Add the targeted employee attendance write grant.                                                      | N(provision-employee-attendance-permissions); employee-attendance docs.                                                            | Deployment CLI; retain.    |
-| `employee-attendance-permissions.ts`           | Add EMPLOYEE attendance.self.write only.                                                               | Imported by provision-employee-attendance-permissions; `tests/unit/employee-attendance-permissions.test.ts`.                       | Deployment helper; retain. |
-| `provision-employee-shift-permissions.ts`      | Add the targeted employee schedule-read grant.                                                         | N(provision-employee-shift-permissions); employee-shifts docs.                                                                     | Deployment CLI; retain.    |
-| `employee-shift-permissions.ts`                | Add EMPLOYEE shifts.read only; preserve HR/Admin grants.                                               | Imported by provision-employee-shift-permissions; `tests/unit/employee-shift-permissions.test.ts`.                                 | Deployment helper; retain. |
+The developer manually deleted these 11 PostgreSQL verification scripts (some
+were modules invoked by the station runner):
 
-## Verification tools
+- `verify-attendance-postgres.ts`: attendance/shift/report verification module.
+- `verify-employee-attendance-postgres.ts`: self-attendance/migration/role races.
+- `verify-employee-order-consistency-postgres.ts`: employee lifecycle/claim races.
+- `verify-employee-orders-postgres.ts`: queue persistence/restart/HTTP claim races.
+- `verify-manager-ownership-postgres.ts`: ownership/eligibility concurrency.
+- `verify-orders-postgres.ts`: guarded order acceptance orchestrator.
+- `verify-prices-postgres.ts`: reference price/ingestion verification module.
+- `verify-station-pumps-postgres.ts`: pump availability/concurrency/rollback.
+- `verify-stations-postgres.ts`: disposable database/migration/domain orchestrator.
+- `verify-transfers-postgres.ts`: transfer/session/rollback verification module.
+- `verify-users-postgres.ts`: user lifecycle/authorization verification module.
 
-| File in `apps/api/scripts`               | Purpose                                                                                                                                                                                                                                                                 | Invocation and references                                                                                                                                                                                                                                     | Classification                                                             |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `preflight-employee-attendance.sql`      | Read-only duplicate-open-attendance report before the unique-index migration; changes no records.                                                                                                                                                                       | `psql "$env:DATABASE_URL" -X -v ON_ERROR_STOP=1 -f apps/api/scripts/preflight-employee-attendance.sql`; employee-attendance and employee-order-work docs.                                                                                                     | Verification/preflight tool; retain.                                       |
-| `verify-stations-postgres.ts`            | Main disposable PostgreSQL harness: creates a randomly named database, checks migration history, executes station acceptance or a flagged verification module, then drops the disposable DB and temporary migration directory.                                          | T(verify-stations-postgres.ts), optionally --users/--prices/--attendance/--transfers; station-management, authentication, user-management, fuel-prices, attendance and manager-attendance docs. Invokes provisioning CLIs only against its disposable target. | Verification CLI; retain, migration guard currently blocks it (see below). |
-| `verify-users-postgres.ts`               | Real auth/user-management acceptance, role/station isolation, permissions, CSRF, safe responses and account lifecycle cases.                                                                                                                                            | Dynamic import by H(--users); documented through the harness in authentication/user-management/fuel-prices docs. Exports a helper, not a standalone main.                                                                                                     | Verification helper; retain.                                               |
-| `verify-prices-postgres.ts`              | Real PostgreSQL/Express pricing acceptance and targeted permission CLI checks with a synthetic upstream-provider transport.                                                                                                                                             | Dynamic import by H(--prices); fuel-prices docs. Exports a helper, not a standalone main.                                                                                                                                                                     | Verification helper; retain.                                               |
-| `verify-attendance-postgres.ts`          | Real attendance/shift and Manager-report acceptance, filtering/history, authorization and permission-provisioning checks.                                                                                                                                               | Dynamic import by H(--attendance); attendance and manager-attendance docs; imports attendance permission helper and attendance test fixtures.                                                                                                                 | Verification helper; retain.                                               |
-| `verify-transfers-postgres.ts`           | Real employee-transfer acceptance, authorization, session/assignment behavior and transaction races.                                                                                                                                                                    | Dynamic import by H(--transfers); user-management docs; imports transfer and attendance permission helpers.                                                                                                                                                   | Verification helper; retain.                                               |
-| `verify-employee-attendance-postgres.ts` | Against an explicitly authorized empty disposable database: verify migration rejection for duplicate open records, unique index, idempotency, concurrent check-ins and transfer races. Applies test migrations and manufactures test records on that disposable target. | T(verify-employee-attendance-postgres.ts); employee-attendance docs. Requires EMPLOYEE_ATTENDANCE_TEST_DATABASE_URL and ALLOW_EMPLOYEE_ATTENDANCE_TEST_WRITES=yes. Imports the relocated employee attendance service/repository and user service/repository.  | Verification CLI; retain, migration guard currently blocks it (see below). |
-| `verify-employee-orders-postgres.ts`     | Reuse guarded fixtures, check two employees share persisted station rows across API process restarts, check station isolation, and race two claims to verify one winner/event and matching persisted metadata. Adds a marked race order per run.                        | T(verify-employee-orders-postgres.ts); employee-orders and employee-order-work docs. Imports employee-orders-fixtures and spawns employee-orders-fixture --probe/--race.                                                                                      | Verification CLI; retain.                                                  |
+Cleanup removed four now-orphaned verification helpers, not application services:
 
-## Fixtures
+- `orders-postgres-scenarios.ts`: sole runner was deleted; no runtime caller.
+- `orders-verification-preflight.ts`: only obsolete infrastructure tests remained.
+- `orders-verification-safety.ts`: only obsolete infrastructure tests remained.
+- `postgres-verification-migrations.ts`: only obsolete infrastructure tests remained.
 
-| File in `apps/api/scripts`    | Purpose                                                                                                                                                                                                               | Invocation and references                                                                                                                                                         | Classification                              |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `employee-orders-fixture.ts`  | Explicit guarded fixture CLI; creates/reuses two stations, matching pumps, PENDING orders/initial events and three test employees. Also provides listening API subprocess probes and the claim race for verification. | N(fixture-employee-orders); employee-orders/employee-order-work docs; spawned by verify-employee-orders-postgres with --probe, --employee and optionally --race/--second/--order. | Fixture CLI and verification probe; retain. |
-| `employee-orders-fixtures.ts` | Disposable URL/write-authorization guard and repeatable transactional fixture helper; adds only needed fixture role grants and preserves existing fixture state.                                                      | Imported by employee-orders-fixture and verify-employee-orders-postgres; `tests/unit/employee-orders-fixtures.test.ts`. No startup registration.                                  | Fixture helper; retain.                     |
+The 13 migration directories, Prisma schema and generated client are unchanged.
+No package command, seed, CI job or application import invokes these deleted files.
+No obsolete npm verification command existed to remove. Ignored stale compiled
+copies of the 15 scripts and two old test files were removed by exact file path;
+a normal TypeScript build does not prune deleted source output.
 
-Order fixture/probe/verifier paths require EMPLOYEE_ORDERS_TEST_DATABASE_URL,
-ALLOW_EMPLOYEE_ORDER_FIXTURES=yes, and the guarded local database-name convention.
-Fixture creation and the verifier additionally require the explicit fixture
-password. The existing schema must already be installed. No development URL
-fallback exists.
+## Test accounting
 
-## CI and current limitations
+Previous baseline: 36 suites / 1,226 tests. Only removed-runner infrastructure
+coverage was retired:
 
-CI runs root `npm run lint`, `npm run test`, and `npm run build`. The API lint and
-TypeScript configuration cover scripts; routine Jest imports the unit-tested
-helpers listed above with mocked databases. CI does not directly run provisioning,
-fixtures, the SQL preflight or any PostgreSQL verifier.
+| Former suite | Removed tests | Reason |
+| --- | --- | --- |
+| `orders-verification-safety.test.ts` | 23 | 1 explicit target test; 9 invalid URL cases; 1 protected-name test; 5 opt-in rejection cases; 1 opt-in acceptance; 1 migration inventory/hash test; 3 deleted-runner startup checks; 2 deleted pump-runner checks |
+| `postgres-verification-migrations.test.ts` | 8 | 1 accepted reviewed-history case; 7 changed-history rejection cases for removed verifier guard |
 
-Two existing migration guards intentionally reject this checkout's later
-`20261121170000_employee_order_work` migration:
+The two customer-grant tests were copied without changing their bodies to
+`tests/unit/customer-order-permissions.test.ts`; their original mixed suite was
+removed. The separate eight employee fixture tests remain, because that CLI and
+its guards remain. Expected post-cleanup total: 35 suites / 1,195 tests, a decrease
+of one suite and 31 verification-infrastructure tests. No application unit or
+HTTP integration regression test was removed or weakened.
 
-- `verify-stations-postgres.ts` asserts an exact migration list ending at
-  `20261121130000_employee_attendance`. It creates its disposable database before
-  that assertion, then cleans it up on failure. All its flagged helper runs share
-  this limitation.
-- `verify-employee-attendance-postgres.ts` asserts that employee-attendance is the
-  latest migration before applying any test migration.
+## Operational functionality (source inspection only)
 
-These are referenced tools needing a separately scoped verifier update, **not
-deletion candidates**. Their guards and behavior are unchanged by this refactor.
-No PostgreSQL verifier, provisioning CLI or fixture command was run here.
+- Prisma migration deployment uses the installed Prisma CLI and
+  `apps/api/prisma.config.ts`; its migrations directory remains intact.
+- Client generation uses the same config and schema generator, with custom output
+  `apps/api/src/generated/prisma`. All 28 generated TS files remain tracked; CI
+  still relies on checked-in output rather than a generation step.
+- Seed configuration points to `apps/api/prisma/seed.ts`. Its imports resolve to
+  dotenv, Prisma adapter/client and Node builtins; none references deleted files.
+  The seed upserts roles/permissions then **replaces role-permission assignments**;
+  it is not equivalent to additive provisioning and was not executed here.
+- `create-admin` and six additive provisioning commands retain their CLI/helper
+  pairs and package entries.
+- API `dev` uses `tsx watch src/server.ts`; `build` uses TypeScript;
+  `start` uses `node dist/src/server.js`; `test` uses Jest.
+- Root workspace scripts, TypeScript/Jest configs and CI do not name removed
+  runners. CI continues to install, lint, run database-mocked tests and build.
 
-All 24 files have an npm, documented manual, import, test or subprocess use path.
-There are **no confirmed unused scripts or deletion candidates** in this audit.
+## Historical acceptance evidence and limitations
+
+Task 08 completed full guarded local PostgreSQL order acceptance on 2026-11-23.
+The Stage 9 defect was a raw Serializable `FOR UPDATE` failure: Prisma P2010
+carried SQLSTATE 40001, while transaction retries recognized only P2034. The
+bounded retry correction and all five application regression cases remain.
+A separate verifier fault-injection fix targeted the actual transaction delegate.
+Cash confirmation, idempotency, pump uniqueness, claim/completion, cancellation,
+ownership/authorization, transaction rollback and lifecycle races passed then.
+See the [unchanged historical scenario results and root cause](frontend-api-guide.md#task-08-observed-stage-9-root-cause-and-postgresql-acceptance).
+
+Task 01's earlier migration-guard baseline (33 suites / 1,091 tests) and Task 09's
+pre-removal audit (36 suites / 1,226 tests; static checks passed) were historical
+snapshots, not the current inventory. Earlier detailed audit versions remain in
+Git history. The developer reports deleting all five disposable acceptance
+databases, leaving `m7atati` and `postgres` (excluding PostgreSQL templates). This
+review did not query even database names and did not recreate or mutate targets.
+
+No fresh PostgreSQL acceptance is claimed. This checkout no longer has automated
+live PostgreSQL concurrency/rollback acceptance runners. Historical evidence and
+current mocked application regressions are complementary, not substitutes.
+Deployment readiness remains READY WITH CONDITIONS; primary-data compatibility,
+secrets, origins/CORS, external provider configuration and operations are not
+certified by these checks.
+
+## Post-cleanup regression results
+
+All requested checks passed (exit 0):
+
+- Full backend Jest: **35 suites / 1,195 tests**, no failures or snapshots.
+- TypeScript typecheck, including unused-local/parameter checks: passed.
+- ESLint and backend build: passed.
+- `git diff --check`: passed.
+- Mounted HTTP inventory: **52 endpoints across 15 routers**, unchanged.
+
+The 31-test decrease matches the infrastructure-only accounting above. The two
+preserved provisioning test bodies match their originals exactly. Application
+source, integration tests, schema and migrations have no diff. Repository scans
+found no live imports or fenced execution commands referring to removed files.
+Remaining mentions in documents are explicitly historical. Nothing was staged
+or committed, and no database was contacted.

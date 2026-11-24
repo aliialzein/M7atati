@@ -31,6 +31,16 @@ export const usersRepository = {
     // Employee claims/completions lock this same row before checking eligibility.
     await tx.$queryRaw`SELECT id FROM users WHERE id = ${id} FOR UPDATE`;
   },
+  async hasOpenAttendance(employeeId: number, tx: Prisma.TransactionClient) {
+    return (
+      (await tx.attendanceRecord.findFirst({
+        // Include historical/mismatched stations: checkout requires EMPLOYEE
+        // regardless of where the open record was originally recorded.
+        where: { employeeId, clockOutAt: null },
+        select: { id: true },
+      })) !== null
+    );
+  },
   async hasActiveClaimedOrder(
     employeeId: number,
     tx: Prisma.TransactionClient,

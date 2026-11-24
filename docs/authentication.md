@@ -1,5 +1,21 @@
 # Authentication and authorization
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+The [frontend API guide](frontend-api-guide.md) consolidates current contracts
+across modules. Historical stage-scope exclusions below do not imply that current
+station, ownership or order modules are absent.
+
+Verification notes below retain their original task scope. Task 08 subsequently
+resolved the Stage 9 HTTP 500 and passed full guarded local PostgreSQL order
+acceptance; see [the Task 08 evidence](frontend-api-guide.md#task-08-observed-stage-9-root-cause-and-postgresql-acceptance).
+Earlier statements that the failure remained unresolved are historical.
+
 ## Account token versions
 
 Apply the additive `20261117090000_add_user_token_version` migration before
@@ -17,9 +33,8 @@ only refresh capability; role/station changes retain their existing semantics.
 Prepare/generate from repository root with the existing Prisma conventions.
 Review pending migrations and the target before explicitly deploying:
 `prisma migrate deploy --config apps/api/prisma.config.ts`.
-No normal-development migration is automatically applied by the verification
-scripts. The disposable users acceptance command is
-`tsx apps/api/scripts/verify-stations-postgres.ts --users`.
+The former users PostgreSQL runner has been removed; its rollout results below
+are historical. Deployment remains an explicit operation on a reviewed target.
 
 Local rollout on 2026-11-17 explicitly applied this migration to `m7atati` using
 `migrate deploy`; migration status was verified up to date. A newly provisioned
@@ -74,7 +89,98 @@ All responses from `/api/auth` use `Cache-Control: no-store`.
 | `GET /api/auth/me`        | Access cookie                    | 200, `{ "user": ... }`                     |
 
 The safe user object contains `id`, `name`, `email`, `role` (role name), and
-`stationId`. JSON responses never contain passwords, hashes, or JWTs.
+`stationId`, plus `permissions` (effective permission strings). JSON responses
+never contain passwords, hashes, or JWTs.
+
+### Effective permissions (Task 06)
+
+Registration, login, refresh and current-user responses all use the same mapper
+and retain their existing `{ "user": ... }` envelope and status codes. The only
+added field is `user.permissions`; existing fields and cookie contracts remain.
+For example, the previous profile shape:
+
+```json
+{"user":{"id":21,"name":"Manager","email":"manager@example.invalid","role":"MANAGER","stationId":null}}
+```
+
+now includes the currently granted keys:
+
+```json
+{
+  "user": {
+    "id": 21,
+    "name": "Manager",
+    "email": "manager@example.invalid",
+    "role": "MANAGER",
+    "stationId": null,
+    "permissions": ["orders.read", "payments.manage"]
+  }
+}
+```
+
+This is illustrative, not a fixed MANAGER permission list. The authoritative
+source is the account's current role and its `role_permissions` / `permissions`
+relationships. There are no direct user overrides. ADMIN uses explicit grants
+and has no wildcard or permission bypass. A role with no grants returns `[]`,
+including ADMIN. Keys are preserved exactly, deduplicated, and sorted using
+JavaScript's default lexicographic string order. Only strings are returned;
+permission IDs, role IDs, join records and permission descriptions are excluded.
+
+| Endpoint | Permission-bearing success |
+| --- | --- |
+| `POST /api/auth/register` | 201 `{ user }`, CUSTOMER grants, initial cookies |
+| `POST /api/auth/login` | 200 `{ user }`, current grants, session cookies |
+| `POST /api/auth/refresh` | 200 `{ user }`, current grants, rotated cookies |
+| `GET /api/auth/me` | 200 `{ user }`, current grants, access cookie required |
+| `POST /api/auth/logout` | Unchanged 204, no user body |
+
+The profile/current-session restoration endpoint is `/api/auth/me`; no new
+session or permissions endpoint is added. Public registration remains CUSTOMER
+only and rejects client-supplied permissions, roles and station affiliation.
+Login inputs are also strict and cannot provide permissions. User-management
+DTOs describing other accounts retain their existing contract; they are not
+authenticated-session profiles.
+
+Authentication loads current database grants on every protected request, and the
+middleware's permission list uses the same normalization as the response mapper.
+No role or permission list is added to JWTs or stored as a refresh-session grant
+snapshot. Grant/revocation changes therefore appear on subsequent `/me` requests,
+login and refresh without requiring a newly issued access token. Already
+in-flight requests may finish using grants read earlier in that request.
+
+Role/station changes retain the existing refresh-session revocation policy;
+existing unexpired access tokens read the new role and grants on subsequent
+requests. Deactivation still increments tokenVersion and revokes sessions;
+reactivation does not restore old tokens. Login, `/me` and refresh continue to
+reject inactive accounts. Logout clears cookies and revokes refresh capability;
+it does not independently revoke an already-issued access JWT. Refresh rotation,
+expiry/version checks and replay protection are unchanged.
+
+Frontend usage is limited to presentation, for example:
+
+```tsx
+const canConfirmCash = user.permissions.includes('payments.manage');
+return canConfirmCash ? <button onClick={confirmCash}>Confirm cash</button> : null;
+```
+
+Hiding a button is not authorization. Treat the array as a UI hint, reload `/me`
+when restoring a session or refreshing UI identity, and handle API denials.
+Editing the array, request body or client storage cannot grant server access.
+Protected routes continue to use database-backed authentication/authorization;
+the frontend array is never accepted as proof of a grant.
+
+Permissions are global capabilities, distinct from resource access. A manager
+with `payments.manage` must still own the station; employee operations still
+check affiliation and station activity. `stationId` is affiliation, not manager
+ownership. No station IDs are encoded into keys and no extra grants follow from
+affiliation. Endpoint role restrictions still apply even when a role has a
+permission string. These checks are unchanged.
+
+Task 06 changes only response mapping and reuse of its normalized keys. Jest
+coverage mocks Prisma and checks all auth responses, freshness, lifecycle and
+resource restrictions. No new database constraint/transaction behavior requires
+a migration; no primary or retained verification database is queried or changed.
+The existing Task 02 order Stage 9 HTTP 500 remains unresolved and was not run.
 
 Email is trimmed and lowercased on registration and login. Future staff
 provisioning must use the same normalization. Public registration accepts only

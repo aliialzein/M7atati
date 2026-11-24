@@ -1,8 +1,72 @@
 # External reference fuel prices
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+Current cross-module contracts and readiness are in the authoritative
+[frontend API guide](frontend-api-guide.md). Stage-specific exclusions and
+verification notes below are historical: Task 08 resolved the Stage 9 HTTP 500
+and passed full guarded local PostgreSQL order acceptance. This does not certify
+live provider configuration or deployment readiness.
+
 Prices are station-independent **Lebanon market reference prices**, not a world
 average, station selling prices, crude benchmarks or order charging inputs.
 No orders, scheduling, polling or frontend integration is added.
+
+## Fuel-type lookup (Task 04)
+
+`GET /api/fuel-types` is a public, read-only global catalog for form choices,
+including guest order forms. It requires no authentication, permission or CSRF
+header, matching `/api/stations/picker`. Responses use `Cache-Control: no-store`.
+It accepts no query parameters; unsupported parameters return 400
+`{ "message": "Invalid request" }`. Unexpected database failures use the shared
+sanitized 500 response `{ "message": "Internal Server Error" }`.
+
+Success is 200:
+
+```json
+{
+  "fuelTypes": [
+    { "id": 2, "name": "Road diesel", "code": "diesel" },
+    { "id": 1, "name": "Petrol 95 RON", "code": "gasoline_95" }
+  ]
+}
+```
+
+These IDs and values are illustrative: results come from `fuel_types`, with no
+hardcoded fallback list, seeding or provider request. The only item fields are
+numeric `id`, display `name` and internal `code`. Results are ordered by `code`
+ascending, then `id` ascending using database collation, with no pagination.
+An empty table returns 200 `{ "fuelTypes": [] }`.
+
+Fuel types have no active flag or station ownership. All stored types appear,
+including types with no reference or selling price. No price, provider metadata,
+tank, pump, station, order or audit relationship is returned. Pumps have no direct
+fuel-type relationship; tanks reference both station and fuel type. This catalog
+does not establish pump availability or station inventory.
+
+Use the returned numeric `id` unchanged as `fuelTypeId` when configuring global
+selling tariffs or requesting `POST /api/orders/quotes`. Order creation then uses
+the returned `quoteId`; it does not accept a fuel code instead. The quote endpoint
+still checks the active station, fuel existence and an effective global selling
+price for the requested currency. Catalog presence does not guarantee a quote
+can be created. Reference-price provider codes and mappings remain separate;
+reference observations are not order charging inputs. Existing ADMIN-only pricing
+routes and permissions are unchanged.
+
+Implementation adds only a router, controller and repository. No schema,
+migration, active flag or generic lookup framework is introduced. Jest/Supertest
+coverage mocks Prisma and checks the ordering/select contract, safe response,
+empty state, public access, query rejection, unsupported mutations and error
+sanitization. The existing order-creation suite also exercises a returned ID
+through selling-price creation, guest quote and order creation. These tests do
+not claim real PostgreSQL collation verification. Task 04 does not query or
+modify the primary database or rerun database fixture scripts. The pre-existing
+Task 02 order Stage 9 HTTP 500 remains unresolved and outside this lookup's scope.
 
 ## Provider contract and actual coverage
 
@@ -212,11 +276,7 @@ The existing opt-in PostgreSQL harness (not run for this change) creates a dispo
 deploys repository migrations, tests pre-migration legacy retention and runs
 targeted provisioning twice before real in-process HTTP/auth/Prisma checks:
 
-```powershell
-node_modules/.bin/tsx.cmd apps/api/scripts/verify-stations-postgres.ts --prices
-node_modules/.bin/tsx.cmd apps/api/scripts/verify-stations-postgres.ts --users
-node_modules/.bin/tsx.cmd apps/api/scripts/verify-stations-postgres.ts
-```
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
 Focused manual HTTP smoke testing used the listening server started with the
 normal development command. Health/readiness, ADMIN login/profile, refresh,

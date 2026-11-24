@@ -9,6 +9,7 @@ import { authRouter } from './modules/auth/auth.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
 import { stationsRouter } from './modules/stations/stations.routes.js';
 import { fuelPricesRouter } from './modules/fuel-prices/fuel-prices.routes.js';
+import { fuelTypesRouter } from './modules/fuel-types/fuel-types.routes.js';
 import {
   managerOrdersRouter,
   employeeOrdersRouter,
@@ -63,6 +64,7 @@ app.use('/api/orders', customerOrdersRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/stations', stationsRouter);
 app.use('/api/fuel-prices', fuelPricesRouter);
+app.use('/api/fuel-types', fuelTypesRouter);
 app.use('/api/shifts', shiftsRouter);
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/manager', managerOrdersRouter);

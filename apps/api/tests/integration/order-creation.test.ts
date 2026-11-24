@@ -10,7 +10,7 @@ import { selectFields } from '../fixtures/orders.js';
 jest.mock('../../src/database/prisma.js', () => ({
   prisma: {
     user: { findUnique: jest.fn() },
-    fuelType: { findUnique: jest.fn() },
+    fuelType: { findUnique: jest.fn(), findMany: jest.fn() },
     sellingPrice: {
       create: jest.fn(),
       findFirst: jest.fn(),
@@ -37,7 +37,7 @@ jest.mock('../../src/utils/logger.js', () => ({
 type Row = Record<string, unknown>;
 const db = prisma as unknown as {
   user: { findUnique: jest.Mock };
-  fuelType: { findUnique: jest.Mock };
+  fuelType: { findUnique: jest.Mock; findMany: jest.Mock };
   sellingPrice: {
     create: jest.Mock;
     findFirst: jest.Mock;
@@ -346,6 +346,37 @@ beforeEach(() => {
 });
 
 describe('Admin global selling prices', () => {
+  it('uses the lookup ID unchanged for selling prices, guest quotes and orders', async () => {
+    const fuel = { id: 83, name: 'Stored fuel', code: 'stored_grade' };
+    db.fuelType.findMany.mockResolvedValue([fuel]);
+    db.fuelType.findUnique.mockImplementation(async ({ where }) =>
+      where.id === fuel.id ? { id: fuel.id } : null,
+    );
+    const lookup = await request(app).get('/api/fuel-types');
+    expect(lookup.status).toBe(200);
+    const fuelTypeId = lookup.body.fuelTypes[0].id;
+    const price = await post(
+      '/fuel-prices/selling',
+      {
+        fuelTypeId,
+        currency: 'USD',
+        unitPrice: '1.99',
+        effectiveAt: '2020-01-01T00:00:00Z',
+      },
+      1,
+    );
+    expect(price.status).toBe(201);
+    expect(price.body.price.fuelTypeId).toBe(fuel.id);
+    const q = await quote(undefined, { fuelTypeId });
+    expect(q.quote.fuelTypeId).toBe(fuel.id);
+    const order = await post('/orders', creation(q));
+    expect(order.status).toBe(201);
+    expect(orders[0].fuelTypeId).toBe(fuel.id);
+    expect(db.fuelType.findUnique).toHaveBeenCalledWith({
+      where: { id: fuel.id },
+      select: { id: true },
+    });
+  });
   it('returns no fabricated current price and protects reads from non-Admins', async () => {
     expect(
       (await get('/fuel-prices/selling/current?fuelTypeId=1&currency=USD'))

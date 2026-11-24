@@ -23,6 +23,10 @@ export interface UserProfile {
   stationId: number | null;
 }
 
+export interface AuthenticatedUserProfile extends UserProfile {
+  permissions: string[];
+}
+
 export interface AuthContext {
   user: UserProfile;
   permissions: readonly string[];
@@ -38,16 +42,19 @@ export interface TokenPair {
 }
 
 export interface AuthResult {
-  user: UserProfile;
+  user: AuthenticatedUserProfile;
   tokens: TokenPair;
 }
 
-export function userProfile(user: AuthUser): UserProfile {
+export function userProfile(user: AuthUser): AuthenticatedUserProfile {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     role: user.role.name,
     stationId: user.stationId,
+    permissions: [
+      ...new Set(user.role.permissions.map(({ permission }) => permission.key)),
+    ].sort(),
   };
 }

@@ -11,7 +11,7 @@ import { guestOrderAccessToken } from '../../src/modules/orders/orders.guest-acc
 jest.mock('../../src/database/prisma.js', () => ({
   prisma: {
     user: { findUnique: jest.fn() },
-    station: { findFirst: jest.fn() },
+    station: { findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
     fuelOrder: {
       findFirst: jest.fn(),
       findMany: jest.fn(),
@@ -31,7 +31,7 @@ jest.mock('../../src/utils/logger.js', () => ({
 type Row = Record<string, unknown>;
 const db = prisma as unknown as {
   user: { findUnique: jest.Mock };
-  station: { findFirst: jest.Mock };
+  station: { findFirst: jest.Mock; findUnique: jest.Mock; update: jest.Mock };
   fuelOrder: {
     findFirst: jest.Mock;
     findMany: jest.Mock;
@@ -249,13 +249,38 @@ beforeEach(() => {
       ? station
       : null;
   });
-  const matches = (row: Row, where: Row) =>
+  const stationRow = () => ({
+    ...station,
+    name: 'Station',
+    address: 'Station address',
+    latitude: null,
+    longitude: null,
+    createdAt: new Date(0),
+  });
+  db.station.findUnique.mockImplementation(async ({ where }) =>
+    where.id === station.id ? stationRow() : null,
+  );
+  db.station.update.mockImplementation(async ({ data }) => {
+    Object.assign(station, data);
+    return stationRow();
+  });
+  const matches = (row: Row, where: Row): boolean =>
     Object.entries(where).every(([key, value]) =>
-      key === 'payments'
-        ? !payments.some((payment) => payment.orderId === row.id)
-        : value !== null && typeof value === 'object' && 'in' in value
-          ? (value.in as unknown[]).includes(row[key])
-          : row[key] === value,
+      key === 'OR'
+        ? (value as Row[]).some((part) => matches(row, part))
+        : key === 'payments'
+          ? value && typeof value === 'object' && 'some' in value
+            ? payments.some(
+                (payment) =>
+                  payment.orderId === row.id &&
+                  matches(payment, value.some as Row),
+              )
+            : !payments.some((payment) => payment.orderId === row.id)
+          : value !== null && typeof value === 'object' && 'in' in value
+            ? (value.in as unknown[]).includes(row[key])
+            : value !== null && typeof value === 'object' && 'gt' in value
+              ? Number(row[key]) > Number(value.gt)
+              : row[key] === value,
     );
   db.fuelOrder.findFirst.mockImplementation(async ({ where, select }) => {
     const row = [order, ...otherOrders].find((row) => matches(row, where));
@@ -308,6 +333,7 @@ beforeEach(() => {
       });
       await previous;
       const before = {
+        station: { ...station },
         order: { ...order },
         otherOrders: otherOrders.map((row) => ({ ...row })),
         payments: [...payments],
@@ -316,6 +342,7 @@ beforeEach(() => {
       try {
         return await work(db);
       } catch (error) {
+        station = before.station;
         order = before.order;
         otherOrders = before.otherOrders;
         payments = before.payments;
@@ -323,6 +350,123 @@ beforeEach(() => {
         throw error;
       } finally {
         release();
+      }
+    },
+  );
+});
+
+it('pump lookup follows cash reservation, claim and completion without modifying pump status', async () => {
+  const availability = async () => {
+    db.station.findFirst.mockImplementationOnce(async ({ select }) => ({
+      id: station.id,
+      isActive: station.isActive,
+      pumps: [
+        {
+          id: pump!.id,
+          number: 1,
+          status: pump!.status,
+          _count: {
+            orders: [order, ...otherOrders].filter(
+              (row) =>
+                row.pumpId === pump!.id &&
+                select.pumps.select._count.select.orders.where.status.in.includes(
+                  row.status,
+                ),
+            ).length,
+          },
+        },
+      ],
+    }));
+    const response = await get('/stations/10/pumps');
+    expect(response.status).toBe(200);
+    return response.body.pumps[0].available;
+  };
+  expect(await availability()).toBe(true);
+  expect((await confirm()).status).toBe(201);
+  expect(await availability()).toBe(false);
+  expect((await employeeAction('claim')).status).toBe(200);
+  expect(await availability()).toBe(false);
+  expect((await employeeAction('complete')).status).toBe(200);
+  expect(await availability()).toBe(true);
+  expect(pump!.status).toBe('IDLE');
+});
+
+describe('station status versus cash confirmation (mock transaction protocol)', () => {
+  function deactivate() {
+    users.get(2)!.permissions.push('stations.update');
+    return request(app)
+      .patch('/api/stations/10/status')
+      .set('Cookie', `${ACCESS_COOKIE}=${tokenService.issue(2).accessToken}`)
+      .set('Origin', 'http://localhost:3000')
+      .set('X-CSRF-Protection', '1')
+      .send({ isActive: false });
+  }
+
+  it('rejects deactivation after application cash activation without altering its payment or reservation', async () => {
+    expect((await confirm()).status).toBe(201);
+    const before = JSON.stringify({ station, order, payments, events, pump });
+    expect((await deactivate()).status).toBe(409);
+    expect(JSON.stringify({ station, order, payments, events, pump })).toBe(
+      before,
+    );
+    expect((await confirm()).status).toBe(200);
+  });
+
+  it.each([true, false])(
+    'coordinates cash/deactivation with cash first: %s',
+    async (cashFirst) => {
+      const transaction = db.$transaction.getMockImplementation()!;
+      let release!: () => void;
+      let entered!: () => void;
+      let arrived!: () => void;
+      const held = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const firstEntered = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const competitorArrived = new Promise<void>((resolve) => {
+        arrived = resolve;
+      });
+      let calls = 0;
+      db.$transaction.mockImplementation(
+        (work: (tx: typeof db) => Promise<unknown>, ...args: unknown[]) => {
+          if (++calls === 1)
+            return transaction(
+              async (tx: typeof db) => {
+                entered();
+                await held;
+                return work(tx);
+              },
+              ...args,
+            );
+          arrived();
+          return transaction(work, ...args);
+        },
+      );
+      const first = (cashFirst ? confirm() : deactivate()).then(
+        (response) => response,
+      );
+      try {
+        await firstEntered;
+        const second = (cashFirst ? deactivate() : confirm()).then(
+          (response) => response,
+        );
+        await competitorArrived;
+        release();
+        const results = await Promise.all([first, second]);
+        expect(results.map((response) => response.status)).toEqual([
+          cashFirst ? 201 : 200,
+          409,
+        ]);
+        expect(station.isActive).toBe(cashFirst);
+        expect(order.status).toBe(cashFirst ? 'PENDING' : 'AWAITING_PAYMENT');
+        expect(order.pumpId).toBe(cashFirst ? 7 : null);
+        expect(payments).toHaveLength(cashFirst ? 1 : 0);
+        expect(events).toHaveLength(cashFirst ? 1 : 0);
+      } finally {
+        release();
+        await first;
       }
     },
   );
@@ -752,6 +896,7 @@ it('rechecks station ownership under the station lock', async () => {
   );
   expect((await confirm()).status).toBe(404);
   expect(payments).toHaveLength(0);
+  expect((await confirm(body, 5)).status).toBe(201);
 });
 it('rechecks Manager activation inside the transaction', async () => {
   const find = db.user.findUnique.getMockImplementation()!;
@@ -872,6 +1017,60 @@ it('rolls back a conditional update conflict', async () => {
   expect(payments).toHaveLength(0);
   expect(events).toHaveLength(0);
 });
+it.each([
+  { code: '40001' },
+  {
+    driverAdapterError: {
+      cause: { originalCode: '40001', kind: 'TransactionWriteConflict' },
+    },
+  },
+])(
+  'retries the Stage 9 raw order-lock serialization failure: %j',
+  async (meta) => {
+    const query = db.$queryRaw.getMockImplementation()!;
+    let conflicted = false;
+    db.$queryRaw.mockImplementation(
+      async (sql: TemplateStringsArray, id: number, stationId?: number) => {
+        if (!conflicted && sql.join('').includes('FROM orders')) {
+          conflicted = true;
+          throw { code: 'P2010', meta };
+        }
+        return query(sql, id, stationId);
+      },
+    );
+    expect((await confirm()).status).toBe(201);
+    expect(conflicted).toBe(true);
+    expect(db.$transaction).toHaveBeenCalledTimes(2);
+    expect(order.status).toBe('PENDING');
+    expect(payments).toHaveLength(1);
+    expect(events).toHaveLength(1);
+  },
+);
+
+it('bounds raw serialization retries without leaving partial payment or reservation writes', async () => {
+  db.$queryRaw.mockRejectedValue({
+    code: 'P2010',
+    meta: { driverAdapterError: { cause: { originalCode: '40001' } } },
+  });
+  const before = JSON.stringify({ order, payments, events });
+  expect((await confirm()).status).toBe(409);
+  expect(db.$transaction).toHaveBeenCalledTimes(3);
+  expect(JSON.stringify({ order, payments, events })).toBe(before);
+});
+
+it.each(['22012', '42501'])(
+  'does not retry unrelated raw SQLSTATE %s',
+  async (sqlState) => {
+    db.$queryRaw.mockRejectedValue({
+      code: 'P2010',
+      meta: { driverAdapterError: { cause: { originalCode: sqlState } } },
+    });
+    expect((await confirm()).status).toBe(500);
+    expect(db.$transaction).toHaveBeenCalledTimes(1);
+    expect(payments).toHaveLength(0);
+  },
+);
+
 it('retries a serialization failure with all partial writes rolled back', async () => {
   db.orderEvent.create.mockRejectedValueOnce({ code: 'P2034' });
   expect((await confirm()).status).toBe(201);

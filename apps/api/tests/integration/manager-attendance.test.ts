@@ -53,12 +53,13 @@ function get(
   path: string,
   query: Record<string, string | number | undefined> = {},
   authenticated = true,
+  actorId = 1,
 ) {
   const pending = request(app).get(path).query(query);
   if (authenticated)
     pending.set(
       'Cookie',
-      `${ACCESS_COOKIE}=${tokenService.issue(1).accessToken}`,
+      `${ACCESS_COOKIE}=${tokenService.issue(actorId).accessToken}`,
     );
   return pending;
 }
@@ -103,7 +104,7 @@ beforeEach(() => {
   employeeName = 'Transferred Zoë';
   stations = [
     { id: 10, name: 'Historical Café', isActive: false, managerId: 1 },
-    { id: 11, name: 'Active North', isActive: true, managerId: 1 },
+    { id: 11, name: 'Active North', isActive: true, managerId: null },
     { id: 20, name: 'Affiliated only', isActive: true, managerId: 2 },
   ];
   rows = workRecordFixtures({
@@ -116,8 +117,8 @@ beforeEach(() => {
     id: i + 1,
     createdAt: new Date('2026-11-19T12:00:00Z'),
   }));
-  db.user.findUnique.mockImplementation(async () => ({
-    id: 1,
+  db.user.findUnique.mockImplementation(async ({ where }) => ({
+    id: where.id,
     name: 'Manager',
     email: 'manager@example.invalid',
     isActive: true,
@@ -181,16 +182,25 @@ beforeEach(() => {
 });
 
 describe('managed station discovery', () => {
-  it('returns every owned station, including inactive, with only minimal fields', async () => {
+  it('revokes discovery, attendance and export access immediately after reassignment and grants it to the new owner', async () => {
+    stations[2].managerId = null;
+    stations[0].managerId = 2;
+    expect((await get('/api/stations/managed')).body.stations).toEqual([]);
+    expect(
+      (await get('/api/stations/managed', {}, true, 2)).body.stations,
+    ).toEqual([{ id: 10, name: stations[0].name, isActive: false }]);
+    for (const path of paths) {
+      expect((await get(path)).status).toBe(404);
+      expect((await get(path, {}, true, 2)).status).toBe(200);
+    }
+  });
+  it('returns the single owned station, including inactive, with only minimal fields', async () => {
     permissions = []; // Discovery requires the role, not stations.read or attendance.read.
     const response = await get('/api/stations/managed');
     expect(response.status).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
     expect(response.body).toEqual({
-      stations: [
-        { id: 11, name: 'Active North', isActive: true },
-        { id: 10, name: 'Historical Café', isActive: false },
-      ],
+      stations: [{ id: 10, name: 'Historical Café', isActive: false }],
     });
     expect(db.station.findMany).toHaveBeenCalledWith({
       where: { managerId: 1 },
@@ -285,7 +295,9 @@ describe('manager attendance list and filters', () => {
       isActive: true,
     });
   });
-  it('reads another managed station independently and uses existing defaults', async () => {
+  it('reads the newly assigned station after releasing previous ownership', async () => {
+    stations[0].managerId = null;
+    stations[1].managerId = 1;
     rows.push({ ...rows[0], id: 8, stationId: 11 });
     const response = await get(base.replace('/10/', '/11/'));
     expect(response.body.attendance.map((r: Row) => r.id)).toEqual([8]);

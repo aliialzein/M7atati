@@ -1,5 +1,12 @@
 # User and access management
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
 Operational staff means MANAGER, EMPLOYEE, HR and SECURITY. ADMIN account
 administration is conceptually separate; the existing ADMIN provisioning and
 user endpoints retain their capabilities. This terminology adds no role group or
@@ -10,9 +17,9 @@ New station assignments (creation or a changed stationId) must target an active
 station within the actor's existing scope. Station deactivation preserves existing
 assignments. An unchanged stationId, including an explicitly repeated value, is
 not a transfer; unrelated profile changes remain allowed at inactive stations.
-Manager deactivation retains managed-station links and leaves employee accounts
-active; authentication is blocked. Manager demotion still requires reassignment
-of managed stations first.
+Assigned managers cannot be deactivated or changed away from MANAGER until their
+ownership is explicitly released or reassigned. These rejected operations leave
+accounts, sessions and employee relationships unchanged.
 
 Account deactivation atomically increments the private token version and revokes
 refresh sessions with the status update. Reactivation leaves that version intact:
@@ -37,6 +44,38 @@ Errors retain the existing `{ message }` format. Validation errors are 400,
 authentication errors 401, permission/scope errors 403, hidden/missing users 404,
 and duplicate email or integrity/concurrency conflicts 409. Unexpected errors
 remain sanitized 500 responses.
+
+## Employee role exits and open attendance (Task 02)
+
+`PATCH /api/users/:id` rejects a change from EMPLOYEE to another role when any
+attendance record for that employee has a null clock-out, including a historical
+record at a different station. It returns 409:
+
+```json
+{ "message": "Employee has open attendance; check out before changing role" }
+```
+
+The rejection does not update the user, attendance timestamps or refresh sessions.
+Name edits, an unchanged EMPLOYEE role and entering EMPLOYEE from another role do
+not trigger this guard. Existing authorization, station-transfer, claimed-order
+and role-assignment validation still apply first, so those conflicts can retain
+their existing messages.
+
+The predicate read and role update share the existing retryable Serializable user
+transaction and target-user `FOR UPDATE` lock. Attendance check-in/out already use
+retryable Serializable transactions. If overlapping check-in reads EMPLOYEE and
+creates an open record while role exit reads no open record and updates the user,
+the conflicting read/write dependencies cannot both commit at Serializable
+isolation; the existing P2034 retry reloads the role/attendance. Checkout may cause
+a conservative 409 from an older snapshot; retry after checkout is safe. Competing
+role updates lock the same user row. No global lock or automatic checkout exists.
+
+HTTP cases extend `tests/integration/users.test.ts`. Real PostgreSQL scenarios in
+`scripts/verify-employee-attendance-postgres.ts` cover check-in versus MANAGER or
+SECURITY role exit in both commit orders, checkout overlap with later role retry,
+and competing role exits. They require an explicitly authorized, initially empty
+disposable target as documented in `api-scripts-audit.md`; mocked tests do not
+establish real PostgreSQL concurrency acceptance.
 
 ## Scope policy
 
@@ -118,12 +157,20 @@ Station assignment policy:
 | ADMIN, HR          | Must be null                                |
 | CUSTOMER           | Not assignable through this module          |
 
-A MANAGER's station affiliation never proves management; actual managed stations
-are represented by `Station.managerId`/`User.managedStations`. Creating a manager
-does not assign stations to that manager. A later station-management workflow
-must maintain those relationships. A manager with managed stations cannot be
-demoted until those relationships are reassigned; this phase does not provide
-a station reassignment endpoint.
+A MANAGER's station affiliation never proves management. Ownership is represented
+by nullable unique `Station.managerId` and the generated optional
+`User.managedStation` inverse. Creating a manager does not assign ownership.
+ADMIN uses `PATCH /api/stations/:id/manager` and `stations.update` to assign,
+reassign or explicitly unassign it; see `station-management.md` for the contract.
+
+An assigned manager cannot be demoted (existing 409
+`Reassign managed stations before changing this role`) or deactivated (409
+`Unassign managed station before deactivating this manager`). Unassignment must
+be explicit; neither lifecycle operation clears ownership automatically. Manager
+affiliation changes remain independent and do not move ownership. Station
+deactivation preserves the owner. Manager reads and cash confirmation use current
+Station.managerId rather than affiliation, so subsequent requests reflect a
+committed reassignment immediately. Existing permissions are still required.
 
 General PATCH accepts only a nonempty combination of name, role, and stationId.
 Email, password, isActive, roleId, and other Prisma fields are rejected. Changes
@@ -187,12 +234,10 @@ include this permission; do not rerun the replacing seed on an existing database
 Stage 3 needs no migration. Deploy Stage 2's shift/attendance migration first if
 it is still pending, and use its generated client.
 
-The disposable PostgreSQL verifier includes rollback and controlled concurrency
-checks, without changing application data in the development database:
+The removed PostgreSQL verifier historically exercised rollback and controlled
+concurrency on an isolated target without changing development application data:
 
-```sh
-node --import tsx apps/api/scripts/verify-stations-postgres.ts --transfers
-```
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
 ## Status, sessions, and concurrency
 
@@ -249,17 +294,16 @@ Jest/Supertest uses mocked Prisma and explicit test credentials, preserving
 database-free CI. Tests verify the emitted filters/transaction options and model
 rollback/conflict retries; they do not simulate PostgreSQL's full Serializable
 implementation. The token-version policy requires the additive
-`20261117090000_add_user_token_version` migration; the disposable PostgreSQL
-`verify-stations-postgres.ts --users` run verifies real authentication and storage
+`20261117090000_add_user_token_version` migration; the former disposable users
+acceptance run checked real authentication and storage
 independently of those mocks. The token-version migration was explicitly applied
 to local development `m7atati` on 2026-11-17. Users/station acceptance suites were
 not repeated for the subsequent pricing-only conversion change, at the user's request.
 
 HR Stage 1 adds only employee registration and lookup. Shifts, attendance,
 transfers, Security workflows, hardware integration, and frontend work remain
-outside this stage. Its Jest/Supertest checks use mocked Prisma; the updated
-disposable PostgreSQL acceptance helper must be run separately to verify real
-storage behavior.
+outside this stage. Its Jest/Supertest checks use mocked Prisma. The former
+disposable PostgreSQL helper checked storage separately and has now been removed.
 Future credential changes, email verification, invitations, audit trails, and
 shared multi-instance rate limiting remain separate work. Preserve the existing
 CSRF and authentication protections when adding those features.

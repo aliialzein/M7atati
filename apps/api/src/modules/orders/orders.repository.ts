@@ -5,6 +5,7 @@ import { prisma } from '../../database/prisma.js';
 import { HttpError } from '../../types/http-error.js';
 import {
   employeeOrderTransitions,
+  activePumpOrderStatuses,
   orderStatus,
   type OrderStatus,
   type OrderFilters,
@@ -62,7 +63,22 @@ export const employeeOrdersRepository = {
           typeof error === 'object' && error !== null && 'code' in error
             ? error.code
             : undefined;
-        if (code === 'P2034') {
+        // Raw FOR UPDATE failures from the pg adapter carry SQLSTATE 40001
+        // inside P2010 rather than P2034. Retry the entire transaction so a
+        // competing confirmation observes the committed payment on replay.
+        const meta = (
+          error as {
+            meta?: {
+              code?: string;
+              driverAdapterError?: { cause?: { originalCode?: string } };
+            };
+          } | null
+        )?.meta;
+        const rawSerializationFailure =
+          code === 'P2010' &&
+          (meta?.code === '40001' ||
+            meta?.driverAdapterError?.cause?.originalCode === '40001');
+        if (code === 'P2034' || rawSerializationFailure) {
           if (attempt < 2) continue;
           throw new HttpError('Concurrent update; retry request', 409);
         }
@@ -421,7 +437,7 @@ export const cashOrdersRepository = {
     return tx.fuelOrder.findFirst({
       where: {
         pumpId,
-        status: { in: [orderStatus.PENDING, orderStatus.IN_PROGRESS] },
+        status: { in: activePumpOrderStatuses },
       },
       select: { id: true },
     });

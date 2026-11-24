@@ -2,7 +2,7 @@ import type { PrismaClient } from '../src/generated/prisma/client.js';
 import { HttpError } from '../src/types/http-error.js';
 
 // Add this one capability, preserving every existing role and permission link.
-// Callers control database selection; the Stage 9 runner enforces isolation.
+// Callers select the database explicitly; this helper does not validate targets.
 export async function provisionCustomerOrderCancellation(
   database: PrismaClient,
 ) {

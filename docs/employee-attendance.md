@@ -1,5 +1,16 @@
 # Employee Stage 1: attendance and home-page controls
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+Stage-specific exclusions and rollout notes below are historical, not statements
+that persistent orders or weekly shifts remain unimplemented.
+
 This stage adds self-service attendance only. Existing HR/Admin reads, employee
 transfer restrictions, Manager lists/CSV/PDF reports, analytics, and demo orders
 retain their contracts. Weekly shifts and persistent orders are later stages.
@@ -121,25 +132,10 @@ cover session restoration/login, other roles, coordinated refresh, pending
 controls, ambiguous failures, stable UUIDs and historical record IDs across reloads.
 Mocks verify behavior but cannot prove PostgreSQL index or SSI concurrency.
 
-The opt-in verifier requires an **existing, empty, explicitly authorized local
-disposable database** named `m7atati_employee_verify_<suffix>`. It never falls back
-to development DATABASE_URL or creates a database. It checks database identity and
-empty public schema before executing migrations and creating its own test data.
-It verifies duplicate-migration rollback, uniqueness, concurrent same/different
-keys, historical retry, and both transfer/check-in commit orders. It leaves its
-disposable fixtures for inspection; use a fresh empty database for another run.
-
-After configuring the dedicated URL through your secret management:
-
-```powershell
-$env:ALLOW_EMPLOYEE_ATTENDANCE_TEST_WRITES = 'yes'
-node --import tsx apps/api/scripts/verify-employee-attendance-postgres.ts
-```
-
-The URL must be in `EMPLOYEE_ATTENDANCE_TEST_DATABASE_URL`; setting the ordinary
-development `DATABASE_URL` is insufficient. Without a supplied authorized target,
-these real PostgreSQL checks remain **pending**. No claim of verified transaction
-or migration behavior should be inferred from mocked tests.
+The removed opt-in runner checked duplicate-migration rollback, uniqueness,
+concurrent same/different keys, historical retry and transfer/check-in commit
+orders against an isolated database. These are historical scenarios; the current
+repository no longer provides that runner or its target configuration workflow.
 
 Routine checks from the root:
 

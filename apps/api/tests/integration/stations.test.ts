@@ -10,6 +10,7 @@ jest.mock('../../src/database/prisma.js', () => ({
   prisma: {
     user: { findUnique: jest.fn() },
     station: {
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
@@ -52,6 +53,7 @@ type FindMany = {
 type Database = {
   user: { findUnique: jest.Mock };
   station: {
+    findFirst: jest.Mock;
     findUnique: jest.Mock;
     findMany: jest.Mock;
     count: jest.Mock;
@@ -66,7 +68,14 @@ const db = prisma as unknown as Database;
 let rows: Row[];
 let role: string;
 let permissions: string[];
-let orders: { id: number; stationId: number; status: string }[];
+let candidates: Map<number, { role: string; active: boolean }>;
+let orders: {
+  id: number;
+  stationId: number;
+  status: string;
+  pumpId?: number | null;
+  payments?: { id: number; status: string; capturedMinor: number }[];
+}[];
 const grants = ['stations.read', 'stations.create', 'stations.update'];
 function row(id: number, name: string, isActive = true): Row {
   return {
@@ -76,7 +85,7 @@ function row(id: number, name: string, isActive = true): Row {
     latitude: null,
     longitude: null,
     isActive,
-    managerId: 20,
+    managerId: id === 1 ? 20 : null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     deviceKeyHash: 'device-value-must-never-leak',
     users: [{ id: 9, isActive: true }],
@@ -122,6 +131,12 @@ beforeEach(() => {
   jest.resetAllMocks();
   role = 'ADMIN';
   permissions = [...grants];
+  candidates = new Map([
+    [20, { role: 'MANAGER', active: true }],
+    [21, { role: 'MANAGER', active: true }],
+    [22, { role: 'MANAGER', active: false }],
+    [23, { role: 'EMPLOYEE', active: true }],
+  ]);
   rows = [row(3, 'Beta'), row(2, 'Alpha', false), row(1, 'Alpha')];
   orders = [];
   db.$queryRaw.mockResolvedValue([]);
@@ -129,28 +144,58 @@ beforeEach(() => {
     async ({ where }) =>
       orders.find(
         (order) =>
-          order.stationId === where.stationId && order.status === where.status,
+          order.stationId === where.stationId &&
+          where.OR.some(
+            (condition: {
+              status: string;
+              payments?: {
+                some: { status: string; capturedMinor: { gt: number } };
+              };
+            }) =>
+              order.status === condition.status &&
+              (!condition.payments ||
+                order.payments?.some(
+                  (payment) =>
+                    payment.status === condition.payments!.some.status &&
+                    payment.capturedMinor >
+                      condition.payments!.some.capturedMinor.gt,
+                )),
+          ),
       ) ?? null,
   );
-  db.user.findUnique.mockImplementation(async () => ({
-    id: 1,
-    name: 'Actor',
-    email: 'actor@example.com',
-    passwordHash: 'unused',
-    isActive: true,
-    stationId: null,
-    tokenVersion: 0,
-    role: {
-      name: role,
-      permissions: permissions.map((key) => ({ permission: { key } })),
-    },
-  }));
+  db.user.findUnique.mockImplementation(async ({ where }) =>
+    where.id !== 1
+      ? candidates.has(where.id)
+        ? {
+            id: where.id,
+            isActive: candidates.get(where.id)!.active,
+            role: { name: candidates.get(where.id)!.role, permissions: [] },
+          }
+        : null
+      : {
+          id: 1,
+          name: 'Actor',
+          email: 'actor@example.com',
+          passwordHash: 'unused',
+          isActive: true,
+          stationId: null,
+          tokenVersion: 0,
+          role: {
+            name: role,
+            permissions: permissions.map((key) => ({ permission: { key } })),
+          },
+        },
+  );
   db.$transaction.mockImplementation(
     async (work: (tx: Database) => Promise<unknown>) => work(db),
   );
   db.station.findUnique.mockImplementation(
     async ({ where }: { where: { id: number } }) =>
       rows.find((r) => r.id === where.id) ?? null,
+  );
+  db.station.findFirst.mockImplementation(
+    async ({ where }) =>
+      rows.find((station) => station.managerId === where.managerId) ?? null,
   );
   db.station.findMany.mockImplementation(
     async ({ where, skip = 0, take }: FindMany) => {
@@ -174,6 +219,15 @@ beforeEach(() => {
   db.station.update.mockImplementation(
     async ({ where, data }: { where: { id: number }; data: Partial<Row> }) => {
       const station = rows.find((r) => r.id === where.id)!;
+      if (
+        data.managerId !== undefined &&
+        data.managerId !== null &&
+        rows.some(
+          (other) =>
+            other.id !== station.id && other.managerId === data.managerId,
+        )
+      )
+        throw { code: 'P2002', meta: { target: ['manager_id'] } };
       Object.assign(station, data);
       return station;
     },
@@ -186,7 +240,202 @@ const operations = [
   ['get', '/1', undefined, 'stations.read'],
   ['patch', '/1', { name: 'Changed' }, 'stations.update'],
   ['patch', '/1/status', { isActive: false }, 'stations.update'],
+  ['patch', '/1/manager', { managerId: 21 }, 'stations.update'],
 ] as const;
+
+describe('ADMIN manager assignment', () => {
+  it('assigns, reassigns and unassigns without changing affiliation or other relationships', async () => {
+    const before = structuredClone(rows.find((station) => station.id === 3)!);
+    for (const managerId of [21, 20, null]) {
+      if (managerId === 20)
+        expect(
+          (await call('patch', '/1/manager', { managerId: null })).status,
+        ).toBe(200);
+      const response = await call('patch', '/3/manager', { managerId });
+      expect(response.status).toBe(200);
+      expect(response.body.station).toEqual({
+        id: 3,
+        name: before.name,
+        address: before.address,
+        latitude: null,
+        longitude: null,
+        isActive: true,
+        managerId,
+        createdAt: before.createdAt.toISOString(),
+      });
+      expect(rows.find((station) => station.id === 3)).toEqual({
+        ...before,
+        managerId,
+      });
+    }
+    expect(
+      db.station.update.mock.calls.every(
+        ([args]) => Object.keys(args.data).join() === 'managerId',
+      ),
+    ).toBe(true);
+  });
+  it.each([20, null])(
+    'treats a repeated managerId %s as a no-op',
+    async (managerId) => {
+      const id = managerId === null ? 3 : 1;
+      expect(
+        (await call('patch', `/${id}/manager`, { managerId })).status,
+      ).toBe(200);
+      expect(db.station.update).not.toHaveBeenCalled();
+    },
+  );
+  it('assigns to an inactive station without reactivating it', async () => {
+    const result = await call('patch', '/2/manager', { managerId: 21 });
+    expect(result.status).toBe(200);
+    expect(result.body.station).toMatchObject({
+      isActive: false,
+      managerId: 21,
+    });
+  });
+  it.each([22, 23])(
+    'rejects ineligible manager %s without changing ownership',
+    async (managerId) => {
+      const before = structuredClone(rows);
+      const response = await call('patch', '/1/manager', { managerId });
+      expect(response.status).toBe(409);
+      expect(response.body.message).toBe('User must be an active MANAGER');
+      expect(rows).toEqual(before);
+    },
+  );
+  it('requires explicit unassignment before moving a manager', async () => {
+    const before = structuredClone(rows);
+    expect((await call('patch', '/3/manager', { managerId: 20 })).status).toBe(
+      409,
+    );
+    expect(rows).toEqual(before);
+    expect(
+      (await call('patch', '/1/manager', { managerId: null })).status,
+    ).toBe(200);
+    expect((await call('patch', '/3/manager', { managerId: 20 })).status).toBe(
+      200,
+    );
+  });
+  it.each([
+    {},
+    { managerId: '21' },
+    { managerId: 'manager-uuid' },
+    { managerId: 0 },
+    { managerId: -1 },
+    { managerId: 1.5 },
+    { managerId: 2147483648 },
+    { managerId: true },
+    { managerId: [] },
+    { managerId: 21, isActive: true },
+  ])('rejects malformed manager assignment %j', async (body) => {
+    expect((await call('patch', '/3/manager', body)).status).toBe(400);
+    expect(db.station.update).not.toHaveBeenCalled();
+  });
+  it('returns 404 for a missing station or manager', async () => {
+    expect(
+      (await call('patch', '/999/manager', { managerId: 21 })).status,
+    ).toBe(404);
+    expect((await call('patch', '/3/manager', { managerId: 999 })).status).toBe(
+      404,
+    );
+    expect(db.station.update).not.toHaveBeenCalled();
+  });
+  it('preserves CSRF checks', async () => {
+    expect(
+      (
+        await request(app)
+          .patch('/api/stations/3/manager')
+          .set(
+            'Cookie',
+            `${ACCESS_COOKIE}=${tokenService.issue(1).accessToken}`,
+          )
+          .send({ managerId: 21 })
+      ).status,
+    ).toBe(403);
+  });
+  it.each(['role', 'permission', 'active'])(
+    'rechecks actor %s inside the transaction',
+    async (change) => {
+      const implementation = db.user.findUnique.getMockImplementation()!;
+      db.user.findUnique
+        .mockImplementationOnce(implementation)
+        .mockImplementationOnce((...args: unknown[]) => {
+          if (change === 'role') role = 'MANAGER';
+          if (change === 'permission') permissions = [];
+          if (change === 'active') return { id: 1, isActive: false };
+          return implementation(...args);
+        });
+      expect(
+        (await call('patch', '/3/manager', { managerId: 21 })).status,
+      ).toBe(change === 'active' ? 401 : 403);
+      expect(db.station.update).not.toHaveBeenCalled();
+    },
+  );
+  it('maps the database uniqueness race to 409', async () => {
+    db.station.update.mockRejectedValueOnce({
+      code: 'P2002',
+      meta: { target: ['manager_id'] },
+    });
+    const response = await call('patch', '/3/manager', { managerId: 21 });
+    expect(response.status).toBe(409);
+    expect(response.body).toEqual({
+      message: 'Manager already owns another station',
+    });
+  });
+  it.each([
+    { code: '40001' },
+    { driverAdapterError: { cause: { originalCode: '40001' } } },
+  ])(
+    'retries raw-lock serialization failures and bounds retries: %j',
+    async (meta) => {
+      db.$transaction.mockRejectedValueOnce({ code: 'P2010', meta });
+      expect(
+        (await call('patch', '/3/manager', { managerId: 21 })).status,
+      ).toBe(200);
+      expect(db.$transaction).toHaveBeenCalledTimes(2);
+
+      db.$transaction.mockClear();
+      db.$transaction.mockRejectedValue({ code: 'P2010', meta });
+      expect(
+        (await call('patch', '/3/manager', { managerId: 21 })).status,
+      ).toBe(409);
+      expect(db.$transaction).toHaveBeenCalledTimes(3);
+    },
+  );
+  it('does not retry unrelated raw SQL errors', async () => {
+    db.$transaction.mockRejectedValue({
+      code: 'P2010',
+      meta: { driverAdapterError: { cause: { originalCode: '42501' } } },
+    });
+    expect((await call('patch', '/3/manager', { managerId: 21 })).status).toBe(
+      500,
+    );
+    expect(db.$transaction).toHaveBeenCalledTimes(1);
+  });
+  it('allows only one conflicting assignment in the mock constraint protocol', async () => {
+    const results = await Promise.all([
+      call('patch', '/2/manager', { managerId: 21 }),
+      call('patch', '/3/manager', { managerId: 21 }),
+    ]);
+    expect(results.map((response) => response.status).sort()).toEqual([
+      200, 409,
+    ]);
+    expect(rows.filter((station) => station.managerId === 21)).toHaveLength(1);
+  });
+  it('locks the candidate before the station and retains ownership on station deactivation', async () => {
+    expect((await call('patch', '/3/manager', { managerId: 21 })).status).toBe(
+      200,
+    );
+    const locks = db.$queryRaw.mock.calls.map(([sql]) =>
+      (sql as TemplateStringsArray).join(''),
+    );
+    expect(locks[0]).toContain('FROM users');
+    expect(locks[1]).toContain('FROM stations');
+    expect((await call('patch', '/3/status', { isActive: false })).status).toBe(
+      200,
+    );
+    expect(rows.find((station) => station.id === 3)!.managerId).toBe(21);
+  });
+});
 
 describe('station access controls', () => {
   it.each(operations)(
@@ -469,6 +718,106 @@ describe('station management and picker contracts', () => {
 });
 
 describe('station deactivation with claimed orders', () => {
+  it('blocks paid PENDING orders and preserves station, payment and pump reservation data', async () => {
+    orders.push({
+      id: 90,
+      stationId: 1,
+      status: 'PENDING',
+      pumpId: 7,
+      payments: [{ id: 70, status: 'CONFIRMED', capturedMinor: 1250 }],
+    });
+    const before = structuredClone({ rows, orders });
+    for (let retry = 0; retry < 2; retry++) {
+      const response = await call('patch', '/1/status', { isActive: false });
+      expect(response.status).toBe(409);
+      expect(response.body.message).toMatch(/active orders/);
+    }
+    expect({ rows, orders }).toEqual(before);
+    expect(db.station.update).not.toHaveBeenCalled();
+    expect(db.fuelOrder.findFirst).toHaveBeenCalledWith({
+      where: {
+        stationId: 1,
+        OR: [
+          { status: 'IN_PROGRESS' },
+          {
+            status: 'PENDING',
+            payments: {
+              some: { status: 'CONFIRMED', capturedMinor: { gt: 0 } },
+            },
+          },
+        ],
+      },
+      select: { id: true },
+    });
+  });
+
+  it.each(['AWAITING_PAYMENT', 'COMPLETED', 'CANCELLED'])(
+    'does not block %s history even when a payment is present',
+    async (status) => {
+      orders.push({
+        id: 90,
+        stationId: 1,
+        status,
+        pumpId: 7,
+        payments: [{ id: 70, status: 'CONFIRMED', capturedMinor: 1250 }],
+      });
+      const before = structuredClone(orders);
+      expect(
+        (await call('patch', '/1/status', { isActive: false })).status,
+      ).toBe(200);
+      expect(orders).toEqual(before);
+    },
+  );
+
+  it.each([
+    { status: 'PENDING', capturedMinor: 0 },
+    { status: 'FAILED', capturedMinor: 0 },
+    { status: 'CONFIRMED', capturedMinor: 0 },
+  ])(
+    'does not treat an unpaid payment attempt as paid: %j',
+    async (payment) => {
+      orders.push({
+        id: 90,
+        stationId: 1,
+        status: 'PENDING',
+        payments: [{ id: 70, ...payment }],
+      });
+      expect(
+        (await call('patch', '/1/status', { isActive: false })).status,
+      ).toBe(200);
+    },
+  );
+
+  it('ignores paid pending orders belonging to another station', async () => {
+    orders.push({
+      id: 90,
+      stationId: 3,
+      status: 'PENDING',
+      payments: [{ id: 70, status: 'CONFIRMED', capturedMinor: 1250 }],
+    });
+    expect((await call('patch', '/1/status', { isActive: false })).status).toBe(
+      200,
+    );
+  });
+
+  it('rechecks newly paid pending work on a serialization retry', async () => {
+    db.$transaction.mockImplementationOnce(async () => {
+      orders.push({
+        id: 90,
+        stationId: 1,
+        status: 'PENDING',
+        pumpId: 7,
+        payments: [{ id: 70, status: 'CONFIRMED', capturedMinor: 1250 }],
+      });
+      throw { code: 'P2034' };
+    });
+    expect((await call('patch', '/1/status', { isActive: false })).status).toBe(
+      409,
+    );
+    expect(rows.find((station) => station.id === 1)!.isActive).toBe(true);
+    expect(db.station.update).not.toHaveBeenCalled();
+  });
+
   it('rejects deactivation with active station work and preserves every relationship', async () => {
     orders.push({ id: 90, stationId: 1, status: 'IN_PROGRESS' });
     const before = structuredClone(rows);

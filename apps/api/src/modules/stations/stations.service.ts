@@ -1,5 +1,5 @@
 import type { Prisma } from '../../generated/prisma/client.js';
-import type { UserProfile } from '../auth/auth.types.js';
+import type { AuthContext, UserProfile } from '../auth/auth.types.js';
 import { stationScope } from '../../utils/accessScope.js';
 import { HttpError } from '../../types/http-error.js';
 import { stationsRepository } from './stations.repository.js';
@@ -13,6 +13,60 @@ import type {
 
 export class StationsService {
   constructor(private readonly repository = stationsRepository) {}
+
+  pumps(actor: UserProfile, id: number) {
+    if (!['ADMIN', 'MANAGER'].includes(actor.role))
+      throw new HttpError('Insufficient permissions', 403);
+    return this.repository.transaction(async (tx) => {
+      const station = await this.repository.pumpLookup(
+        { AND: [{ id }, stationScope(actor)] },
+        tx,
+      );
+      if (!station) throw new HttpError('Station not found', 404);
+      if (!station.isActive) throw new HttpError('Station is inactive', 409);
+      return {
+        pumps: station.pumps.map(({ id, number, status, _count }) => ({
+          id,
+          number,
+          status,
+          available: status === 'IDLE' && _count.orders === 0,
+        })),
+      };
+    });
+  }
+
+  async setManager(context: AuthContext, id: number, managerId: number | null) {
+    return this.repository.transaction(async (tx) => {
+      const actor = await this.repository.assignmentUser(context.user.id, tx);
+      if (!actor?.isActive) throw new HttpError('Unauthenticated', 401);
+      if (
+        actor.role.name !== 'ADMIN' ||
+        !actor.role.permissions.some(
+          ({ permission }) => permission.key === 'stations.update',
+        )
+      )
+        throw new HttpError('Insufficient permissions', 403);
+
+      // User -> station matches existing lifecycle and cash/fulfillment ordering.
+      // Holding the candidate row lock keeps eligibility valid through commit.
+      if (managerId !== null) await this.repository.lockManager(managerId, tx);
+      await this.repository.lockStation(id, tx);
+      const station = await this.requireStation(id, tx);
+      if (managerId !== null) {
+        const manager = await this.repository.assignmentUser(managerId, tx);
+        if (!manager) throw new HttpError('Manager not found', 404);
+        if (!manager.isActive || manager.role.name !== 'MANAGER')
+          throw new HttpError('User must be an active MANAGER', 409);
+        const owned = await this.repository.ownedStation(managerId, tx);
+        if (owned && owned.id !== id)
+          throw new HttpError('Manager already owns another station', 409);
+      }
+      if (station.managerId === managerId) return managedStation(station);
+      return managedStation(
+        await this.repository.update(id, { managerId }, tx),
+      );
+    });
+  }
 
   async managed(actor: UserProfile) {
     if (actor.role !== 'MANAGER')
@@ -95,7 +149,10 @@ export class StationsService {
       const station = await this.requireStation(id, tx);
       // Check even an already-inactive legacy station; reactivation must remain
       // available to recover it, but deactivation cannot acknowledge active work.
-      if (!isActive && (await this.repository.hasInProgressOrder(id, tx)))
+      // Cash confirmation and fulfillment hold FOR SHARE on this same station
+      // through their order/payment/event commit. FOR UPDATE above plus the
+      // Serializable retry prevents checking an obsolete pre-payment snapshot.
+      if (!isActive && (await this.repository.hasBlockingOrder(id, tx)))
         throw new HttpError(
           'Station has active orders; complete them before deactivating the station',
           409,

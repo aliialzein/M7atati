@@ -94,7 +94,10 @@ let attendanceRecords: {
   stationId: number;
   clockOutAt: Date | null;
 }[];
-const stations = new Map([
+const stations = new Map<
+  number,
+  { id: number; managerId: number | null; isActive: boolean }
+>([
   [10, { id: 10, managerId: 2, isActive: true }],
   [20, { id: 20, managerId: 9, isActive: true }],
 ]);
@@ -392,12 +395,13 @@ beforeEach(() => {
     async ({
       where,
     }: {
-      where: { employeeId: number; stationId: number; clockOutAt: null };
+      where: { employeeId: number; stationId?: number; clockOutAt: null };
     }) =>
       attendanceRecords.find(
         (row) =>
           row.employeeId === where.employeeId &&
-          row.stationId === where.stationId &&
+          (where.stationId === undefined ||
+            row.stationId === where.stationId) &&
           row.clockOutAt === where.clockOutAt,
       ) ?? null,
   );
@@ -561,6 +565,144 @@ beforeEach(() => {
 });
 afterEach(() => {
   jest.restoreAllMocks();
+});
+
+describe('employee role changes with attendance', () => {
+  it.each(['MANAGER', 'SECURITY'])(
+    'rejects leaving EMPLOYEE for %s with open attendance without changing data',
+    async (role) => {
+      // Even a legacy record at a different station still requires checkout.
+      attendanceRecords.push({
+        id: 70,
+        employeeId: 3,
+        stationId: 20,
+        clockOutAt: null,
+      });
+      const beforeUser = structuredClone(users.get(3));
+      const beforeAttendance = structuredClone(attendanceRecords);
+      const beforeSessions = structuredClone(sessions);
+      const response = await authenticated('patch', '/3').send({ role });
+      expect(response.status).toBe(409);
+      expect(response.body).toEqual({
+        message: 'Employee has open attendance; check out before changing role',
+      });
+      expect(users.get(3)).toEqual(beforeUser);
+      expect(attendanceRecords).toEqual(beforeAttendance);
+      expect(sessions).toEqual(beforeSessions);
+      expect(db.user.update).not.toHaveBeenCalled();
+      expect(db.refreshSession.updateMany).not.toHaveBeenCalled();
+      expect(db.attendanceRecord.findFirst).toHaveBeenCalledWith({
+        where: { employeeId: 3, clockOutAt: null },
+        select: { id: true },
+      });
+      expect(db.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+        isolationLevel: 'Serializable',
+      });
+      expect(db.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+        db.attendanceRecord.findFirst.mock.invocationCallOrder[0],
+      );
+    },
+  );
+
+  it.each([
+    ['MANAGER', false],
+    ['SECURITY', false],
+    ['MANAGER', true],
+    ['SECURITY', true],
+  ] as const)(
+    'allows %s when attendance is closed or absent (closed record: %s)',
+    async (role, closed) => {
+      if (closed)
+        attendanceRecords.push({
+          id: 70,
+          employeeId: 3,
+          stationId: 10,
+          clockOutAt: new Date('2026-01-02T16:00:00Z'),
+        });
+      const before = structuredClone(attendanceRecords);
+      const response = await authenticated('patch', '/3').send({ role });
+      expect(response.status).toBe(200);
+      expect(response.body.user.role).toBe(role);
+      expect(attendanceRecords).toEqual(before);
+    },
+  );
+
+  it.each([{ name: 'Renamed employee' }, { role: 'EMPLOYEE' }])(
+    'preserves changes that do not leave EMPLOYEE: %j',
+    async (body) => {
+      attendanceRecords.push({
+        id: 70,
+        employeeId: 3,
+        stationId: 10,
+        clockOutAt: null,
+      });
+      expect((await authenticated('patch', '/3').send(body)).status).toBe(200);
+      expect(users.get(3)!.role.name).toBe('EMPLOYEE');
+      expect(db.attendanceRecord.findFirst).not.toHaveBeenCalled();
+      expect(attendanceRecords[0].clockOutAt).toBeNull();
+    },
+  );
+
+  it('ignores other employees and does not apply the exit rule when entering EMPLOYEE', async () => {
+    attendanceRecords.push({
+      id: 70,
+      employeeId: 4,
+      stationId: 10,
+      clockOutAt: null,
+    });
+    expect(
+      (await authenticated('patch', '/3').send({ role: 'MANAGER' })).status,
+    ).toBe(200);
+    db.attendanceRecord.findFirst.mockClear();
+    expect(
+      (await authenticated('patch', '/7').send({ role: 'EMPLOYEE' })).status,
+    ).toBe(200);
+    expect(db.attendanceRecord.findFirst).not.toHaveBeenCalled();
+  });
+
+  it.each([2, 5])(
+    'keeps role-change authorization effective for actor %s',
+    async (actor) => {
+      attendanceRecords.push({
+        id: 70,
+        employeeId: 3,
+        stationId: 10,
+        clockOutAt: null,
+      });
+      expect(
+        (await authenticated('patch', '/3', actor).send({ role: 'SECURITY' }))
+          .status,
+      ).toBe(403);
+      expect(db.attendanceRecord.findFirst).not.toHaveBeenCalled();
+      expect(users.get(3)!.role.name).toBe('EMPLOYEE');
+    },
+  );
+
+  it('still requires users.update before checking attendance', async () => {
+    permissions = permissions.filter((key) => key !== 'users.update');
+    expect(
+      (await authenticated('patch', '/3').send({ role: 'SECURITY' })).status,
+    ).toBe(403);
+    expect(db.attendanceRecord.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('rechecks an open record after a serialization retry instead of updating the role', async () => {
+    db.$transaction.mockImplementationOnce(async () => {
+      attendanceRecords.push({
+        id: 70,
+        employeeId: 3,
+        stationId: 10,
+        clockOutAt: null,
+      });
+      throw { code: 'P2034' };
+    });
+    expect(
+      (await authenticated('patch', '/3').send({ role: 'SECURITY' })).status,
+    ).toBe(409);
+    expect(db.$transaction).toHaveBeenCalledTimes(2);
+    expect(users.get(3)!.role.name).toBe('EMPLOYEE');
+    expect(db.user.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('user endpoint authentication, RBAC, and CSRF', () => {
@@ -1261,8 +1403,7 @@ describe('immediate employee transfers', () => {
     expect(users.get(7)!.role.name).toBe('SECURITY');
   });
 
-  it('keeps manager scope and applies conflicts when both stations are managed', async () => {
-    stations.get(20)!.managerId = 2;
+  it('keeps managers inside their single owned station', async () => {
     attendanceRecords.push({
       id: 1,
       employeeId: 3,
@@ -1271,7 +1412,7 @@ describe('immediate employee transfers', () => {
     });
     expect(
       (await authenticated('patch', '/3', 2).send({ stationId: 20 })).status,
-    ).toBe(409);
+    ).toBe(400);
     expect(
       (await authenticated('patch', '/3', 2).send({ name: 'Unrelated rename' }))
         .status,
@@ -1279,7 +1420,7 @@ describe('immediate employee transfers', () => {
     attendanceRecords = [];
     expect(
       (await authenticated('patch', '/3', 2).send({ stationId: 20 })).status,
-    ).toBe(200);
+    ).toBe(400);
   });
 
   it.each(['post', 'patch'] as const)(
@@ -1403,6 +1544,31 @@ describe('updates, deactivation, and integrity', () => {
         .every((session) => session.revokedAt),
     ).toBe(true);
   });
+  it('reflects a committed role change in the next authenticated profile using the existing access token', async () => {
+    const accessCookie = `${ACCESS_COOKIE}=${tokenService.issue(3).accessToken}`;
+    const me = () =>
+      request(app).get('/api/auth/me').set('Cookie', accessCookie);
+    expect((await me()).body.user).toMatchObject({
+      role: 'EMPLOYEE',
+      permissions: [],
+    });
+    expect(
+      (await authenticated('patch', '/3').send({ role: 'HR', stationId: null }))
+        .status,
+    ).toBe(200);
+    const response = await me();
+    expect(response.status).toBe(200);
+    expect(response.body.user).toMatchObject({
+      role: 'HR',
+      stationId: null,
+      permissions: [...permissions].sort(),
+    });
+    expect(
+      sessions
+        .filter((session) => session.userId === 3)
+        .every((session) => session.revokedAt),
+    ).toBe(true);
+  });
 
   it.each([
     { email: 'new@example.com' },
@@ -1427,6 +1593,55 @@ describe('updates, deactivation, and integrity', () => {
       ).status,
     ).toBe(409);
     expect(db.user.update).not.toHaveBeenCalled();
+  });
+  it('requires explicit unassignment before manager deactivation and preserves sessions and ownership', async () => {
+    sessions.push({ userId: 2, revokedAt: null });
+    const before = structuredClone(users.get(2));
+    const links = JSON.stringify([...stations]);
+    const sessionBefore = structuredClone(sessions);
+    const result = await authenticated('patch', '/2/status').send({
+      isActive: false,
+    });
+    expect(result.status).toBe(409);
+    expect(result.body.message).toBe(
+      'Unassign managed station before deactivating this manager',
+    );
+    expect(users.get(2)).toEqual(before);
+    expect(JSON.stringify([...stations])).toBe(links);
+    expect(sessions).toEqual(sessionBefore);
+    expect(db.user.update).not.toHaveBeenCalled();
+  });
+  it('allows deactivation and role change after explicit unassignment, while affiliation alone confers no ownership', async () => {
+    stations.get(10)!.managerId = null;
+    // Manager 2 is still affiliated with station 20, owned by manager 9.
+    expect(
+      (await authenticated('patch', '/2/status').send({ isActive: false }))
+        .status,
+    ).toBe(200);
+    expect(
+      (await authenticated('patch', '/2/status').send({ isActive: true }))
+        .status,
+    ).toBe(200);
+    expect(
+      (await authenticated('patch', '/2').send({ role: 'SECURITY' })).status,
+    ).toBe(200);
+  });
+  it('allows manager affiliation edits and repeated activation without moving ownership', async () => {
+    const links = JSON.stringify([...stations]);
+    expect(
+      (
+        await authenticated('patch', '/2').send({
+          stationId: 10,
+          name: 'Affiliation edit',
+        })
+      ).status,
+    ).toBe(200);
+    expect(users.get(2)!.stationId).toBe(10);
+    expect(
+      (await authenticated('patch', '/2/status').send({ isActive: true }))
+        .status,
+    ).toBe(200);
+    expect(JSON.stringify([...stations])).toBe(links);
   });
 
   it('allows ADMIN customer name/status management without promoting customers to staff', async () => {

@@ -1,12 +1,17 @@
 # Smart Fuel Stations Monitoring & Management System
 
-This repository contains the initial frontend and backend foundation for the Smart
-Fuel Stations Monitoring & Management System. Business features are intentionally
-out of scope at this stage.
+This repository contains the backend and web workspace for the Smart Fuel Stations
+Monitoring & Management System. Backend hardening Tasks 01–08 have passed local
+application and guarded PostgreSQL acceptance. Deployment readiness remains
+**READY WITH CONDITIONS**; local acceptance does not certify production configuration.
+
+The authoritative backend contract is [the frontend API guide](docs/frontend-api-guide.md),
+covering 52 endpoints across 15 mounted routers. Available operational scripts and historical
+PostgreSQL acceptance evidence are catalogued in [the scripts audit](docs/api-scripts-audit.md).
 
 ## Stack
 
-- Node.js + Express + TypeScript for the API foundation
+- Node.js + Express + TypeScript, Prisma and PostgreSQL for the API
 - Next.js + React + TypeScript for the web foundation
 - npm workspaces for monorepo management
 - A minimal shared package

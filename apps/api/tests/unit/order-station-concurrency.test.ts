@@ -112,7 +112,7 @@ it.each([true, false])(
     });
     jest.spyOn(stationMocks, 'find').mockImplementation(async () => station());
     jest
-      .spyOn(stationsRepository, 'hasInProgressOrder')
+      .spyOn(stationsRepository, 'hasBlockingOrder')
       .mockImplementation(async () => status === 'IN_PROGRESS');
     jest
       .spyOn(stationMocks, 'update')

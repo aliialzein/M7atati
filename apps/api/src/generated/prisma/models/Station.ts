@@ -294,6 +294,7 @@ export type StationOrderByWithRelationInput = {
 
 export type StationWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  managerId?: number
   deviceKeyHash?: string
   AND?: Prisma.StationWhereInput | Prisma.StationWhereInput[]
   OR?: Prisma.StationWhereInput[]
@@ -303,7 +304,6 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   address?: Prisma.StringNullableFilter<"Station"> | string | null
   latitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  managerId?: Prisma.IntNullableFilter<"Station"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   manager?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   users?: Prisma.UserListRelationFilter
@@ -314,7 +314,7 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   callSessions?: Prisma.CallSessionListRelationFilter
   shifts?: Prisma.ShiftListRelationFilter
   attendance?: Prisma.AttendanceRecordListRelationFilter
-}, "id" | "deviceKeyHash">
+}, "id" | "managerId" | "deviceKeyHash">
 
 export type StationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -356,7 +356,7 @@ export type StationCreateInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
@@ -395,7 +395,7 @@ export type StationUpdateInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
@@ -520,16 +520,6 @@ export type StationNullableScalarRelationFilter = {
   isNot?: Prisma.StationWhereInput | null
 }
 
-export type StationListRelationFilter = {
-  every?: Prisma.StationWhereInput
-  some?: Prisma.StationWhereInput
-  none?: Prisma.StationWhereInput
-}
-
-export type StationOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type StationCreateNestedOneWithoutOrderQuotesInput = {
   create?: Prisma.XOR<Prisma.StationCreateWithoutOrderQuotesInput, Prisma.StationUncheckedCreateWithoutOrderQuotesInput>
   connectOrCreate?: Prisma.StationCreateOrConnectWithoutOrderQuotesInput
@@ -554,18 +544,16 @@ export type StationCreateNestedOneWithoutUsersInput = {
   connect?: Prisma.StationWhereUniqueInput
 }
 
-export type StationCreateNestedManyWithoutManagerInput = {
-  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput> | Prisma.StationCreateWithoutManagerInput[] | Prisma.StationUncheckedCreateWithoutManagerInput[]
-  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput | Prisma.StationCreateOrConnectWithoutManagerInput[]
-  createMany?: Prisma.StationCreateManyManagerInputEnvelope
-  connect?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
+export type StationCreateNestedOneWithoutManagerInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput
+  connect?: Prisma.StationWhereUniqueInput
 }
 
-export type StationUncheckedCreateNestedManyWithoutManagerInput = {
-  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput> | Prisma.StationCreateWithoutManagerInput[] | Prisma.StationUncheckedCreateWithoutManagerInput[]
-  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput | Prisma.StationCreateOrConnectWithoutManagerInput[]
-  createMany?: Prisma.StationCreateManyManagerInputEnvelope
-  connect?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
+export type StationUncheckedCreateNestedOneWithoutManagerInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput
+  connect?: Prisma.StationWhereUniqueInput
 }
 
 export type StationUpdateOneWithoutUsersNestedInput = {
@@ -578,32 +566,24 @@ export type StationUpdateOneWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutUsersInput, Prisma.StationUpdateWithoutUsersInput>, Prisma.StationUncheckedUpdateWithoutUsersInput>
 }
 
-export type StationUpdateManyWithoutManagerNestedInput = {
-  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput> | Prisma.StationCreateWithoutManagerInput[] | Prisma.StationUncheckedCreateWithoutManagerInput[]
-  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput | Prisma.StationCreateOrConnectWithoutManagerInput[]
-  upsert?: Prisma.StationUpsertWithWhereUniqueWithoutManagerInput | Prisma.StationUpsertWithWhereUniqueWithoutManagerInput[]
-  createMany?: Prisma.StationCreateManyManagerInputEnvelope
-  set?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  disconnect?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  delete?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  connect?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  update?: Prisma.StationUpdateWithWhereUniqueWithoutManagerInput | Prisma.StationUpdateWithWhereUniqueWithoutManagerInput[]
-  updateMany?: Prisma.StationUpdateManyWithWhereWithoutManagerInput | Prisma.StationUpdateManyWithWhereWithoutManagerInput[]
-  deleteMany?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
+export type StationUpdateOneWithoutManagerNestedInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput
+  upsert?: Prisma.StationUpsertWithoutManagerInput
+  disconnect?: Prisma.StationWhereInput | boolean
+  delete?: Prisma.StationWhereInput | boolean
+  connect?: Prisma.StationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutManagerInput, Prisma.StationUpdateWithoutManagerInput>, Prisma.StationUncheckedUpdateWithoutManagerInput>
 }
 
-export type StationUncheckedUpdateManyWithoutManagerNestedInput = {
-  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput> | Prisma.StationCreateWithoutManagerInput[] | Prisma.StationUncheckedCreateWithoutManagerInput[]
-  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput | Prisma.StationCreateOrConnectWithoutManagerInput[]
-  upsert?: Prisma.StationUpsertWithWhereUniqueWithoutManagerInput | Prisma.StationUpsertWithWhereUniqueWithoutManagerInput[]
-  createMany?: Prisma.StationCreateManyManagerInputEnvelope
-  set?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  disconnect?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  delete?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  connect?: Prisma.StationWhereUniqueInput | Prisma.StationWhereUniqueInput[]
-  update?: Prisma.StationUpdateWithWhereUniqueWithoutManagerInput | Prisma.StationUpdateWithWhereUniqueWithoutManagerInput[]
-  updateMany?: Prisma.StationUpdateManyWithWhereWithoutManagerInput | Prisma.StationUpdateManyWithWhereWithoutManagerInput[]
-  deleteMany?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
+export type StationUncheckedUpdateOneWithoutManagerNestedInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutManagerInput
+  upsert?: Prisma.StationUpsertWithoutManagerInput
+  disconnect?: Prisma.StationWhereInput | boolean
+  delete?: Prisma.StationWhereInput | boolean
+  connect?: Prisma.StationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutManagerInput, Prisma.StationUpdateWithoutManagerInput>, Prisma.StationUncheckedUpdateWithoutManagerInput>
 }
 
 export type StationCreateNestedOneWithoutShiftsInput = {
@@ -698,7 +678,7 @@ export type StationCreateWithoutOrderQuotesInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
@@ -751,7 +731,7 @@ export type StationUpdateWithoutOrderQuotesInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
@@ -788,7 +768,7 @@ export type StationCreateWithoutUsersInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
@@ -864,11 +844,6 @@ export type StationCreateOrConnectWithoutManagerInput = {
   create: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput>
 }
 
-export type StationCreateManyManagerInputEnvelope = {
-  data: Prisma.StationCreateManyManagerInput | Prisma.StationCreateManyManagerInput[]
-  skipDuplicates?: boolean
-}
-
 export type StationUpsertWithoutUsersInput = {
   update: Prisma.XOR<Prisma.StationUpdateWithoutUsersInput, Prisma.StationUncheckedUpdateWithoutUsersInput>
   create: Prisma.XOR<Prisma.StationCreateWithoutUsersInput, Prisma.StationUncheckedCreateWithoutUsersInput>
@@ -888,7 +863,7 @@ export type StationUpdateWithoutUsersInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
@@ -917,35 +892,52 @@ export type StationUncheckedUpdateWithoutUsersInput = {
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
-export type StationUpsertWithWhereUniqueWithoutManagerInput = {
-  where: Prisma.StationWhereUniqueInput
+export type StationUpsertWithoutManagerInput = {
   update: Prisma.XOR<Prisma.StationUpdateWithoutManagerInput, Prisma.StationUncheckedUpdateWithoutManagerInput>
   create: Prisma.XOR<Prisma.StationCreateWithoutManagerInput, Prisma.StationUncheckedCreateWithoutManagerInput>
+  where?: Prisma.StationWhereInput
 }
 
-export type StationUpdateWithWhereUniqueWithoutManagerInput = {
-  where: Prisma.StationWhereUniqueInput
+export type StationUpdateToOneWithWhereWithoutManagerInput = {
+  where?: Prisma.StationWhereInput
   data: Prisma.XOR<Prisma.StationUpdateWithoutManagerInput, Prisma.StationUncheckedUpdateWithoutManagerInput>
 }
 
-export type StationUpdateManyWithWhereWithoutManagerInput = {
-  where: Prisma.StationScalarWhereInput
-  data: Prisma.XOR<Prisma.StationUpdateManyMutationInput, Prisma.StationUncheckedUpdateManyWithoutManagerInput>
+export type StationUpdateWithoutManagerInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutStationNestedInput
+  tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
+  pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
+  orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
+  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutStationNestedInput
+  callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
 }
 
-export type StationScalarWhereInput = {
-  AND?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
-  OR?: Prisma.StationScalarWhereInput[]
-  NOT?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
-  id?: Prisma.IntFilter<"Station"> | number
-  name?: Prisma.StringFilter<"Station"> | string
-  isActive?: Prisma.BoolFilter<"Station"> | boolean
-  address?: Prisma.StringNullableFilter<"Station"> | string | null
-  latitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  longitude?: Prisma.DecimalNullableFilter<"Station"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  managerId?: Prisma.IntNullableFilter<"Station"> | number | null
-  deviceKeyHash?: Prisma.StringNullableFilter<"Station"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
+export type StationUncheckedUpdateWithoutManagerInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutStationNestedInput
+  tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
+  pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
+  orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
+  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutStationNestedInput
+  callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
+  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateWithoutShiftsInput = {
@@ -956,7 +948,7 @@ export type StationCreateWithoutShiftsInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
@@ -1009,7 +1001,7 @@ export type StationUpdateWithoutShiftsInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
@@ -1046,7 +1038,7 @@ export type StationCreateWithoutAttendanceInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
@@ -1099,7 +1091,7 @@ export type StationUpdateWithoutAttendanceInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
@@ -1136,7 +1128,7 @@ export type StationCreateWithoutTanksInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
@@ -1189,7 +1181,7 @@ export type StationUpdateWithoutTanksInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
@@ -1226,7 +1218,7 @@ export type StationCreateWithoutPumpsInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   orders?: Prisma.FuelOrderCreateNestedManyWithoutStationInput
@@ -1279,7 +1271,7 @@ export type StationUpdateWithoutPumpsInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
@@ -1316,7 +1308,7 @@ export type StationCreateWithoutOrdersInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
@@ -1369,7 +1361,7 @@ export type StationUpdateWithoutOrdersInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
@@ -1406,7 +1398,7 @@ export type StationCreateWithoutCallSessionsInput = {
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: string | null
   createdAt?: Date | string
-  manager?: Prisma.UserCreateNestedOneWithoutManagedStationsInput
+  manager?: Prisma.UserCreateNestedOneWithoutManagedStationInput
   users?: Prisma.UserCreateNestedManyWithoutStationInput
   tanks?: Prisma.TankCreateNestedManyWithoutStationInput
   pumps?: Prisma.PumpCreateNestedManyWithoutStationInput
@@ -1459,7 +1451,7 @@ export type StationUpdateWithoutCallSessionsInput = {
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  manager?: Prisma.UserUpdateOneWithoutManagedStationsNestedInput
+  manager?: Prisma.UserUpdateOneWithoutManagedStationNestedInput
   users?: Prisma.UserUpdateManyWithoutStationNestedInput
   tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
   pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
@@ -1486,65 +1478,6 @@ export type StationUncheckedUpdateWithoutCallSessionsInput = {
   orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutStationNestedInput
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
   attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
-}
-
-export type StationCreateManyManagerInput = {
-  id?: number
-  name: string
-  isActive?: boolean
-  address?: string | null
-  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  deviceKeyHash?: string | null
-  createdAt?: Date | string
-}
-
-export type StationUpdateWithoutManagerInput = {
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserUpdateManyWithoutStationNestedInput
-  tanks?: Prisma.TankUpdateManyWithoutStationNestedInput
-  pumps?: Prisma.PumpUpdateManyWithoutStationNestedInput
-  orders?: Prisma.FuelOrderUpdateManyWithoutStationNestedInput
-  orderQuotes?: Prisma.OrderQuoteUpdateManyWithoutStationNestedInput
-  callSessions?: Prisma.CallSessionUpdateManyWithoutStationNestedInput
-  shifts?: Prisma.ShiftUpdateManyWithoutStationNestedInput
-  attendance?: Prisma.AttendanceRecordUpdateManyWithoutStationNestedInput
-}
-
-export type StationUncheckedUpdateWithoutManagerInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserUncheckedUpdateManyWithoutStationNestedInput
-  tanks?: Prisma.TankUncheckedUpdateManyWithoutStationNestedInput
-  pumps?: Prisma.PumpUncheckedUpdateManyWithoutStationNestedInput
-  orders?: Prisma.FuelOrderUncheckedUpdateManyWithoutStationNestedInput
-  orderQuotes?: Prisma.OrderQuoteUncheckedUpdateManyWithoutStationNestedInput
-  callSessions?: Prisma.CallSessionUncheckedUpdateManyWithoutStationNestedInput
-  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutStationNestedInput
-  attendance?: Prisma.AttendanceRecordUncheckedUpdateManyWithoutStationNestedInput
-}
-
-export type StationUncheckedUpdateManyWithoutManagerInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  deviceKeyHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 

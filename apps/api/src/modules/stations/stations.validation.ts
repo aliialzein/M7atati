@@ -6,6 +6,7 @@ const positiveInteger = z
   .transform(Number)
   .refine((value) => Number.isSafeInteger(value) && value <= 2147483647);
 export const stationIdSchema = positiveInteger;
+export const stationPumpsQuerySchema = z.object({}).strict();
 const name = z.string().trim().min(1).max(128);
 const address = z.string().trim().min(1).max(512);
 const latitude = z.number().finite().min(-90).max(90).nullable();
@@ -38,6 +39,9 @@ export const updateStationSchema = z
   .strict()
   .refine((value) => Object.keys(value).length > 0);
 export const stationStatusSchema = z.object({ isActive: z.boolean() }).strict();
+export const stationManagerSchema = z
+  .object({ managerId: z.number().int().positive().max(2147483647).nullable() })
+  .strict();
 export const listStationsSchema = z
   .object({
     page: positiveInteger.refine((value) => value <= 1000000).default('1'),

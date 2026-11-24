@@ -78,11 +78,10 @@ export class AuthService {
     const user = await this.repository.findUserById(userId);
     if (!user?.isActive || user.tokenVersion !== tokenVersion)
       throw new HttpError('Unauthenticated', 401);
+    const profile = userProfile(user);
     return {
-      user: userProfile(user),
-      permissions: user.role.permissions.map(
-        ({ permission }) => permission.key,
-      ),
+      user: profile,
+      permissions: [...profile.permissions],
     };
   }
 }

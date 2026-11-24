@@ -55,11 +55,25 @@ let active: boolean;
 let orders: OrderFixture[];
 let stations: {
   id: number;
-  managerId: number;
+  managerId: number | null;
   name: string;
   isActive: boolean;
 }[];
 const base = '/api/manager/stations/10/orders';
+it('exposes the grant without authorizing another manager station or trusting edited hints', async () => {
+  const profile = await get({}, '/api/auth/me');
+  expect(profile.status).toBe(200);
+  expect(profile.body.user.permissions).toEqual(['orders.read']);
+  profile.body.user.permissions.push('payments.manage');
+  const foreign = await get({}, '/api/manager/stations/20/orders');
+  expect(foreign.status).toBe(404);
+  expect(foreign.body).toEqual({ message: 'Station not found' });
+  permissions = [];
+  expect(
+    (await get({ permissions: JSON.stringify(profile.body.user.permissions) }))
+      .status,
+  ).toBe(403);
+});
 function get(
   query: Record<string, string | number | undefined> = {},
   path = base,
@@ -82,7 +96,7 @@ beforeEach(() => {
   active = true;
   stations = [
     { id: 10, managerId: 1, name: 'Historical station', isActive: false },
-    { id: 11, managerId: 1, name: 'Second station', isActive: true },
+    { id: 11, managerId: null, name: 'Unassigned station', isActive: true },
     { id: 20, managerId: 2, name: 'Other manager', isActive: true },
   ];
   orders = [...orderFixtures(10), ...orderFixtures(11), ...orderFixtures(20)];
@@ -228,11 +242,19 @@ describe('manager persisted order access', () => {
       where: { AND: [{ id: 10 }, { managerId: 1 }] },
       select: { id: true, name: true, isActive: true },
     });
-    stations[0].managerId = 2;
+    stations[0].managerId = null;
     expect((await get()).status).toBe(404);
     expect((await get({}, `${base}/1002`)).status).toBe(404);
+    stations[2].managerId = null;
+    stations[0].managerId = 2;
+    actorId = 2;
+    expect((await get()).status).toBe(200);
+    expect((await get({}, `${base}/1002`)).status).toBe(200);
   });
-  it('isolates both owned stations and other managers', async () => {
+  it('isolates reassigned stations and other managers', async () => {
+    stations[0].managerId = null;
+    stations[1].managerId = 1;
+    expect((await get()).status).toBe(404);
     expect(
       (await get({}, base.replace('/10/', '/11/'))).body.orders.map(
         (o: { stationId: number }) => o.stationId,
@@ -406,9 +428,11 @@ describe('persisted Manager listing and detail', () => {
       pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
     });
   });
-  it('scopes order IDs to the requested owned station, including a second owned station', async () => {
+  it('scopes order IDs after explicit reassignment to another station', async () => {
     for (const id of [1102, 2002, 9999])
       expect((await get({}, `${base}/${id}`)).status).toBe(404);
+    stations[0].managerId = null;
+    stations[1].managerId = 1;
     expect((await get({}, base.replace('/10/', '/11/') + '/1102')).status).toBe(
       200,
     );

@@ -1,5 +1,16 @@
 # Employee Stage 4: claim and complete
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
+References below to unchanged demo Manager APIs describe this stage's history;
+current Manager orders and analytics use persisted database records.
+
 Builds on Stages 1–3 without changing Manager demo orders/analytics, attendance,
 CSV/PDF reports or weekly shifts. No production creation, cancellation,
 reassignment, payments or actual dispensed-volume updates are introduced.
@@ -106,22 +117,21 @@ already deployed), and `EMPLOYEE_ORDER_FIXTURE_PASSWORD`, then:
 ```powershell
 $env:ALLOW_EMPLOYEE_ORDER_FIXTURES = 'yes'
 npm run fixture-employee-orders --workspace @smart-fuel-station/api
-node --import tsx apps/api/scripts/verify-employee-orders-postgres.ts
 ```
 
-The verifier retains Stage 3 shared-employee/restart checks and creates one new
-marked race order plus initial event per verification run, preserving previous
-history. Two employees race through real HTTP claim requests against PostgreSQL;
+The removed verifier retained Stage 3 shared-employee/restart checks and creates one new
+marked race order plus initial event per historical verification run, preserving previous
+history. Two employees raced through real HTTP claim requests against PostgreSQL;
 assert one 200, one 409, one actor-attributed claim event, matching persisted
-assignee/status/claimedAt, and untouched delivery/payment fields. Neither fixture
-nor verifier applies migrations or falls back to development DATABASE_URL.
+assignee/status/claimedAt, and untouched delivery/payment fields. The retained fixture CLI does not apply migrations or fall back to development
+DATABASE_URL. Its automated acceptance runner has been removed.
 
 API tests cover permissions/CSRF, station/assignee isolation, strict inputs,
 invalid transitions, safe history, retries, event rollback, list removal and
 restoration. Web tests cover actions, double clicks, conflict refresh, work
 pagination/reload and discarded action responses after transfer/logout.
-Real PostgreSQL race/persistence checks remain pending without an authorized
-disposable target; mocks do not prove database transaction behavior.
+Task 08 later passed real PostgreSQL acceptance, as recorded in the authoritative
+guide. That evidence is historical; this checkout no longer has its runners.
 
 ## Stage 4 changed files
 
