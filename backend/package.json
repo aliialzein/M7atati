@@ -1,0 +1,34 @@
+{
+  "name": "smart-fuel-station",
+  "private": true,
+  "workspaces": [
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @smart-fuel-station/api",
+    "dev:all": "concurrently --kill-others --names API,WEB \"npm run dev\" \"npm --prefix ../frontend run dev\"",
+    "start": "npm run start --workspace @smart-fuel-station/api",
+    "db:migrate": "prisma migrate deploy --config apps/api/prisma.config.ts",
+    "db:seed": "prisma db seed --config apps/api/prisma.config.ts",
+    "create-admin": "npm run create-admin --workspace @smart-fuel-station/api",
+    "provision-local-catalog": "npm run provision-local-catalog --workspace @smart-fuel-station/api --",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "concurrently": "^9.1.2",
+    "prisma": "^7.10.1"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "dotenv": "^18.0.9",
+    "pg": "^8.23.1"
+  }
+}
