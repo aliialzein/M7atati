@@ -1,5 +1,12 @@
 # HR Stage 2: shift and attendance reads
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
 Current cross-module contracts: [frontend API guide](frontend-api-guide.md).
 Stage exclusions/deployment notes below are historical; employee attendance writes
 now exist, while these ADMIN/HR global endpoints remain read-only.
@@ -83,17 +90,10 @@ JSON/CSV/PDF endpoints are documented in
 
 `apps/api/tests/fixtures/attendance.ts` contains explicit TEST/demo shifts and
 independently authored attendance, including overnight and open records. Only
-tests and the disposable PostgreSQL verifier import it; application startup and
+tests import it now; the removed disposable verifier previously also used it; application startup and
 permission provisioning do not. This stage provides no production attendance
 source, scheduling, clock-in/out, transfers, hardware, Security, or frontend work.
 
-Jest/Supertest tests use mocked Prisma. Run real storage and API checks with:
-
-```sh
-node --import tsx apps/api/scripts/verify-stations-postgres.ts --attendance
-```
-
-The existing runner requires local development `m7atati` configuration, creates a
-uniquely named disposable database, deploys migrations only there, checks storage
-constraints and real API queries, and removes that database afterward. It does
-not migrate, seed, or change application data in the development database.
+Jest/Supertest tests use mocked Prisma. Historical PostgreSQL checks used an
+isolated disposable database and tested constraints and real API queries. That
+runner was removed; no current command repeats those checks.

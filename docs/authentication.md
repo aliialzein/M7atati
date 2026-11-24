@@ -1,8 +1,20 @@
 # Authentication and authorization
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
 The [frontend API guide](frontend-api-guide.md) consolidates current contracts
 across modules. Historical stage-scope exclusions below do not imply that current
 station, ownership or order modules are absent.
+
+Verification notes below retain their original task scope. Task 08 subsequently
+resolved the Stage 9 HTTP 500 and passed full guarded local PostgreSQL order
+acceptance; see [the Task 08 evidence](frontend-api-guide.md#task-08-observed-stage-9-root-cause-and-postgresql-acceptance).
+Earlier statements that the failure remained unresolved are historical.
 
 ## Account token versions
 
@@ -21,9 +33,8 @@ only refresh capability; role/station changes retain their existing semantics.
 Prepare/generate from repository root with the existing Prisma conventions.
 Review pending migrations and the target before explicitly deploying:
 `prisma migrate deploy --config apps/api/prisma.config.ts`.
-No normal-development migration is automatically applied by the verification
-scripts. The disposable users acceptance command is
-`tsx apps/api/scripts/verify-stations-postgres.ts --users`.
+The former users PostgreSQL runner has been removed; its rollout results below
+are historical. Deployment remains an explicit operation on a reviewed target.
 
 Local rollout on 2026-11-17 explicitly applied this migration to `m7atati` using
 `migrate deploy`; migration status was verified up to date. A newly provisioned

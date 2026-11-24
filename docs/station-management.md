@@ -1,5 +1,18 @@
 # Station management
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+Current cross-module contracts and readiness are in the authoritative
+[frontend API guide](frontend-api-guide.md). Task-specific acceptance notes below
+retain their original scope. Task 08 subsequently resolved the Stage 9 HTTP 500
+and passed full guarded local PostgreSQL order acceptance; earlier unresolved
+failure statements are historical. Deployment remains READY WITH CONDITIONS.
+
 Administrative routes require the existing access cookie, the explicit ADMIN role,
 and the applicable permission. A non-admin is forbidden even if granted that
 permission. ADMIN has no permission bypass. Unsafe requests also require an
@@ -80,23 +93,14 @@ The cash-confirmation suite follows availability through real application
 cash/claim/complete handlers with mocked Prisma; it does not establish PostgreSQL
 behavior.
 
-A separate guarded scenario is available for a newly approved disposable target:
+Historical Task 05 scenario (runner removed):
 
-```powershell
-# Configure ORDERS_VERIFY_DATABASE_URL privately and confirm its exact name.
-# Name: m7atati_employee_orders_verify_pumps_task05, optionally suffixed _<a-z0-9_>.
-# Only loopback targets are accepted; application and earlier-task names are rejected.
-node --import tsx apps/api/scripts/verify-station-pumps-postgres.ts --preflight
-# Review preflight; separately deploy reviewed migrations to this disposable only.
-# Before --verify, require all 13 migrations applied and explicit fixture-write approval:
-$env:ALLOW_ORDERS_VERIFY_MUTATIONS = 'yes'
-node --import tsx apps/api/scripts/verify-station-pumps-postgres.ts --verify
-```
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
-The scenario checks real station relations, ordering, lookup read preservation,
+The removed scenario checked real station relations, ordering, lookup read preservation,
 non-IDLE exclusion, cash/claim/completion, unpaid legacy reservations, terminal
-history and inactive stations. It retains fixtures and never creates, resets,
-drops or migrates a database. It does not invoke Stage 9. Task 05 did not run this
+history and inactive stations. It retained fixtures without creating, resetting,
+dropping or migrating a database, and did not invoke Stage 9. Task 05 did not run this
 scenario: no fresh target was approved, and retained Task 02/03 databases were
 not repurposed. No primary database connection or migration was performed.
 The pre-existing Task 02 order Stage 9 HTTP 500 remains unresolved and separate.
@@ -108,9 +112,7 @@ schema public, database `m7atati_employee_orders_verify_pumps_task05`.
 Read-only maintenance-catalog inspection confirmed this exact target was absent
 and template0 existed before execution of:
 
-```sql
-CREATE DATABASE "m7atati_employee_orders_verify_pumps_task05" WITH TEMPLATE template0;
-```
+Historical creation used template0 for the exact disposable pump target.
 
 No primary or retained Task 02/03 database was connected to or modified. The new
 target was never reset or dropped. Connection credentials were loaded privately;
@@ -121,12 +123,7 @@ the new database as its process-local DATABASE_URL.
 
 From repository root the workflow executed:
 
-```powershell
-node --import tsx apps/api/scripts/verify-station-pumps-postgres.ts --preflight
-node node_modules/prisma/build/index.js migrate deploy --config apps/api/prisma.config.ts
-node --import tsx apps/api/scripts/verify-station-pumps-postgres.ts --preflight
-node --import tsx apps/api/scripts/verify-station-pumps-postgres.ts --verify
-```
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
 Before deployment: 0 applied/13 pending, no conflicts. After deployment and on
 the final verifier run: all 13 applied with matching checksums, none pending,
@@ -170,7 +167,7 @@ The non-fatal pg concurrent-query deprecation warning remains separate.
 Safety regression tests reject earlier-task targets and missing mutation opt-in
 before database imports. Reruns append uniquely named fixtures and retain earlier
 rows; they do not maintain a fixed fixture count. A preflight conflict stops the
-run for review and is never automatically repaired. All fixtures remain retained.
+run for review and is never automatically repaired. Fixtures were retained at acceptance time; the developer later deleted the targets.
 The pre-existing Task 02 Stage 9 verifier was not invoked; its HTTP 500 remains
 unresolved. No schema, migration, dependency or permission-policy changes were made.
 Regression passed: 4 targeted suites / 291 tests, all 35 backend suites / 1,191
@@ -236,40 +233,18 @@ owners. Do not query or modify the primary database without approval. Review
 conflicts explicitly; do not reset, delete or manufacture assignments to proceed.
 Regenerate the client with the existing Prisma generate command; generated output
 is not handwritten application source. Repository whitespace rules still apply.
-The reviewed historical verifier allowlist now contains 13 migrations.
+The retired verifier allowlist checked the 13 migrations present at acceptance.
 
-Standalone acceptance is intentionally separate from the pre-existing Stage 9
-HTTP 500. It does not run Stage 9 or claim that failure is fixed:
+Historical standalone acceptance was separate from the pre-existing Stage 9
+HTTP 500. It did not run Stage 9 or establish its eventual correction:
 
-```powershell
-# First configure an approved ORDERS_VERIFY_DATABASE_URL and its exact
-# ORDERS_VERIFY_CONFIRM_DATABASE. The loopback disposable name must begin
-# m7atati_employee_orders_verify_ and differ from every application database.
-if (-not $env:ORDERS_VERIFY_DATABASE_URL -or -not $env:ORDERS_VERIFY_CONFIRM_DATABASE) {
-  throw 'Configure and approve the dedicated disposable target first.'
-}
-node --import tsx apps/api/scripts/verify-manager-ownership-postgres.ts --preflight
-if ($LASTEXITCODE -ne 0) { throw 'Review ownership/migration conflicts before proceeding.' }
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
-# Only after explicitly approving existing migrations on this disposable target:
-$previousDatabaseUrl = $env:DATABASE_URL
-try {
-  $env:DATABASE_URL = $env:ORDERS_VERIFY_DATABASE_URL
-  node node_modules/prisma/build/index.js migrate deploy --config apps/api/prisma.config.ts
-  if ($LASTEXITCODE -ne 0) { throw 'Disposable migration deployment failed.' }
-} finally { $env:DATABASE_URL = $previousDatabaseUrl }
-
-# Requires separate explicit fixture-write authorization:
-$env:ALLOW_ORDERS_VERIFY_MUTATIONS = 'yes'
-node --import tsx apps/api/scripts/verify-manager-ownership-postgres.ts --verify
-if ($LASTEXITCODE -ne 0) { throw 'Ownership acceptance failed; retain fixtures for diagnosis.' }
-```
-
-The preflight is read-only and reports duplicate/ineligible owners, migration
-history and separate order-data conflicts. Verification requires all migrations
-already applied, checks unique-index/FK metadata, tests duplicate migration refusal
+The removed preflight reported duplicate/ineligible owners, migration history and
+separate order-data conflicts using read-only queries. Historical verification
+required all migrations already applied, checked unique-index/FK metadata and duplicate migration refusal
 on a connection-local temporary table, and runs real assignment, lifecycle,
-visibility and concurrency scenarios. It writes marked fixtures/grants only to
+visibility and concurrency scenarios. It wrote marked fixtures/grants only to
 the confirmed disposable database, retains them, and never creates/drops/reset
 databases or changes the application database. A missing approved target means
 BLOCKED PostgreSQL verification; mocked tests do not prove database integrity.
@@ -538,9 +513,7 @@ for these write tests; the full seed was not run.
 To repeat this isolated verification from repository root using the existing local
 development connection (requires local database-creation privileges):
 
-```powershell
-.\node_modules\.bin\tsx.cmd apps/api/scripts/verify-stations-postgres.ts
-```
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
 The harness refuses nonlocal targets, a source database other than `m7atati`,
 non-development configuration and an unexpected repository migration set. It

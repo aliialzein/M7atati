@@ -1,5 +1,18 @@
 # External reference fuel prices
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
+Current cross-module contracts and readiness are in the authoritative
+[frontend API guide](frontend-api-guide.md). Stage-specific exclusions and
+verification notes below are historical: Task 08 resolved the Stage 9 HTTP 500
+and passed full guarded local PostgreSQL order acceptance. This does not certify
+live provider configuration or deployment readiness.
+
 Prices are station-independent **Lebanon market reference prices**, not a world
 average, station selling prices, crude benchmarks or order charging inputs.
 No orders, scheduling, polling or frontend integration is added.
@@ -263,11 +276,7 @@ The existing opt-in PostgreSQL harness (not run for this change) creates a dispo
 deploys repository migrations, tests pre-migration legacy retention and runs
 targeted provisioning twice before real in-process HTTP/auth/Prisma checks:
 
-```powershell
-node_modules/.bin/tsx.cmd apps/api/scripts/verify-stations-postgres.ts --prices
-node_modules/.bin/tsx.cmd apps/api/scripts/verify-stations-postgres.ts --users
-node_modules/.bin/tsx.cmd apps/api/scripts/verify-stations-postgres.ts
-```
+*Historical runner commands removed: the referenced PostgreSQL tooling is no longer available.*
 
 Focused manual HTTP smoke testing used the listening server started with the
 normal development command. Health/readiness, ADMIN login/profile, refresh,

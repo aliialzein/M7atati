@@ -1,5 +1,12 @@
 # Employee Stage 3: persistent pending-order queue
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
 This document describes the read-only pending queue. Current creation, payments,
 claiming/completion and persisted Manager APIs are consolidated in the authoritative
 [frontend API guide](frontend-api-guide.md). Claim/completion details also appear
@@ -124,19 +131,11 @@ pumps/stations, and initial events. Web tests cover polling/visibility/focus,
 non-overlap, cleanup, stale responses/data, assignment/page changes, disappearing
 orders, and independent attendance/shift controls.
 
-With the same authorized disposable URL/password and write flag, run:
-
-```powershell
-node --import tsx apps/api/scripts/verify-employee-orders-postgres.ts
-```
-
-The verifier reruns fixture creation, then starts a new listening API process for
-each probe. It checks two station-A employees see the same order, station B is
-isolated, and station-A data remains visible after stopping/restarting API
-processes. It runs no migrations. Use initial PENDING fixture state for this check.
-Stage 4 extends this verifier with a separate marked order and concurrent claim race.
-Without an available authorized target, these real PostgreSQL and API restart
-checks remain pending; mocked tests do not establish database persistence.
+Historical PostgreSQL acceptance used a fixture runner and independent listening
+API processes. It checked shared station-A orders, station-B isolation, persistence
+across restarts and, in Stage 4, a concurrent claim race. Those runners were
+removed. Task 08 later passed guarded PostgreSQL acceptance; see the authoritative
+guide. Current mocked tests do not establish fresh database persistence.
 
 Routine checks: full API/web tests, both TypeScript checks with `--noEmit`, API/web
 lint, and `git diff --check`. Stage 2's baseline is 699 API and 42 web tests.

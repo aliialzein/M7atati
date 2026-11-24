@@ -1,5 +1,12 @@
 # Frontend API integration contract
 
+> Post-cleanup tooling status (2026-11-24): PostgreSQL acceptance runners have
+> been intentionally removed. Their scenarios and results below are historical
+> evidence, not currently executable tooling or fresh database acceptance. See
+> [the current scripts inventory](api-scripts-audit.md). The developer reports
+> that the five disposable acceptance databases were deleted; this review does
+> not connect to PostgreSQL.
+
 Authoritative integration reference, audited against mounted Express routes on
 2026-11-23 (Task 07). Domain documents provide implementation/deployment history;
 this guide supersedes their older demo/stage assumptions. Updated by Task 08
@@ -7,6 +14,13 @@ after full guarded local PostgreSQL order acceptance passed. **Overall readiness
 READY WITH CONDITIONS. The Stage 9 HTTP500 blocker is resolved; deployment
 configuration, primary-data compatibility, secrets, CORS and operational readiness
 are not certified by local acceptance.** See the Task 08 evidence below.
+
+Post-cleanup application regression on 2026-11-24 passed 35 suites / 1,195 tests,
+typecheck (including unused checks), lint and build. The mounted inventory remains
+52 endpoints on 15 routers. The decrease from 36 suites / 1,226 tests retires 31
+tests solely for removed PostgreSQL verifier infrastructure; two provisioning
+tests were preserved in a dedicated suite. Application regression coverage and
+HTTP contracts are unchanged. These results do not claim fresh PostgreSQL acceptance.
 
 ## Connection, identity and browser security
 
@@ -484,8 +498,9 @@ for checkout totals. Do not invent client-side permissions, locks or these APIs.
 All endpoint families are documented and covered by HTTP tests with mocked Prisma;
 these are not database proofs. Prior retained acceptance evidence is distinguished
 below. No live database or fixture-writing acceptance was used for Task 07.
-Existing Jest safety tests spawn verifier CLIs only with deliberately invalid or
-missing targets and confirm refusal before database imports; no Stage 9 scenarios run.
+At Task 07, Jest safety tests spawned verifier CLIs with deliberately invalid or
+missing targets. Those infrastructure tests and runners were removed after
+Task 09; application HTTP and transaction regression coverage remains.
 
 | Backend module | Explicit endpoints | Authorization coverage | Contract docs | Automated coverage | PostgreSQL evidence | Frontend readiness | Known blockers / conditions |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -533,7 +548,8 @@ passed, and the final read-only inspection found 13 successful/0 failed
 migrations, zero duplicate active pump reservations, zero active orders missing
 pumps and zero duplicate confirmed cash payments. Primary and earlier retained
 verification databases were not connected to, migrated or modified. No .env file
-was edited. All Task08 fixtures, including failed-run fixtures, remain retained.
+was edited. All Task08 fixtures, including failed-run fixtures, were retained at acceptance
+time. The developer subsequently reported deleting the disposable targets.
 
 ### Reproduction and correction
 
@@ -599,20 +615,11 @@ Every following scenario actually executed successfully after both corrections:
 | station deactivation versus claim in both lock orders, completion release, reactivation and repeated status row no-ops | PASS (appended runner) |
 | final preflight and all Stage 2–8 PostgreSQL verification phases | PASS, exit0; zero integrity conflicts |
 
-Commands from repository root, with the private confirmed disposable URL supplied
-only through child-process environment, exact ORDERS_VERIFY_CONFIRM_DATABASE and
-ALLOW_ORDERS_VERIFY_MUTATIONS=yes for migration/verification:
-
-```powershell
-node --import tsx apps/api/scripts/verify-orders-postgres.ts --preflight
-node --import tsx apps/api/scripts/verify-orders-postgres.ts --migrate
-node --import tsx apps/api/scripts/verify-orders-postgres.ts --verify
-```
-
-Creation used `CREATE DATABASE "m7atati_employee_orders_verify_stage9_task08" WITH TEMPLATE template0`
-after maintenance-catalog absence/template checks. No reset, db push, deletion,
-automatic fixture repair or migration resolution occurred. The guard's --verify
-also runs the existing employee-order consistency verifier on this same target.
+The historical run used separately guarded preflight, migration and acceptance
+phases on a target created from template0 after maintenance-catalog absence
+checks. The removed order runner also invoked employee-order consistency
+scenarios on that same target. Execution instructions were retired with the
+runners; the results above remain historical evidence.
 The global readiness conditions above remain: local acceptance is not production
 deployment, secret provisioning, CORS validation, external-provider availability
 or primary-data compatibility certification.
